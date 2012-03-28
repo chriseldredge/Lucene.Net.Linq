@@ -1,0 +1,4 @@
+*.suo
+*ReSharper*
+*.user
+*.dotCover
