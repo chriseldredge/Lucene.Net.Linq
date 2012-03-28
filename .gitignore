@@ -2,3 +2,5 @@
 *ReSharper*
 *.user
 *.dotCover
+bin
+obj

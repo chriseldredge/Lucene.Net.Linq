@@ -6,13 +6,16 @@ using Lucene.Net.Documents;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq;
+using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 
 namespace Lucene.Net.Linq
 {
     public class LuceneQueryExecutor : IQueryExecutor
     {
         private readonly Directory directory;
-        private Document current;
+
+        public Document CurrentDocument { get; private set; }
 
         public LuceneQueryExecutor(Directory directory)
         {
@@ -33,30 +36,33 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
-            var projection = GetInMemoryProjection<T>(queryModel, () => current);
+            var mapping = new QuerySourceMapping();
+            mapping.AddMapping(queryModel.MainFromClause, Expression.Property(Expression.Constant(this), "CurrentDocument"));
+
+            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));    
+
+            var projection = GetInMemoryProjection<T>(queryModel);
             var projector = projection.Compile();
 
-            var searcher = new IndexSearcher(directory, true);
-
-            using (var reader = searcher.GetIndexReader())
+            using (var searcher = new IndexSearcher(directory, true))
             {
-                for (var i = 0; i < reader.MaxDoc(); i++)
+                using (var reader = searcher.GetIndexReader())
                 {
-                    if (reader.IsDeleted(i)) continue;
+                    for (var i = 0; i < reader.MaxDoc(); i++)
+                    {
+                        if (reader.IsDeleted(i)) continue;
 
-                    current = reader.Document(i);
-                    return new[] { projector(current) };
+                        CurrentDocument = reader.Document(i);
+                        yield return projector(CurrentDocument);
+                    }
                 }
             }
-
-            return null;
         }
 
-        public Expression<Func<Document, T>> GetInMemoryProjection<T>(QueryModel queryModel, Expression<Func<Document>> current)
+        public Expression<Func<Document, T>> GetInMemoryProjection<T>(QueryModel queryModel)
         {
-            var t = new QueryTransformer(current);
-            queryModel.TransformExpressions(t.Replace);
             return Expression.Lambda<Func<Document, T>>(queryModel.SelectClause.Selector, Expression.Parameter(typeof(Document)));
         }
     }
+
 }

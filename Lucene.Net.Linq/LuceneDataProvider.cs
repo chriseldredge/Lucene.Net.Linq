@@ -15,11 +15,14 @@ namespace Lucene.Net.Linq
         public LuceneDataProvider(Directory directory)
         {
             var nodeTypeProvider = ExpressionTreeParser.CreateDefaultNodeTypeProvider();
-            //nodeTypeProvider.InnerProviders.Add(customNodeTypeRegistry);
+            
+            //nodeTypeProvider.InnerProviders.Add();
+
             var transformerRegistry = ExpressionTransformerRegistry.CreateDefault();
+            
             var processor = ExpressionTreeParser.CreateDefaultProcessor(transformerRegistry);
             var expressionTreeParser = new ExpressionTreeParser(nodeTypeProvider, processor);
-
+            
             queryParser = new QueryParser(expressionTreeParser);
             executor = new LuceneQueryExecutor(directory);
         }
@@ -29,4 +32,5 @@ namespace Lucene.Net.Linq
             return new LuceneQueryable<Document>(queryParser, executor);
         }
     }
+
 }
