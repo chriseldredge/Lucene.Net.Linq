@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Documents;
 using NUnit.Framework;
 

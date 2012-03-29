@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\SelectTests.cs" />
+    <Compile Include="Integration\DocumentHolderTests.cs" />
     <Compile Include="Integration\WhereTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

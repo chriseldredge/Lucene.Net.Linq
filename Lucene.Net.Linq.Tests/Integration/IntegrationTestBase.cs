@@ -21,7 +21,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             directory = new RAMDirectory();
             writer = new IndexWriter(directory, new PorterStemAnalyzer(version), IndexWriter.MaxFieldLength.UNLIMITED);
-            provider = new LuceneDataProvider(directory);
+            
+            provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), version);
         }
 
         class PorterStemAnalyzer : StandardAnalyzer
@@ -52,10 +53,15 @@ namespace Lucene.Net.Linq.Tests.Integration
                 doc.Add(new Field("text", text, Field.Store.YES, Field.Index.ANALYZED));
             }
 
-            writer.AddDocument(doc);
-            writer.Commit();
+            AddDocument(doc);
 
             return doc;
+        }
+
+        protected void AddDocument(Document document)
+        {
+            writer.AddDocument(document);
+            writer.Commit();
         }
     }
 }
