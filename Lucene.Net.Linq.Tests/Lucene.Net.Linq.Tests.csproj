@@ -50,6 +50,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentHolderPropertyAccessHookTests.cs" />
+    <Compile Include="DocumentHolderMultiValueTests.cs" />
     <Compile Include="DocumentHolderTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\SelectTests.cs" />

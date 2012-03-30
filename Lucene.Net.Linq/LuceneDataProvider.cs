@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -50,7 +51,12 @@ namespace Lucene.Net.Linq
 
         public IQueryable<T> AsQueryable<T>() where T : IDocumentHolder, new()
         {
-            var executor = new DocumentHolderQueryExecutor<T>(directory, analyzer, version);
+            return AsQueryable<T>(() => new T());
+        }
+
+        public IQueryable<T> AsQueryable<T>(Func<T> documentFactory) where T : IDocumentHolder
+        {
+            var executor = new DocumentHolderQueryExecutor<T>(directory, analyzer, version, documentFactory);
             return new LuceneQueryable<T>(queryParser, executor);
         }
     }

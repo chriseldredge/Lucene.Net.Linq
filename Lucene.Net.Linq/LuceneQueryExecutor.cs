@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
@@ -30,15 +29,21 @@ namespace Lucene.Net.Linq
         }
     }
 
-    internal class DocumentHolderQueryExecutor<TDocument> : LuceneQueryExecutor<TDocument> where TDocument : IDocumentHolder, new()
+    internal class DocumentHolderQueryExecutor<TDocument> : LuceneQueryExecutor<TDocument> where TDocument : IDocumentHolder
     {
-        public DocumentHolderQueryExecutor(Directory directory, Analyzer analyzer, Version version) : base(directory, analyzer, version)
+        private readonly Func<TDocument> documentFactory;
+
+        public DocumentHolderQueryExecutor(Directory directory, Analyzer analyzer, Version version, Func<TDocument> documentFactory) : base(directory, analyzer, version)
         {
+            this.documentFactory = documentFactory;
         }
 
         protected override void  SetCurrentDocument(Document doc)
         {
-            CurrentDocument = new TDocument {Document = doc};
+            var holder = documentFactory();
+            holder.Document = doc;
+
+            CurrentDocument = holder;
         }
     }
 

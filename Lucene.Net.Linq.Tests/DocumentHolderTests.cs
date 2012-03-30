@@ -5,7 +5,6 @@ using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests
 {
-
     [TestFixture]
     public class DocumentHolderTests
     {

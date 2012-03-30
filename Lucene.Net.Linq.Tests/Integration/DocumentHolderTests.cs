@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Lucene.Net.Documents;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -12,7 +13,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             public string Name
             {
                 get { return Get("Name"); }
-                set { Set("Name", value); }
+                set { Set("Name", value, Field.Store.YES, Field.Index.NOT_ANALYZED); }
             }
 
             public int? Scalar
