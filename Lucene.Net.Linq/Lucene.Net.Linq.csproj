@@ -49,6 +49,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentHolder.cs" />
+    <Compile Include="IDocumentHolder.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />

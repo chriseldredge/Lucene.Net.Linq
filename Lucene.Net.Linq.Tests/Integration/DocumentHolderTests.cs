@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Lucene.Net.Documents;
+﻿using System.Linq;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -13,29 +11,14 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             public string Name
             {
-                get { return Document.Get("Name"); }
-                set { Document.Add(new Field("Name", value, Field.Store.YES, Field.Index.NOT_ANALYZED)); }
+                get { return Get("Name"); }
+                set { Set("Name", value); }
             }
 
             public int? Scalar
             {
-                get
-                {
-                    var field = Document.GetField("Scalar");
-
-                    return (field == null) ? null : (int?)Convert.ToInt32(field.StringValue());
-                }
-                set
-                {
-                    Document.RemoveField("Scalar");
-
-                    if (!value.HasValue) return;
-
-                    var field = new NumericField("Scalar", Field.Store.YES, true);
-                    field.SetIntValue(value.Value);
-                    
-                    Document.Add(field);
-                }
+                get { return GetNumeric<int>("Scalar"); }
+                set { SetNumeric("Scalar", value); }
             }
         }
 
@@ -91,7 +74,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             var result = from doc in documents where doc.Scalar == 12 select doc;
 
-            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+            Assert.That(result.Single().Scalar, Is.EqualTo(12));
         }
 
         [Test, Ignore("TODO: *:* -Scaler:[* TO *]")]

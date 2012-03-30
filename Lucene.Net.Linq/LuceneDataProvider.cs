@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -53,21 +52,6 @@ namespace Lucene.Net.Linq
         {
             var executor = new DocumentHolderQueryExecutor<T>(directory, analyzer, version);
             return new LuceneQueryable<T>(queryParser, executor);
-        }
-    }
-
-    public interface IDocumentHolder
-    {
-        Document Document { get; set; }
-    }
-
-    public class DocumentHolder : IDocumentHolder
-    {
-        public Document Document { get; set; }
-
-        public DocumentHolder()
-        {
-            Document = new Document();
         }
     }
 }
