@@ -80,13 +80,14 @@ namespace Lucene.Net.Linq
 
             if (value == null) return;
             
+            
             document.Add(new Field(fieldName, value, store, index));
         }
 
         protected void Set(string fieldName, IEnumerable<string> values, Field.Store store, Field.Index index)
         {
             document.RemoveFields(fieldName);
-
+            
             if (values == null) return;
 
             var fields = values.Select(v => new Field(fieldName, v, store, index));

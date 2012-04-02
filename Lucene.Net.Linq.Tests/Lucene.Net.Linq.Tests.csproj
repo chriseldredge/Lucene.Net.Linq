@@ -41,6 +41,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NUnit.2.6.0.12054\lib\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="Remotion.Linq, Version=1.13.111.1, Culture=neutral, PublicKeyToken=fee00910d6e5f53b, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -54,10 +55,12 @@
     <Compile Include="DocumentHolderMultiValueTests.cs" />
     <Compile Include="DocumentHolderTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
+    <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\DocumentHolderTests.cs" />
     <Compile Include="Integration\WhereTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryBuildingExpressionTreeVisitorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
