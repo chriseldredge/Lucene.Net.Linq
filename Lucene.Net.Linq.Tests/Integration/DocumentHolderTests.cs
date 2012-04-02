@@ -106,7 +106,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
-        public void Where_ExactMatch2()
+        public void Where_ExactMatch_Phrase()
         {
             AddDocument(new MappedDocument { Name = "Documents Bill", Id = "X.Y.1.2" }.Document);
             AddDocument(new MappedDocument { Name = "Bills Document", Id = "X.Z.1.3" }.Document);
