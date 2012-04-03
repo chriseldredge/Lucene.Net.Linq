@@ -74,7 +74,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = from doc in documents where doc.Name == "My Document" select doc;
+            var result = from doc in documents where doc.Name == "My" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }

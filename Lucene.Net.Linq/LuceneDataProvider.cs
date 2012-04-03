@@ -4,7 +4,6 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Store;
-using Remotion.Linq;
 using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
 using Remotion.Linq.Parsing.Structure;
 using Version = Lucene.Net.Util.Version;
@@ -45,18 +44,18 @@ namespace Lucene.Net.Linq
 
         public IQueryable<Document> AsQueryable()
         {
-            var executor = new DocumentQueryExecutor(directory, analyzer, version);
+            var executor = new DocumentQueryExecutor(directory, new Context(analyzer, version));
             return new LuceneQueryable<Document>(queryParser, executor);
         }
 
         public IQueryable<T> AsQueryable<T>() where T : IDocumentHolder, new()
         {
-            return AsQueryable<T>(() => new T());
+            return AsQueryable(() => new T());
         }
 
         public IQueryable<T> AsQueryable<T>(Func<T> documentFactory) where T : IDocumentHolder
         {
-            var executor = new DocumentHolderQueryExecutor<T>(directory, analyzer, version, documentFactory);
+            var executor = new DocumentHolderQueryExecutor<T>(directory, new Context(analyzer, version), documentFactory);
             return new LuceneQueryable<T>(queryParser, executor);
         }
     }

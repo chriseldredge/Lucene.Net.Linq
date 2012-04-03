@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
-using Remotion.Linq;
 using Remotion.Linq.Parsing;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
 {
     
     public class QueryBuildingExpressionTreeVisitor : ExpressionTreeVisitor
     {
-        private readonly QueryParser queryParser;
+        private readonly Context context;
         private readonly Stack<Query> queries = new Stack<Query>();
 
-        public QueryBuildingExpressionTreeVisitor(QueryParser queryParser)
+        internal QueryBuildingExpressionTreeVisitor(Context context)
         {
-            this.queryParser = queryParser;
+            this.context = context;
         }
 
         public Query Query
@@ -43,7 +40,10 @@ namespace Lucene.Net.Linq
 
         public Query Parse(string fieldName, string pattern)
         {
-            return queryParser.Parse(string.Format("{0}:{1}", fieldName, pattern));
+            var queryParser = new QueryParser(context.Version, fieldName, context.Analyzer);
+            queryParser.SetLowercaseExpandedTerms(false);
+
+            return queryParser.Parse(pattern);
         }
 
         protected override Expression VisitBinaryExpression(BinaryExpression expression)

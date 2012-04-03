@@ -7,16 +7,36 @@ using Remotion.Linq.Clauses;
 
 namespace Lucene.Net.Linq
 {
-    public class QueryModelTranslator : QueryModelVisitorBase
+    internal class Context
     {
         private readonly Analyzer analyzer;
         private readonly Version version;
-        private Query query;
 
-        public QueryModelTranslator(Analyzer analyzer, Version version)
+        public Context(Analyzer analyzer, Version version)
         {
             this.analyzer = analyzer;
             this.version = version;
+        }
+
+        public Analyzer Analyzer
+        {
+            get { return analyzer; }
+        }
+
+        public Version Version
+        {
+            get { return version; }
+        }
+    }
+
+    public class QueryModelTranslator : QueryModelVisitorBase
+    {
+        private readonly Context context;
+        private Query query;
+
+        internal QueryModelTranslator(Context context)
+        {
+            this.context = context;
         }
 
         public Query Build(QueryModel queryModel)
@@ -28,13 +48,7 @@ namespace Lucene.Net.Linq
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            var queryParser = new QueryParser(version, "*", analyzer);
-            queryParser.SetLowercaseExpandedTerms(false);
-            
-            // TODO: test me:
-            //queryParser.SetAllowLeadingWildcard(true);
-
-            var visitor = new QueryBuildingExpressionTreeVisitor(queryParser);
+            var visitor = new QueryBuildingExpressionTreeVisitor(context);
             visitor.VisitExpression(whereClause.Predicate);
             query = visitor.Query;
         }

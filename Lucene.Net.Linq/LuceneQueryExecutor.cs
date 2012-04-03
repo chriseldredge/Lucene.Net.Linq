@@ -15,7 +15,7 @@ namespace Lucene.Net.Linq
 {
     internal class DocumentQueryExecutor : LuceneQueryExecutor<Document>
     {
-        public DocumentQueryExecutor(Directory directory, Analyzer analyzer, Version version) : base(directory, analyzer, version)
+        public DocumentQueryExecutor(Directory directory, Context context) : base(directory, context)
         {
         }
 
@@ -29,7 +29,7 @@ namespace Lucene.Net.Linq
     {
         private readonly Func<TDocument> documentFactory;
 
-        public DocumentHolderQueryExecutor(Directory directory, Analyzer analyzer, Version version, Func<TDocument> documentFactory) : base(directory, analyzer, version)
+        public DocumentHolderQueryExecutor(Directory directory, Context context, Func<TDocument> documentFactory) : base(directory, context)
         {
             this.documentFactory = documentFactory;
         }
@@ -46,16 +46,14 @@ namespace Lucene.Net.Linq
     internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor
     {
         private readonly Directory directory;
-        private readonly Analyzer analyzer;
-        private readonly Version version;
+        private readonly Context context;
 
         public TDocument CurrentDocument { get; protected set; }
 
-        protected LuceneQueryExecutor(Directory directory, Analyzer analyzer, Version version)
+        protected LuceneQueryExecutor(Directory directory, Context context)
         {
             this.directory = directory;
-            this.analyzer = analyzer;
-            this.version = version;
+            this.context = context;
         }
 
         public T ExecuteScalar<T>(QueryModel queryModel)
@@ -72,7 +70,7 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
-            var builder = new QueryModelTranslator(analyzer, version);
+            var builder = new QueryModelTranslator(context);
             var query = builder.Build(queryModel);
 
             var mapping = new QuerySourceMapping();

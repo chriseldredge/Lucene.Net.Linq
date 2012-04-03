@@ -1,11 +1,7 @@
-﻿using System.IO;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Analysis.Tokenattributes;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Tests.Integration;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using NUnit.Framework;
@@ -19,19 +15,29 @@ namespace Lucene.Net.Linq.Tests
     public class QueryBuildingExpressionTreeVisitorTests_QueryParsing
     {
         private static readonly Version version = new Version("QueryBuildingExpressionTreeVisitorTests_QueryParsing", 0);
+        private Analyzer analyzer;
+        private QueryBuildingExpressionTreeVisitor builder;
+        
+        [SetUp]
+        public void SetUp()
+        {
+            analyzer = new PorterStemAnalyzer(version);
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(analyzer, version));
+        }
 
         [Test]
         public void UsesPorterStemFilter()
         {
-            var analyzer = new PorterStemAnalyzer(version);
-            var builder = new QueryBuildingExpressionTreeVisitor(new QueryParser(version, "*", analyzer));
-            var s = analyzer.TokenStream("Text", new StringReader("values"));
-            s.IncrementToken();
-            var stemmedTerm = ((TermAttribute) s.GetAttribute(typeof (TermAttribute))).Term();
-
             var query = builder.Parse("Text", "values");
 
-            Assert.That(query.ToString(), Is.EqualTo("Text:" + stemmedTerm));
+            Assert.That(query.ToString(), Is.EqualTo("Text:valu"));
+        }
+
+        [Test]
+        public void ParseMultipleTerms()
+        {
+            var query = builder.Parse("Text", "x y z");
+            Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
         }
     }
 
@@ -54,9 +60,7 @@ namespace Lucene.Net.Linq.Tests
         [SetUp]
         public void SetUp()
         {
-            var queryParser = new QueryParser(version, "*", new WhitespaceAnalyzer());
-            queryParser.SetLowercaseExpandedTerms(false);
-            builder = new QueryBuildingExpressionTreeVisitor(queryParser);
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new WhitespaceAnalyzer(), version));
         }
 
         [Test]
