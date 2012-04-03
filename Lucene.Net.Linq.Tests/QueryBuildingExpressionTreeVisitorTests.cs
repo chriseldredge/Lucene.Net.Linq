@@ -99,6 +99,20 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void BinaryNotEqualsExpression()
+        {
+            // where r.Name != "Example"
+            var expression = Expression.MakeBinary(
+                ExpressionType.NotEqual,
+                MemberAccessName,
+                Expression.Constant("Example"));
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("-Name:Example *:*"));
+        }
+
+        [Test]
         public void BinaryEqualsExpression_SubPropertyNotSupported()
         {
             // where 0 == r.Name.Length

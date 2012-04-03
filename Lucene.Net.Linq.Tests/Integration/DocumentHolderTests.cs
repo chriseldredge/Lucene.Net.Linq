@@ -158,7 +158,49 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
-        public void WhereScalar()
+        public void Where_NotEqual()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document" }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents where doc.Name != "\"My Document\"" select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
+        [Test]
+        public void Where_NotNull()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document" }.Document);
+            AddDocument(new MappedDocument { Name = null, Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents where doc.Name != null select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
+        [Test]
+        public void Where_Null()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document" }.Document);
+            AddDocument(new MappedDocument { Name = null, Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents where doc.Name == null select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().Scalar, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void Where_ScalarEqual()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
             AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
@@ -170,8 +212,35 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.Single().Scalar, Is.EqualTo(12));
         }
 
-        [Test, Ignore("TODO: *:* -Scaler:[* TO *]")]
-        public void WhereNullScalar()
+        [Test]
+        public void Where_ScalarNotEqual()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 11}.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = from doc in documents where doc.Scalar != 11 select doc;
+
+            Assert.That(result.Single().Scalar, Is.EqualTo(12));
+        }
+
+
+        [Test]
+        public void Where_ScalarNotNull()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document" }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents where doc.Scalar != null select doc).ToList();
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_ScalarNull()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
             AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
