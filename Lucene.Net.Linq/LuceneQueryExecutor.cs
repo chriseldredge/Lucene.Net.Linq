@@ -68,11 +68,13 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
+            QueryModelTransformer.TransformQueryModel(queryModel);
+
             var builder = new QueryModelTranslator(context);
             var query = builder.Build(queryModel);
 
 #if DEBUG
-            System.Diagnostics.Trace.WriteLine(query, "Lucene.Net.Linq");
+            System.Diagnostics.Trace.WriteLine("Lucene query: " + query, "Lucene.Net.Linq");
 #endif
 
             var mapping = new QuerySourceMapping();

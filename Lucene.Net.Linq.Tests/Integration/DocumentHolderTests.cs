@@ -191,6 +191,19 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Where_IgnoresToLower()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Id = "X.Y.1.2" }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Id = "X.Z.1.3" }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = from doc in documents where doc.Id.ToLower() == "x.z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
         public void Where_ExactMatch_Phrase()
         {
             AddDocument(new MappedDocument { Name = "Documents Bill", Id = "X.Y.1.2" }.Document);

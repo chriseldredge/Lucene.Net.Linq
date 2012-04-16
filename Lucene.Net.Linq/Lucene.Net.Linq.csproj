@@ -58,6 +58,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
     <Compile Include="QueryLocatingVisitor.cs" />
+    <Compile Include="QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
   </ItemGroup>
   <ItemGroup>

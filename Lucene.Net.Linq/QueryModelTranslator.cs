@@ -1,8 +1,6 @@
-﻿using System;
-using Lucene.Net.Search;
+﻿using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 
 namespace Lucene.Net.Linq
 {
