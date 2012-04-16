@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using NUnit.Framework;
@@ -86,6 +87,22 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Where_FlagEqualTrue()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document" }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Flag = true }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+// Not redundant because it generates a different Espression tree
+// ReSharper disable RedundantBoolCompare
+            var result = from doc in documents where doc.Flag == true select doc;
+// ReSharper restore RedundantBoolCompare
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
         public void Where_Multiple()
         {
             AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
@@ -106,9 +123,45 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = (from doc in documents select new { doc }).Where(d => d.doc.Name == "My");
+            var result = (from doc in documents select new { DocName = doc.Name }).Where(d => d.DocName == "My");
 
-            Assert.That(result.Single().doc.Name, Is.EqualTo("My Document"));
+            Assert.That(result.Single().DocName, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_QueryOnFlatteningProjection()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents select doc.Name).Where(d => d == "My");
+
+            Assert.That(result.Single(), Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_QueryOnLambdaProjection()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents select Convert(doc)).Where(d => d.Name == "My");
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        public class ConvertedDocument
+        {
+            public string Name { get; set; }
+        }
+
+        private ConvertedDocument Convert(MappedDocument doc)
+        {
+            return new ConvertedDocument {Name = doc.Name};
         }
 
         [Test]

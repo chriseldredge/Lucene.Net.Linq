@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Tests.Integration;
@@ -202,7 +203,7 @@ namespace Lucene.Net.Linq.Tests
 
             TestDelegate call = () => builder.VisitExpression(expression);
 
-            Assert.That(call, Throws.InvalidOperationException);
+            Assert.That(call, Throws.Exception.InstanceOf<NotSupportedException>());
         }
     }
 

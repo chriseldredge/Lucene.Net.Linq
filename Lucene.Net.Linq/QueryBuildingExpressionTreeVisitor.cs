@@ -6,6 +6,7 @@ using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
+using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq
@@ -41,6 +42,14 @@ namespace Lucene.Net.Linq
             }
         }
 
+        public Query Parse(string fieldName, string pattern)
+        {
+            var queryParser = new QueryParser(context.Version, fieldName, context.Analyzer);
+            queryParser.SetLowercaseExpandedTerms(false);
+            queryParser.SetAllowLeadingWildcard(true);
+            return queryParser.Parse(pattern);
+        }
+
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
         {
             var queryLocator = new QueryLocatingVisitor();
@@ -54,14 +63,6 @@ namespace Lucene.Net.Linq
             return base.VisitMethodCallExpression(expression);
         }
 
-        public Query Parse(string fieldName, string pattern)
-        {
-            var queryParser = new QueryParser(context.Version, fieldName, context.Analyzer);
-            queryParser.SetLowercaseExpandedTerms(false);
-            queryParser.SetAllowLeadingWildcard(true);
-            return queryParser.Parse(pattern);
-        }
-
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
         {
             switch (expression.NodeType)
@@ -73,7 +74,7 @@ namespace Lucene.Net.Linq
                 case ExpressionType.NotEqual:
                     break;
                 default:
-                    throw new InvalidOperationException("BinaryExpression of type " + expression.NodeType + " is not supported.");
+                    throw new NotSupportedException("BinaryExpression of type " + expression.NodeType + " is not supported.");
             }
 
             var queryLocator = new QueryLocatingVisitor();
@@ -92,7 +93,7 @@ namespace Lucene.Net.Linq
             }
             else
             {
-                throw new InvalidOperationException("Failed to map left or right side of BinaryExpression to a field.");
+                throw new NotSupportedException("Failed to map left or right side of BinaryExpression to a field.");
             }
 
             bool isPrefixCoded;
@@ -166,7 +167,12 @@ namespace Lucene.Net.Linq
                 return NumericUtils.IntToPrefixCoded((int) result);
             }
 
-            throw new InvalidOperationException("ValueType " + result.GetType() + " not supported.");
+            if (result is Boolean)
+            {
+                return NumericUtils.IntToPrefixCoded(((bool) result) ? 1 : 0);
+            }
+
+            throw new NotSupportedException("ValueType " + result.GetType() + " not supported.");
         }
     }
 }
