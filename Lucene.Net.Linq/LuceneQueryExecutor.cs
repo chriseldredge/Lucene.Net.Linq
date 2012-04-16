@@ -2,14 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
 {
@@ -72,6 +70,10 @@ namespace Lucene.Net.Linq
         {
             var builder = new QueryModelTranslator(context);
             var query = builder.Build(queryModel);
+
+#if DEBUG
+            System.Diagnostics.Trace.WriteLine(query, "Lucene.Net.Linq");
+#endif
 
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());

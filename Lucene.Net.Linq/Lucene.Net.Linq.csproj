@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Context.cs" />
     <Compile Include="DocumentHolder.cs" />
     <Compile Include="IDocumentHolder.cs" />
     <Compile Include="LuceneDataProvider.cs" />

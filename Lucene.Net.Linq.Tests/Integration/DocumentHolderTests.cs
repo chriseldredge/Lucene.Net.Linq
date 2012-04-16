@@ -28,6 +28,12 @@ namespace Lucene.Net.Linq.Tests.Integration
                 get { return GetNumeric<int>("Scalar"); }
                 set { SetNumeric("Scalar", value); }
             }
+
+            public bool Flag
+            {
+                get { return GetNumeric<bool>("Flag").GetValueOrDefault(); }
+                set { SetNumeric<bool>("Flag", value); }
+            }
         }
 
         protected override Analyzer GetAnalyzer(Util.Version version)
@@ -77,6 +83,32 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = from doc in documents where doc.Name == "My" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_Multiple()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = documents.Where(d => d.Scalar == 12).Where(d => d.Name == "My");
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_QueryOnAnonymousProjection()
+        {
+            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = (from doc in documents select new { doc }).Where(d => d.doc.Name == "My");
+
+            Assert.That(result.Single().doc.Name, Is.EqualTo("My Document"));
         }
 
         [Test]

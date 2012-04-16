@@ -1,34 +1,11 @@
-﻿using Lucene.Net.Analysis;
-using Lucene.Net.QueryParsers;
+﻿using System;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 
 namespace Lucene.Net.Linq
 {
-    internal class Context
-    {
-        private readonly Analyzer analyzer;
-        private readonly Version version;
-
-        public Context(Analyzer analyzer, Version version)
-        {
-            this.analyzer = analyzer;
-            this.version = version;
-        }
-
-        public Analyzer Analyzer
-        {
-            get { return analyzer; }
-        }
-
-        public Version Version
-        {
-            get { return version; }
-        }
-    }
-
     public class QueryModelTranslator : QueryModelVisitorBase
     {
         private readonly Context context;
@@ -50,7 +27,23 @@ namespace Lucene.Net.Linq
         {
             var visitor = new QueryBuildingExpressionTreeVisitor(context);
             visitor.VisitExpression(whereClause.Predicate);
-            query = visitor.Query;
+
+            if (query == null)
+            {
+                query = visitor.Query;
+                return;
+            }
+
+            var bQuery = new BooleanQuery();
+            bQuery.Add(query, BooleanClause.Occur.MUST);
+            bQuery.Add(visitor.Query, BooleanClause.Occur.MUST);
+
+            query = bQuery;
+        }
+
+        public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
+        {
+            base.VisitOrderByClause(orderByClause, queryModel, index);
         }
     }
 }
