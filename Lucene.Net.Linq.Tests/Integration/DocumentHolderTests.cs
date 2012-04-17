@@ -3,6 +3,7 @@ using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using NUnit.Framework;
+using Version = global::Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {
@@ -37,7 +38,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             }
         }
 
-        protected override Analyzer GetAnalyzer(Util.Version version)
+        protected override Analyzer GetAnalyzer(Version version)
         {
             var a = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
             //a.AddAnalyzer(new NumberAnalyzer());

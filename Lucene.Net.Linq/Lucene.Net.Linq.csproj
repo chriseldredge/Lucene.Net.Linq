@@ -61,10 +61,13 @@
     <Compile Include="QueryLocatingVisitor.cs" />
     <Compile Include="QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
+    <Compile Include="Transformers\FlagToBinaryConditionTreeVisitor.cs" />
     <Compile Include="Transformers\MethodCallToBinaryExpressionTreeVisitor.cs" />
     <Compile Include="Transformers\NoOpMethodCallRemovingTreeVisitor.cs" />
     <Compile Include="Transformers\NullSafetyConditionRemovingTreeVisitor.cs" />
-    <Compile Include="Transformers\QuerySourceReferenceTransformingTreeVisitor.cs" />
+    <Compile Include="Transformers\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
+    <Compile Include="Transformers\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
+    <Compile Include="Util\ReflectionUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

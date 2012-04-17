@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
-using Lucene.Net.Documents;
+using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using NUnit.Framework;
-using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.Expressions;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests
@@ -47,14 +44,11 @@ namespace Lucene.Net.Linq.Tests
     {
         private QueryBuildingExpressionTreeVisitor builder;
 
-        private static readonly QuerySourceReferenceExpression ReferenceExpression =
-            new QuerySourceReferenceExpression(new MainFromClause("r", typeof(Record), Expression.Constant("r")));
-        private static readonly MemberExpression MemberAccessName =
-            Expression.MakeMemberAccess(ReferenceExpression,
-            typeof(Record).GetProperty("Name"));
-        private static readonly MemberExpression MemberAccessId =
-            Expression.MakeMemberAccess(ReferenceExpression,
-            typeof(Record).GetProperty("Id"));
+        private static readonly Expression MemberAccessName =
+            new LuceneQueryFieldExpression(typeof(string), "Name");
+
+        private static readonly Expression MemberAccessId =
+            new LuceneQueryFieldExpression(typeof (int), "Id");
 
         private static readonly Version version = new Version("QueryBuildingExpressionTreeVisitorTests", 0);
 
@@ -114,20 +108,6 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
-        public void BinaryEqualsExpression_SubPropertyNotSupported()
-        {
-            // where 0 == r.Name.Length
-            var exp = Expression.MakeBinary(
-                ExpressionType.Equal,
-                Expression.Constant(0),
-                Expression.MakeMemberAccess(MemberAccessName, typeof(string).GetProperty("Length")));
-
-            TestDelegate call = () => builder.VisitExpression(exp);
-            
-            Assert.That(call, Throws.InvalidOperationException);
-        }
-
-        [Test]
         public void BinaryEqualsExpression_Transitive()
         {
             // where "Example" == r.Name
@@ -137,60 +117,6 @@ namespace Lucene.Net.Linq.Tests
                 MemberAccessName));
 
             Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example"));
-        }
-
-        [Test]
-        public void MethodCallExpression_StartsWith()
-        {
-            // where r.Name.StartsWith("Example")
-            var expression = Expression.Call(MemberAccessName, typeof(string).GetMethod("StartsWith", new[] { typeof(string) }), Expression.Constant("Example"));
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example*"));
-            Assert.That(builder.Query, Is.InstanceOf<PrefixQuery>());
-        }
-
-        [Test]
-        public void MethodCallExpression_GetField()
-        {
-            var docRef = new QuerySourceReferenceExpression(new MainFromClause("d", typeof(Document), Expression.Constant("d")));
-
-            // where d.GetField("Name") == "Example"
-            var expression =
-                Expression.MakeBinary(ExpressionType.Equal, 
-                    Expression.Call(docRef, typeof(Document).GetMethod("Get", new[] { typeof(string) }), Expression.Constant("Name")),
-                    Expression.Constant("Example"));
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example"));
-        }
-
-        [Test]
-        public void CompoundQuery_And()
-        {
-            // where r.Name.StartsWith("Example") and r.Id = 100
-            var expression = Expression.AndAlso(
-                Expression.Call(MemberAccessName, typeof(string).GetMethod("StartsWith", new[] { typeof(string) }), Expression.Constant("Example")),
-                Expression.MakeBinary(ExpressionType.Equal, MemberAccessId, Expression.Constant(100)));
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:Example* +Id:" + NumericUtils.IntToPrefixCoded(100)));
-        }
-
-        [Test]
-        public void CompoundQuery_Or()
-        {
-            // where r.Name.StartsWith("Example") and r.Id = 100
-            var expression = Expression.OrElse(
-                Expression.Call(MemberAccessName, typeof(string).GetMethod("StartsWith", new[] { typeof(string) }), Expression.Constant("Example")),
-                Expression.MakeBinary(ExpressionType.Equal, MemberAccessId, Expression.Constant(100)));
-            
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example* Id:" + NumericUtils.IntToPrefixCoded(100)));
         }
 
         [Test]

@@ -75,6 +75,21 @@ namespace Lucene.Net.Linq.Tests.Transformers
         }
 
         [Test]
+        public void ComparesExpressionsByReflection()
+        {
+            // null == x ? null : x
+            var condition = Expression.Condition(
+                Expression.MakeBinary(ExpressionType.Equal, Null, X),
+                Null,
+                Expression.Constant("x"));
+
+            var result = visitor.VisitExpression(condition);
+
+            Assert.That(result, Is.InstanceOf<ConstantExpression>());
+        }
+
+
+        [Test]
         public void IgnoresNonNullResult()
         {
             // x != null ? x : y

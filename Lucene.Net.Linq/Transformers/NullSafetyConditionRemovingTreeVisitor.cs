@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformers
@@ -22,7 +23,7 @@ namespace Lucene.Net.Linq.Transformers
 
             if (testExpression == null || nonNullResult == null) return expression;
 
-            if (testExpression.Equals(nonNullResult))
+            if (ReflectionUtils.ReflectionEquals(testExpression, nonNullResult))
             {
                 return nonNullResult;
             }

@@ -16,7 +16,9 @@ namespace Lucene.Net.Linq
         private QueryModelTransformer()
             : this(new ExpressionTreeVisitor[]
                        {
-                           new QuerySourceReferenceTransformingTreeVisitor(),
+                           new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
+                           new QuerySourceReferencePropertyTransformingTreeVisitor(),
+                           new FlagToBinaryConditionTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new MethodCallToBinaryExpressionTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor()

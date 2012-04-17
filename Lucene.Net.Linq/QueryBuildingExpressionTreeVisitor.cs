@@ -49,19 +49,6 @@ namespace Lucene.Net.Linq
             return queryParser.Parse(pattern);
         }
 
-        protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
-        {
-            var queryLocator = new QueryLocatingVisitor();
-            
-            if (queryLocator.FindQueryFieldName(expression) && queryLocator.Pattern != null)
-            {
-                var query = Parse(queryLocator.FieldName, queryLocator.Pattern);
-                queries.Push(query);
-            }
-                
-            return base.VisitMethodCallExpression(expression);
-        }
-
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
         {
             switch (expression.NodeType)
