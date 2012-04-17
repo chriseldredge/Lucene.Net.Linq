@@ -61,6 +61,7 @@
     <Compile Include="Integration\WhereTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformers\NullSafetyConditionRemovingTreeVisitorTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

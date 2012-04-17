@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using Lucene.Net.Linq.Transformers;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Parsing;
@@ -11,8 +11,22 @@ namespace Lucene.Net.Linq
     /// </summary>
     public class QueryModelTransformer : QueryModelVisitorBase
     {
+        private readonly IEnumerable<ExpressionTreeVisitor> visitors;
+
         private QueryModelTransformer()
+            : this(new ExpressionTreeVisitor[]
+                       {
+                           new QuerySourceReferenceTransformingTreeVisitor(),
+                           new NoOpMethodCallRemovingTreeVisitor(),
+                           new MethodCallToBinaryExpressionTreeVisitor(),
+                           new NullSafetyConditionRemovingTreeVisitor()
+                       })
         {
+        }
+
+        private QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> visitors)
+        {
+            this.visitors = visitors;
         }
 
         public static void TransformQueryModel(QueryModel queryModel)
@@ -31,22 +45,10 @@ namespace Lucene.Net.Linq
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            whereClause.TransformExpressions(new MethodCallExpressionTransformer().VisitExpression);
+            foreach (var v in visitors)
+                whereClause.TransformExpressions(v.VisitExpression);
             
             base.VisitWhereClause(whereClause, queryModel, index);
-        }
-    }
-
-    internal class MethodCallExpressionTransformer : ExpressionTreeVisitor
-    {
-        protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
-        {
-            if (expression.Method.Name == "ToLower")
-            {
-                return expression.Object;
-            }
-
-            return base.VisitMethodCallExpression(expression);
         }
     }
 }

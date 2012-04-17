@@ -4,7 +4,6 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Store;
-using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
 using Remotion.Linq.Parsing.Structure;
 using Version = Lucene.Net.Util.Version;
 
@@ -30,16 +29,7 @@ namespace Lucene.Net.Linq
             this.analyzer = analyzer;
             this.version = version;
 
-            var nodeTypeProvider = ExpressionTreeParser.CreateDefaultNodeTypeProvider();
-
-            //nodeTypeProvider.InnerProviders.Add();
-
-            var transformerRegistry = ExpressionTransformerRegistry.CreateDefault();
-
-            var processor = ExpressionTreeParser.CreateDefaultProcessor(transformerRegistry);
-            var expressionTreeParser = new ExpressionTreeParser(nodeTypeProvider, processor);
-
-            queryParser = new QueryParser(expressionTreeParser);
+            queryParser = QueryParser.CreateDefault();
         }
 
         public IQueryable<Document> AsQueryable()
