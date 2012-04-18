@@ -13,7 +13,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         protected LuceneDataProvider provider;
         protected Directory directory;
         protected IndexWriter writer;
-        protected static readonly Version version = new Version("test", 0);
+        protected static readonly Version version = Version.LUCENE_29;
 
         [SetUp]
         public void SetUp()

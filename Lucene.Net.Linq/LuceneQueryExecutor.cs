@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq;
@@ -71,10 +72,10 @@ namespace Lucene.Net.Linq
             QueryModelTransformer.TransformQueryModel(queryModel);
 
             var builder = new QueryModelTranslator(context);
-            var query = builder.Build(queryModel);
+            builder.Build(queryModel);
 
 #if DEBUG
-            System.Diagnostics.Trace.WriteLine("Lucene query: " + query, "Lucene.Net.Linq");
+            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query, "Lucene.Net.Linq");
 #endif
 
             var mapping = new QuerySourceMapping();
@@ -86,14 +87,11 @@ namespace Lucene.Net.Linq
 
             using (var searcher = new IndexSearcher(directory, true))
             {
-                var hits = searcher.Search(query);
+                var hits = searcher.Search(builder.Query, null, searcher.MaxDoc(), builder.Sort);
 
-                for (var i = 0; i < hits.Length(); i++)
+                foreach (var hit in hits.ScoreDocs)
                 {
-                    // TODO:
-                    //if (reader.IsDeleted(i)) continue;
-
-                    SetCurrentDocument(hits.Doc(i));
+                    SetCurrentDocument(searcher.Doc(hit.doc));
                     yield return projector(CurrentDocument);
                 }
             }

@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
-using Lucene.Net.Linq.Transformers;
+using Lucene.Net.Linq.Transformation.TreeVisitors;
 using NUnit.Framework;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.Expressions;
 
-namespace Lucene.Net.Linq.Tests.Transformers
+namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 {
     [TestFixture]
     public class QuerySourceReferencePropertyTransformingTreeVisitorTests

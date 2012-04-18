@@ -1,10 +1,9 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Transformers
+namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class FlagToBinaryConditionTreeVisitor : ExpressionTreeVisitor
     {

@@ -1,8 +1,8 @@
 ﻿using System.Linq.Expressions;
-using Lucene.Net.Linq.Transformers;
+using Lucene.Net.Linq.Transformation.TreeVisitors;
 using NUnit.Framework;
 
-namespace Lucene.Net.Linq.Tests.Transformers
+namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 {
     [TestFixture]
     public class NullSafetyConditionRemovingTreeVisitorTests

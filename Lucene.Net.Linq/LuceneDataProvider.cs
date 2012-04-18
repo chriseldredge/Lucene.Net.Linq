@@ -11,7 +11,7 @@ namespace Lucene.Net.Linq
 {
     public class LuceneDataProvider
     {
-        public static readonly Version DefaultVersion = new Version("Lucene.Net.Linq", 0);
+        public static readonly Version DefaultVersion = Version.LUCENE_29;
 
         private readonly Directory directory;
         private readonly Analyzer analyzer;

@@ -12,7 +12,7 @@ namespace Lucene.Net.Linq.Tests
     [TestFixture]
     public class QueryBuildingExpressionTreeVisitorTests_QueryParsing
     {
-        private static readonly Version version = new Version("QueryBuildingExpressionTreeVisitorTests_QueryParsing", 0);
+        private static readonly Version version = Version.LUCENE_29;
         private Analyzer analyzer;
         private QueryBuildingExpressionTreeVisitor builder;
         
@@ -50,7 +50,7 @@ namespace Lucene.Net.Linq.Tests
         private static readonly Expression MemberAccessId =
             new LuceneQueryFieldExpression(typeof (int), "Id");
 
-        private static readonly Version version = new Version("QueryBuildingExpressionTreeVisitorTests", 0);
+        private static readonly Version version = Version.LUCENE_29;
 
         [SetUp]
         public void SetUp()

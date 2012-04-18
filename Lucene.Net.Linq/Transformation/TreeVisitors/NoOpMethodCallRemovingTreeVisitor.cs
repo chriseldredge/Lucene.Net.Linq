@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Transformers
+namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     /// <summary>
     /// Removes method calls like string.ToLower() that have no effect on a query due to

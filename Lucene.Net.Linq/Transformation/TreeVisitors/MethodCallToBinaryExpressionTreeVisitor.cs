@@ -2,7 +2,7 @@
 using Lucene.Net.Linq.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Transformers
+namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     /// <summary>
     /// Replaces supported method calls like [LuceneQueryFieldExpression].StartsWith("foo") with a BinaryExpression like [LuceneQueryFieldExpression] == foo*

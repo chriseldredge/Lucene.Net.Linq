@@ -1,19 +1,22 @@
-﻿using System.Collections.Generic;
-using Lucene.Net.Linq.Transformers;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Lucene.Net.Linq.Transformation.TreeVisitors;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq
+namespace Lucene.Net.Linq.Transformation
 {
     /// <summary>
     /// Transforms various expressions in a QueryModel instance to make it easier to convert into a Lucene Query.
     /// </summary>
-    public class QueryModelTransformer : QueryModelVisitorBase
+    internal class QueryModelTransformer : QueryModelVisitorBase
     {
         private readonly IEnumerable<ExpressionTreeVisitor> visitors;
 
-        private QueryModelTransformer()
+        internal QueryModelTransformer()
             : this(new ExpressionTreeVisitor[]
                        {
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
@@ -26,7 +29,7 @@ namespace Lucene.Net.Linq
         {
         }
 
-        private QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> visitors)
+        internal QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> visitors)
         {
             this.visitors = visitors;
         }
@@ -47,10 +50,21 @@ namespace Lucene.Net.Linq
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            foreach (var v in visitors)
-                whereClause.TransformExpressions(v.VisitExpression);
-            
+            ApplyVisitors(whereClause.TransformExpressions);
+
             base.VisitWhereClause(whereClause, queryModel, index);
+        }
+
+        public override void VisitOrdering(Ordering ordering, QueryModel queryModel, OrderByClause orderByClause, int index)
+        {
+            ApplyVisitors(ordering.TransformExpressions);
+
+            base.VisitOrdering(ordering, queryModel, orderByClause, index);
+        }
+
+        private void ApplyVisitors(Action<Func<Expression, Expression>> action)
+        {
+            visitors.Apply(v => action(v.VisitExpression));
         }
     }
 }

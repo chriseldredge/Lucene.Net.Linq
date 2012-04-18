@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using Lucene.Net.Linq.Util;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Transformers
+namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     /// <summary>
     /// Locates expressions like IFF(x != null, x, null) and converts them to x.

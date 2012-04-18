@@ -59,14 +59,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
     <Compile Include="QueryLocatingVisitor.cs" />
-    <Compile Include="QueryModelTransformer.cs" />
+    <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
-    <Compile Include="Transformers\FlagToBinaryConditionTreeVisitor.cs" />
-    <Compile Include="Transformers\MethodCallToBinaryExpressionTreeVisitor.cs" />
-    <Compile Include="Transformers\NoOpMethodCallRemovingTreeVisitor.cs" />
-    <Compile Include="Transformers\NullSafetyConditionRemovingTreeVisitor.cs" />
-    <Compile Include="Transformers\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
-    <Compile Include="Transformers\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
+    <Compile Include="Util\LinqExtensions.cs" />
     <Compile Include="Util\ReflectionUtils.cs" />
   </ItemGroup>
   <ItemGroup>
