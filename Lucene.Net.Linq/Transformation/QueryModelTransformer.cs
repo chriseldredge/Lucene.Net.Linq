@@ -14,7 +14,8 @@ namespace Lucene.Net.Linq.Transformation
     /// </summary>
     internal class QueryModelTransformer : QueryModelVisitorBase
     {
-        private readonly IEnumerable<ExpressionTreeVisitor> visitors;
+        private readonly IEnumerable<ExpressionTreeVisitor> whereSelectClauseVisitors;
+        private readonly IEnumerable<ExpressionTreeVisitor> orderingVisitors;
 
         internal QueryModelTransformer()
             : this(new ExpressionTreeVisitor[]
@@ -25,13 +26,20 @@ namespace Lucene.Net.Linq.Transformation
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new MethodCallToBinaryExpressionTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor()
+                       },
+                   new ExpressionTreeVisitor[]
+                       {
+                           new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
+                           new QuerySourceReferencePropertyTransformingTreeVisitor(),
+                           new NoOpMethodCallRemovingTreeVisitor()
                        })
         {
         }
 
-        internal QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> visitors)
+        internal QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> whereSelectClauseVisitors, IEnumerable<ExpressionTreeVisitor> orderingVisitors)
         {
-            this.visitors = visitors;
+            this.whereSelectClauseVisitors = whereSelectClauseVisitors;
+            this.orderingVisitors = orderingVisitors;
         }
 
         public static void TransformQueryModel(QueryModel queryModel)
@@ -50,21 +58,16 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            ApplyVisitors(whereClause.TransformExpressions);
+            whereSelectClauseVisitors.Apply(v => ((Action<Func<Expression, Expression>>) whereClause.TransformExpressions)(v.VisitExpression));
 
             base.VisitWhereClause(whereClause, queryModel, index);
         }
 
         public override void VisitOrdering(Ordering ordering, QueryModel queryModel, OrderByClause orderByClause, int index)
         {
-            ApplyVisitors(ordering.TransformExpressions);
+            orderingVisitors.Apply(v => ((Action<Func<Expression, Expression>>)ordering.TransformExpressions)(v.VisitExpression));
 
             base.VisitOrdering(ordering, queryModel, orderByClause, index);
-        }
-
-        private void ApplyVisitors(Action<Func<Expression, Expression>> action)
-        {
-            visitors.Apply(v => action(v.VisitExpression));
         }
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
@@ -92,7 +91,7 @@ namespace Lucene.Net.Linq
 
             if (type == typeof(string))
                 return SortField.STRING;
-            if (type == typeof(int))
+            if (type == typeof(int) || type == typeof(bool))
                 return SortField.INT;
             if (type == typeof(long))
                 return SortField.LONG;

@@ -26,7 +26,8 @@ namespace Lucene.Net.Linq.Tests.Transformation
 
             visitor1 = mocks.StrictMock<ExpressionTreeVisitor>();
             visitor2 = mocks.StrictMock<ExpressionTreeVisitor>();
-            transformer = new QueryModelTransformer(new[] { visitor1, visitor2 });
+            var visitors = new[] { visitor1, visitor2 };
+            transformer = new QueryModelTransformer(visitors, visitors);
             
             using (mocks.Ordered())
             {
