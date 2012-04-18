@@ -56,9 +56,12 @@
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
+    <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
+    <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
     <Compile Include="QueryLocatingVisitor.cs" />
+    <Compile Include="Search\ConvertableFieldComparator.cs" />
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitor.cs" />

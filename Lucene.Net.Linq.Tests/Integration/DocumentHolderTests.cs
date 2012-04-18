@@ -1,43 +1,14 @@
 ﻿using System;
 using System.Linq;
 using Lucene.Net.Analysis;
-using Lucene.Net.Documents;
 using NUnit.Framework;
 using Version = global::Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {
-    
     [TestFixture]
-    public class DocumentHolderTests : IntegrationTestBase
+    public class DocumentHolderTests : DocumentHolderTestBase
     {
-        public class MappedDocument : DocumentHolder
-        {
-            public string Name
-            {
-                get { return Get("Name"); }
-                set { Set("Name", value, Field.Store.YES, Field.Index.ANALYZED); }
-            }
-
-            public string Id
-            {
-                get { return Get("Id"); }
-                set { Set("Id", value, Field.Store.YES, Field.Index.ANALYZED); }
-            }
-
-            public int? Scalar
-            {
-                get { return GetNumeric<int>("Scalar"); }
-                set { SetNumeric("Scalar", value); }
-            }
-
-            public bool Flag
-            {
-                get { return GetNumeric<bool>("Flag").GetValueOrDefault(); }
-                set { SetNumeric<bool>("Flag", value); }
-            }
-        }
-
         protected override Analyzer GetAnalyzer(Version version)
         {
             var a = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));

@@ -57,7 +57,9 @@
     <Compile Include="DocumentHolderPropertyAccessHookTests.cs" />
     <Compile Include="DocumentHolderMultiValueTests.cs" />
     <Compile Include="DocumentHolderTests.cs" />
+    <Compile Include="Integration\DocumentHolderTestBase.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
+    <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\DocumentHolderTests.cs" />

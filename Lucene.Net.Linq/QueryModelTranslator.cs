@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -58,8 +59,28 @@ namespace Lucene.Net.Linq
             {
                 var field = (LuceneQueryFieldExpression)x.Expression;
                 var reverse = x.OrderingDirection == OrderingDirection.Desc;
-                sorts.Add(new SortField(field.FieldName, GetSortType(field.Type), reverse));
+
+                var sortType = GetSortType(field.Type);
+
+                if (sortType >= 0)
+                {
+                    sorts.Add(new SortField(field.FieldName, sortType, reverse));    
+                }
+                else
+                {
+                    sorts.Add(new SortField(field.FieldName, GetCustomSort(field.Type), reverse));
+                }
             }
+        }
+
+        private FieldComparatorSource GetCustomSort(Type type)
+        {
+            if (typeof(IComparable).IsAssignableFrom(type))
+            {
+                return new ConvertableFieldComparatorSource(type);
+            }
+
+            throw new NotSupportedException("Unsupported sort field type: " + type);
         }
 
         private static int GetSortType(Type type)
@@ -69,7 +90,7 @@ namespace Lucene.Net.Linq
             if (type == typeof(int))
                 return SortField.INT;
 
-            throw new NotSupportedException("Unsupported sort field type: " + type);
+            return -1;
         }
     }
 }
