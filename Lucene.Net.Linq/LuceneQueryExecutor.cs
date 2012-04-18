@@ -84,14 +84,17 @@ namespace Lucene.Net.Linq
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
-
+            
             using (var searcher = new IndexSearcher(directory, true))
             {
-                var hits = searcher.Search(builder.Query, null, searcher.MaxDoc(), builder.Sort);
+                var skipResults = builder.SkipResults;
+                var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
+                
+                var hits = searcher.Search(builder.Query, null, maxResults + skipResults, builder.Sort);
 
-                foreach (var hit in hits.ScoreDocs)
+                for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
-                    SetCurrentDocument(searcher.Doc(hit.Doc));
+                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].Doc));
                     yield return projector(CurrentDocument);
                 }
             }

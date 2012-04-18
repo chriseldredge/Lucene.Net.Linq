@@ -6,6 +6,7 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
+using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq
 {
@@ -14,7 +15,9 @@ namespace Lucene.Net.Linq
         private readonly Context context;
         private readonly IList<SortField> sorts = new List<SortField>();
         private Query query = new MatchAllDocsQuery();
-        
+        private int maxResults = int.MaxValue;
+        private int skipResults;
+
         internal QueryModelTranslator(Context context)
         {
             this.context = context;
@@ -33,6 +36,41 @@ namespace Lucene.Net.Linq
         public Sort Sort
         {
             get { return sorts.Count > 0 ? new Sort(sorts.ToArray()) : new Sort(); }
+        }
+
+        public int MaxResults
+        {
+            get { return maxResults; }
+        }
+
+        public int SkipResults
+        {
+            get { return skipResults; }
+        }
+
+        public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
+        {
+            //TODO: resultOperator.ExecuteInMemory() on unsupported ones.
+
+            if (resultOperator is TakeResultOperator)
+            {
+                var take = (TakeResultOperator) resultOperator;
+                maxResults = Math.Min(take.GetConstantCount(), maxResults);
+            }
+
+            if (resultOperator is SkipResultOperator)
+            {
+                var skip = (SkipResultOperator)resultOperator;
+                var additionalSkip = skip.GetConstantCount();
+                skipResults += additionalSkip;
+
+                if (maxResults != int.MaxValue)
+                {
+                    maxResults -= additionalSkip;
+                }
+            }
+
+            base.VisitResultOperator(resultOperator, queryModel, index);
         }
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
