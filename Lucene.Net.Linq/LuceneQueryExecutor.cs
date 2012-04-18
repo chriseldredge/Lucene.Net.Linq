@@ -75,7 +75,7 @@ namespace Lucene.Net.Linq
             builder.Build(queryModel);
 
 #if DEBUG
-            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query, "Lucene.Net.Linq");
+            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query + " sort: " + builder.Sort, "Lucene.Net.Linq");
 #endif
 
             var mapping = new QuerySourceMapping();
