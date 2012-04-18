@@ -4,6 +4,7 @@ using System.Linq;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
@@ -85,10 +86,16 @@ namespace Lucene.Net.Linq
 
         private static int GetSortType(Type type)
         {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+
+            type = (type == typeof (DateTimeOffset) || type == typeof (DateTime)) ? typeof (long) : type;
+
             if (type == typeof(string))
                 return SortField.STRING;
             if (type == typeof(int))
                 return SortField.INT;
+            if (type == typeof(long))
+                return SortField.LONG;
 
             return -1;
         }

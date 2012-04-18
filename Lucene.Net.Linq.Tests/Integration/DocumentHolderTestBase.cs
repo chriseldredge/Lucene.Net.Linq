@@ -19,10 +19,16 @@ namespace Lucene.Net.Linq.Tests.Integration
                 set { Set("Id", value, Field.Store.YES, Field.Index.ANALYZED); }
             }
 
-            public int? Scalar
+            public int Scalar
             {
-                get { return GetNumeric<int>("Scalar"); }
-                set { SetNumeric("Scalar", value); }
+                get { return GetNumeric<int>("Scalar").GetValueOrDefault(); }
+                set { SetNumeric<int>("Scalar", value); }
+            }
+
+            public int? NullableScalar
+            {
+                get { return GetNumeric<int>("NullableScalar"); }
+                set { SetNumeric("NullableScalar", value); }
             }
 
             public bool Flag

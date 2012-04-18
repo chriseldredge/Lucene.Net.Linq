@@ -13,9 +13,9 @@ namespace Lucene.Net.Linq.Tests.Integration
         [SetUp]
         public void AddDocuments()
         {
-            AddDocument(new MappedDocument { Name = "c", Version = new Version(100, 0, 0) });
-            AddDocument(new MappedDocument { Name = "a", Version = new Version(20, 0, 0) });
-            AddDocument(new MappedDocument { Name = "b", Version = new Version(3, 0, 0) });
+            AddDocument(new MappedDocument { Name = "c", Scalar = 3, Version = new Version(100, 0, 0) });
+            AddDocument(new MappedDocument { Name = "a", Scalar = 1, Version = new Version(20, 0, 0) });
+            AddDocument(new MappedDocument { Name = "b", Scalar = 2, Version = new Version(3, 0, 0) });
 
             TypeDescriptor.AddAttributes(typeof(Version), new TypeConverterAttribute(typeof(VersionConverter)));
         }
@@ -58,6 +58,16 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = from d in documents orderby d.Name descending select d.Name;
 
             Assert.That(result.ToArray(), Is.EqualTo(new[] { "c", "b", "a" }));
+        }
+
+        [Test]
+        public void OrderBy_Int()
+        {
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = from d in documents orderby d.Scalar select d.Scalar;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new int[] { 1, 2, 3 }));
         }
 
         [Test]

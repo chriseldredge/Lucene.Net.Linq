@@ -91,7 +91,7 @@ namespace Lucene.Net.Linq
 
                 foreach (var hit in hits.ScoreDocs)
                 {
-                    SetCurrentDocument(searcher.Doc(hit.doc));
+                    SetCurrentDocument(searcher.Doc(hit.Doc));
                     yield return projector(CurrentDocument);
                 }
             }

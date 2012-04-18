@@ -1,11 +1,12 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using NUnit.Framework;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -38,9 +39,19 @@ namespace Lucene.Net.Linq.Tests
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            Assert.That(transformer.Sort.GetSort()[0].GetField(), Is.EqualTo("Name"));
-            Assert.That(transformer.Sort.GetSort()[0].GetType(), Is.EqualTo(SortField.STRING));
-            Assert.That(transformer.Sort.GetSort()[0].GetReverse(), Is.False, "Reverse");
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+        }
+
+        [Test]
+        public void ConvertsDateTimeOffsetToSort()
+        {
+            var orderByClause = new OrderByClause();
+            orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(DateTimeOffset?), "Date"), OrderingDirection.Asc));
+
+            transformer.VisitOrderByClause(orderByClause, queryModel, 0);
+
+            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.LONG);
         }
 
         [Test]
@@ -52,9 +63,7 @@ namespace Lucene.Net.Linq.Tests
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            Assert.That(transformer.Sort.GetSort()[0].GetField(), Is.EqualTo("Name"));
-            Assert.That(transformer.Sort.GetSort()[0].GetType(), Is.EqualTo(SortField.STRING));
-            Assert.That(transformer.Sort.GetSort()[0].GetReverse(), Is.True, "Reverse");
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Desc, SortField.STRING);
         }
 
         [Test]
@@ -67,12 +76,8 @@ namespace Lucene.Net.Linq.Tests
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
-            Assert.That(transformer.Sort.GetSort()[0].GetField(), Is.EqualTo("Name"));
-            Assert.That(transformer.Sort.GetSort()[0].GetType(), Is.EqualTo(SortField.STRING));
-            Assert.That(transformer.Sort.GetSort()[0].GetReverse(), Is.False, "Reverse");
-            Assert.That(transformer.Sort.GetSort()[1].GetField(), Is.EqualTo("Id"));
-            Assert.That(transformer.Sort.GetSort()[1].GetType(), Is.EqualTo(SortField.INT));
-            Assert.That(transformer.Sort.GetSort()[1].GetReverse(), Is.True, "Reverse");
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.INT);
         }
 
         [Test]
@@ -89,12 +94,16 @@ namespace Lucene.Net.Linq.Tests
             transformer.VisitOrderByClause(orderByClause, queryModel, 1);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
-            Assert.That(transformer.Sort.GetSort()[0].GetField(), Is.EqualTo("Name"));
-            Assert.That(transformer.Sort.GetSort()[0].GetType(), Is.EqualTo(SortField.STRING));
-            Assert.That(transformer.Sort.GetSort()[0].GetReverse(), Is.False, "Reverse");
-            Assert.That(transformer.Sort.GetSort()[1].GetField(), Is.EqualTo("Id"));
-            Assert.That(transformer.Sort.GetSort()[1].GetType(), Is.EqualTo(SortField.INT));
-            Assert.That(transformer.Sort.GetSort()[1].GetReverse(), Is.True, "Reverse");
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.INT);
         }
+
+        private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)
+        {
+            Assert.That(sortField.GetField(), Is.EqualTo(expectedFieldName));
+            Assert.That(sortField.GetType(), Is.EqualTo(expectedType));
+            Assert.That(sortField.GetReverse(), Is.EqualTo(expectedDirection == OrderingDirection.Desc), "Reverse");
+        }
+
     }
 }

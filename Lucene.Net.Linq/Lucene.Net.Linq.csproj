@@ -35,7 +35,7 @@
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
     <Reference Include="Lucene.Net">
-      <HintPath>..\packages\Lucene.Net.2.9.4.1\lib\net40\Lucene.Net.dll</HintPath>
+      <HintPath>..\packages\Lucene.Net.2.9.4.2-g\lib\net40\Lucene.Net.dll</HintPath>
     </Reference>
     <Reference Include="Remotion.Linq">
       <HintPath>..\packages\Remotion.Linq.1.13.111\lib\net35\Remotion.Linq.dll</HintPath>
@@ -56,12 +56,11 @@
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
-    <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
     <Compile Include="QueryLocatingVisitor.cs" />
-    <Compile Include="Search\ConvertableFieldComparator.cs" />
+    <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitor.cs" />

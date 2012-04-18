@@ -12,7 +12,6 @@ namespace Lucene.Net.Linq.Tests.Integration
         protected override Analyzer GetAnalyzer(Version version)
         {
             var a = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
-            //a.AddAnalyzer(new NumberAnalyzer());
             return a;
         }
 
@@ -34,13 +33,13 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             const int scalar = 99;
 
-            var d = new MappedDocument {Name = "a", Scalar = scalar};
+            var d = new MappedDocument {Name = "a", NullableScalar = scalar};
 
             AddDocument(d.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = from doc in documents select doc.Scalar;
+            var result = from doc in documents select doc.NullableScalar;
 
             Assert.That(result.FirstOrDefault(), Is.EqualTo(scalar));
         }
@@ -49,7 +48,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12}.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12}.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -77,12 +76,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_Multiple()
         {
-            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "Other Document", NullableScalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = documents.Where(d => d.Scalar == 12).Where(d => d.Name == "My");
+            var result = documents.Where(d => d.NullableScalar == 12).Where(d => d.Name == "My");
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
@@ -90,8 +89,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_QueryOnAnonymousProjection()
         {
-            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "Other Document", NullableScalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -103,8 +102,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_QueryOnFlatteningProjection()
         {
-            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "Other Document", NullableScalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -116,8 +115,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_QueryOnLambdaProjection()
         {
-            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 12 }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "Other Document", NullableScalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -231,7 +230,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_StartsWith()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -244,7 +243,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_NotEqual()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -258,7 +257,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_NotNull()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = null, Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = null, NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
@@ -272,40 +271,40 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_Null()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = null, Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = null, NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
             var result = (from doc in documents where doc.Name == null select doc).ToList();
 
             Assert.That(result.Count(), Is.EqualTo(1));
-            Assert.That(result.Single().Scalar, Is.EqualTo(12));
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
         }
 
         [Test]
         public void Where_ScalarEqual()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = from doc in documents where doc.Scalar == 12 select doc;
+            var result = from doc in documents where doc.NullableScalar == 12 select doc;
 
-            Assert.That(result.Single().Scalar, Is.EqualTo(12));
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
         }
 
         [Test]
         public void Where_ScalarNotEqual()
         {
-            AddDocument(new MappedDocument { Name = "Other Document", Scalar = 11}.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "Other Document", NullableScalar = 11}.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = from doc in documents where doc.Scalar != 11 select doc;
+            var result = from doc in documents where doc.NullableScalar != 11 select doc;
 
-            Assert.That(result.Single().Scalar, Is.EqualTo(12));
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
         }
 
 
@@ -313,11 +312,11 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_ScalarNotNull()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = (from doc in documents where doc.Scalar != null select doc).ToList();
+            var result = (from doc in documents where doc.NullableScalar != null select doc).ToList();
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
@@ -326,11 +325,11 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void Where_ScalarNull()
         {
             AddDocument(new MappedDocument { Name = "Other Document" }.Document);
-            AddDocument(new MappedDocument { Name = "My Document", Scalar = 12 }.Document);
+            AddDocument(new MappedDocument { Name = "My Document", NullableScalar = 12 }.Document);
 
             var documents = provider.AsQueryable<MappedDocument>();
 
-            var result = from doc in documents where doc.Scalar == null select doc;
+            var result = from doc in documents where doc.NullableScalar == null select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
         }
