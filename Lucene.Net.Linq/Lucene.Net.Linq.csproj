@@ -73,6 +73,7 @@
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
     <Compile Include="Util\LinqExtensions.cs" />
+    <Compile Include="Util\NumericUtils.cs" />
     <Compile Include="Util\ReflectionUtils.cs" />
   </ItemGroup>
   <ItemGroup>

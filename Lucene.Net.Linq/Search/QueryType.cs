@@ -5,6 +5,14 @@
         Default,
         Prefix,
         GreaterThan,
+        GreaterThanOrEqual,
         LessThan,
+        LessThanOrEqual,
+    }
+
+    public enum RangeType
+    {
+        Exclusive,
+        Inclusive
     }
 }

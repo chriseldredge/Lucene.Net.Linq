@@ -90,6 +90,20 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void GreaterThanOrEqual()
+        {
+            var expression = new LuceneQueryExpression(
+                new LuceneQueryFieldExpression(typeof(float), "Count"),
+                Expression.Constant(6f),
+                BooleanClause.Occur.MUST,
+                QueryType.GreaterThanOrEqual);
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Count:[6 TO " + float.MaxValue + "]"));
+        }
+
+        [Test]
         public void LessThan_DateTime()
         {
             var dateTime = new DateTime(2012, 4, 18, 11, 22, 33);
@@ -103,6 +117,20 @@ namespace Lucene.Net.Linq.Tests
             builder.VisitExpression(expression);
 
             Assert.That(builder.Query.ToString(), Is.EqualTo("+Published:[" + DateTime.MinValue.ToUniversalTime().Ticks + " TO " + dateTime.ToUniversalTime().Ticks + "}"));
+        }
+
+        [Test]
+        public void LessThanOrEqual()
+        {
+            var expression = new LuceneQueryExpression(
+                new LuceneQueryFieldExpression(typeof(DateTime), "Average"),
+                Expression.Constant(11.5d),
+                BooleanClause.Occur.MUST,
+                QueryType.LessThanOrEqual);
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Average:[" + double.MinValue + " TO 11.5]"));
         }
     }
 

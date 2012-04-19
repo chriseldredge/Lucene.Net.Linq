@@ -5,9 +5,9 @@ using System.Linq.Expressions;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq
@@ -32,7 +32,7 @@ namespace Lucene.Net.Linq
                 if (query is BooleanQuery)
                 {
                     var booleanQuery = (BooleanQuery)query.Clone();
-                    
+                    // TODO: need to check recursively?
                     if (booleanQuery.GetClauses().All(c => c.GetOccur() == BooleanClause.Occur.MUST_NOT))
                     {
                         booleanQuery.Add(new MatchAllDocsQuery(), BooleanClause.Occur.SHOULD);
@@ -87,16 +87,20 @@ namespace Lucene.Net.Linq
             {
                 pattern += "*";
             }
-            else if (q.QueryType == QueryType.GreaterThan)
+            else if (q.QueryType == QueryType.GreaterThan || q.QueryType == QueryType.GreaterThanOrEqual)
             {
                 var boundary = EvaluateExpression(q.QueryPattern, out isPrefixCoded);
-                query = CreateNumericRangeQuery(fieldName, boundary, null, false, true);
+                var range = q.QueryType == QueryType.GreaterThan ? RangeType.Exclusive : RangeType.Inclusive;
+                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, (ValueType) boundary, null, range, RangeType.Inclusive);
             }
-            else if (q.QueryType == QueryType.LessThan)
+            else if (q.QueryType == QueryType.LessThan || q.QueryType == QueryType.LessThanOrEqual)
             {
                 var boundary = EvaluateExpression(q.QueryPattern, out isPrefixCoded);
-                query = CreateNumericRangeQuery(fieldName, null, boundary, true, false);
+                var range = q.QueryType == QueryType.LessThan ? RangeType.Exclusive : RangeType.Inclusive;
+                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, null, (ValueType)boundary, RangeType.Inclusive, range);
             }
+
+            //TODO: allow client to use non-encoded textual queries on ints?
 
             if (query == null)
                 query = isPrefixCoded ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
@@ -110,51 +114,7 @@ namespace Lucene.Net.Linq
             return base.VisitExtensionExpression(expression);
         }
 
-        private NumericRangeQuery CreateNumericRangeQuery(string fieldName, object lower, object upper, bool lowerInclusive, bool upperInclusive)
-        {
-            if (lower == null)
-            {
-                lower = upper.GetType().GetField("MinValue").GetValue(null);
-            }
-            else if (upper == null)
-            {
-                upper = lower.GetType().GetField("MaxValue").GetValue(null);
-            }
-
-            lower = Convert(lower);
-            upper = Convert(upper);
-
-            if (lower is int)
-            {
-                return NumericRangeQuery.NewIntRange(fieldName, (int)lower, (int)upper, lowerInclusive, upperInclusive);    
-            }
-            else if (lower is long)
-            {
-                return NumericRangeQuery.NewLongRange(fieldName, (long)lower, (long)upper, lowerInclusive, upperInclusive);    
-            }
-            
-            throw new NotSupportedException("Unsupported numeric range type " + lower.GetType());
-        }
-
-        private static ValueType Convert(object value)
-        {
-            if (value is DateTime)
-            {
-                return ((DateTime) value).ToUniversalTime().Ticks;
-            }
-            if (value is DateTimeOffset)
-            {
-                return ((DateTimeOffset)value).Ticks; 
-            }
-            if (value is bool)
-            {
-                return ((bool) value) ? 1 : 0;
-            }
-
-            return (ValueType) value;
-        }
-
-        private BooleanClause.Occur Negate(BooleanClause.Occur occur)
+        private static BooleanClause.Occur Negate(BooleanClause.Occur occur)
         {
             return (occur == BooleanClause.Occur.MUST_NOT)
                        ? BooleanClause.Occur.MUST
@@ -178,7 +138,7 @@ namespace Lucene.Net.Linq
             return result;
         }
 
-        internal static object EvaluateExpression(Expression expression, out bool isPrefixCoded)
+        private static object EvaluateExpression(Expression expression, out bool isPrefixCoded)
         {
             isPrefixCoded = false;
 
@@ -193,29 +153,13 @@ namespace Lucene.Net.Linq
             return result;
         }
 
-        internal static string EvaluateExpressionToString(Expression expression, out bool isPrefixCoded)
+        private static string EvaluateExpressionToString(Expression expression, out bool isPrefixCoded)
         {
             var result = EvaluateExpression(expression, out isPrefixCoded);
 
-            if (isPrefixCoded) return ConvertToPrefixCoded((ValueType) result);
+            if (isPrefixCoded) return ((ValueType) result).ToPrefixCoded();
 
             return result == null ? null : result.ToString();
-        }
-
-        private static string ConvertToPrefixCoded(ValueType result)
-        {
-            result = Convert(result);
-            //TODO: allow client to use non-encoded textual queries on ints?
-            if (result is int)
-            {
-                return NumericUtils.IntToPrefixCoded((int) result);
-            }
-            if (result is long)
-            {
-                return NumericUtils.LongToPrefixCoded((long)result);
-            }
-
-            throw new NotSupportedException("ValueType " + result.GetType() + " not supported.");
         }
     }
 }

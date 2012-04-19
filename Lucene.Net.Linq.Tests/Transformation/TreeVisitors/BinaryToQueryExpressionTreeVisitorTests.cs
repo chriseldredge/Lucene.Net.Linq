@@ -58,6 +58,16 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         }
 
         [Test]
+        public void GreaterThanOrEqual()
+        {
+            var time = Expression.Constant(new DateTime(2012, 4, 18));
+            var expression = Expression.MakeBinary(ExpressionType.GreaterThanOrEqual, new LuceneQueryFieldExpression(typeof(DateTime), "Time"), time);
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Time", time, QueryType.GreaterThanOrEqual, BooleanClause.Occur.MUST);
+        }
+
+        [Test]
         public void LessThan()
         {
             var five = Expression.Constant(5);
@@ -65,6 +75,16 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             var result = visitor.VisitExpression(expression);
             AssertLuceneQueryExpression(result, "Count", five, QueryType.LessThan, BooleanClause.Occur.MUST);
+        }
+
+        [Test]
+        public void LessThanOrEqual()
+        {
+            var five = Expression.Constant(5.125d);
+            var expression = Expression.MakeBinary(ExpressionType.LessThanOrEqual, new LuceneQueryFieldExpression(typeof(double), "Average"), five);
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Average", five, QueryType.LessThanOrEqual, BooleanClause.Occur.MUST);
         }
 
         [Test]

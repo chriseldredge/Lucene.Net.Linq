@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Search;
@@ -9,26 +10,29 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class BinaryToQueryExpressionTreeVisitor : ExpressionTreeVisitor
     {
+        private static readonly IDictionary<ExpressionType, QueryType> typeMap =
+            new Dictionary<ExpressionType, QueryType>
+                {
+                    {ExpressionType.GreaterThan, QueryType.GreaterThan},
+                    {ExpressionType.GreaterThanOrEqual, QueryType.GreaterThanOrEqual},
+                    {ExpressionType.LessThan, QueryType.LessThan},
+                    {ExpressionType.LessThanOrEqual, QueryType.LessThanOrEqual},
+                    {ExpressionType.Equal, QueryType.Default},
+                    {ExpressionType.NotEqual, QueryType.Default},
+                };
+
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
         {
-            var queryType = QueryType.Default;
-            var occur = BooleanClause.Occur.MUST;
-
-            switch (expression.NodeType)
+            QueryType queryType;
+            if (!typeMap.TryGetValue(expression.NodeType, out queryType))
             {
-                case ExpressionType.GreaterThan:
-                    queryType = QueryType.GreaterThan;
-                    break;
-                case ExpressionType.LessThan:
-                    queryType = QueryType.LessThan;
-                    break;
-                case ExpressionType.Equal:
-                    break;
-                case ExpressionType.NotEqual:
-                    occur = BooleanClause.Occur.MUST_NOT;
-                    break;
-                default:
-                    return base.VisitBinaryExpression(expression);
+                return base.VisitBinaryExpression(expression);
+            }
+
+            var occur = BooleanClause.Occur.MUST;
+            if (expression.NodeType == ExpressionType.NotEqual)
+            {
+                occur = BooleanClause.Occur.MUST_NOT;
             }
 
             LuceneQueryFieldExpression fieldExpression;
