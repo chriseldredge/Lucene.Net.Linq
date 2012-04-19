@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Index;
+using Lucene.Net.Linq.Expressions;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
@@ -56,60 +57,47 @@ namespace Lucene.Net.Linq
                 case ExpressionType.AndAlso:
                 case ExpressionType.OrElse:
                     return MakeBooleanQuery(expression);
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                    break;
                 default:
                     throw new NotSupportedException("BinaryExpression of type " + expression.NodeType + " is not supported.");
             }
+        }
 
-            var queryLocator = new QueryLocatingVisitor();
-            string field;
-            Expression patternExpression;
+        protected override Expression VisitExtensionExpression(Remotion.Linq.Clauses.Expressions.ExtensionExpression expression)
+        {
+            if (!(expression is LuceneQueryExpression))
+            {
+                return base.VisitExtensionExpression(expression);
+            }
 
-            if (queryLocator.FindQueryFieldName(expression.Left))
-            {
-                field = queryLocator.FieldName;
-                patternExpression = expression.Right;
-            }
-            else if (queryLocator.FindQueryFieldName(expression.Right))
-            {
-                field = queryLocator.FieldName;
-                patternExpression = expression.Left;
-            }
-            else
-            {
-                throw new NotSupportedException("Failed to map left or right side of BinaryExpression to a field.");
-            }
+            var q = (LuceneQueryExpression) expression;
 
             bool isPrefixCoded;
-            var pattern = EvaluateExpression(patternExpression, out isPrefixCoded);
+            var pattern = EvaluateExpression(q.QueryPattern, out isPrefixCoded);
 
-            var occur = BooleanClause.Occur.MUST_NOT;
-            var shouldCreateBooleanClause = pattern == null || expression.NodeType == ExpressionType.NotEqual;
+            var occur = q.Occur;
 
             if (pattern == null)
             {
                 pattern = "*";
-                if (expression.NodeType == ExpressionType.NotEqual)
-                {
-                    occur = BooleanClause.Occur.MUST;
-                }
+                occur = Negate(occur);
             }
 
-            var query = isPrefixCoded ? new TermQuery(new Term(field, pattern)) : Parse(field, pattern);
+            var query = isPrefixCoded ? new TermQuery(new Term(q.QueryField.FieldName, pattern)) : Parse(q.QueryField.FieldName, pattern);
 
-            if (shouldCreateBooleanClause)
-            {
-                var booleanQuery = new BooleanQuery();
-                
-                booleanQuery.Add(query, occur);
-                query = booleanQuery;
-            }
+            var booleanQuery = new BooleanQuery();
 
-            queries.Push(query);
-            
-            return base.VisitBinaryExpression(expression);
+            booleanQuery.Add(query, occur);
+
+            queries.Push(booleanQuery);
+
+            return base.VisitExtensionExpression(expression);
+        }
+
+        private BooleanClause.Occur Negate(BooleanClause.Occur occur)
+        {
+            return (occur == BooleanClause.Occur.MUST_NOT)
+                       ? BooleanClause.Occur.MUST
+                       : BooleanClause.Occur.MUST_NOT;
         }
 
         private Expression MakeBooleanQuery(BinaryExpression expression)

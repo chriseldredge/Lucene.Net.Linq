@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Context.cs" />
     <Compile Include="DocumentHolder.cs" />
+    <Compile Include="Expressions\LuceneQueryExpression.cs" />
     <Compile Include="IDocumentHolder.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneQueryable.cs" />
@@ -63,6 +64,7 @@
     <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
+    <Compile Include="Transformation\TreeVisitors\BinaryToQueryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />

@@ -14,7 +14,7 @@ namespace Lucene.Net.Linq
     {
         private readonly Context context;
         private readonly IList<SortField> sorts = new List<SortField>();
-        private Query query = new MatchAllDocsQuery();
+        private Query query;
         private int maxResults = int.MaxValue;
         private int skipResults;
 
@@ -30,7 +30,7 @@ namespace Lucene.Net.Linq
 
         public Query Query
         {
-            get { return query; }
+            get { return query ?? new MatchAllDocsQuery(); }
         }
 
         public Sort Sort

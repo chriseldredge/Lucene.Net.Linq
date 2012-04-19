@@ -25,7 +25,9 @@ namespace Lucene.Net.Linq.Transformation
                            new FlagToBinaryConditionTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new MethodCallToBinaryExpressionTreeVisitor(),
-                           new NullSafetyConditionRemovingTreeVisitor()
+                           new NullSafetyConditionRemovingTreeVisitor(),
+                           // TODO: new EvaluateToContantTransformer()
+                           new BinaryToQueryExpressionTreeVisitor()
                        },
                    new ExpressionTreeVisitor[]
                        {

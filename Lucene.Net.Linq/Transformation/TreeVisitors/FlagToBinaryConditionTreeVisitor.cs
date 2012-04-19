@@ -18,7 +18,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             try
             {
-                return base.VisitBinaryExpression(expression);    
+                return base.VisitBinaryExpression(expression);
             }
             finally
             {
@@ -33,11 +33,11 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 return base.VisitUnaryExpression(expression);
             }
 
-            negate = true;
+            negate = !negate;
 
             var result = VisitExpression(expression.Operand);
 
-            negate = false;
+            negate = !negate;
 
             return result;
         }
@@ -48,7 +48,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             if (field == null || field.Type != typeof(bool) || IsAlreadyInEqualityExpression())
             {
-                return base.VisitExtensionExpression(expression);    
+                return base.VisitExtensionExpression(expression);
             }
 
             return Expression.MakeBinary(ExpressionType.Equal, field, Expression.Constant(!negate));
@@ -58,7 +58,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
         {
             if (!(parent is BinaryExpression)) return false;
 
-            var binary = (BinaryExpression) parent;
+            var binary = (BinaryExpression)parent;
 
             return binary.NodeType == ExpressionType.Equal || binary.NodeType == ExpressionType.NotEqual;
         }

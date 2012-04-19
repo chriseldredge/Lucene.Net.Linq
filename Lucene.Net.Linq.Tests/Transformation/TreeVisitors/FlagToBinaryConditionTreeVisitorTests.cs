@@ -90,5 +90,20 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             Assert.That(((ConstantExpression)result.Right).Value, Is.EqualTo(false));
         }
 
+        [Test]
+        public void DoubleInverse()
+        {
+            // "where !(!doc.SomeFlag)"
+            var flag = new LuceneQueryFieldExpression(typeof(bool), "SomeFlag");
+            var expression = Expression.MakeUnary(ExpressionType.Not, flag, typeof(bool));
+            expression = Expression.MakeUnary(ExpressionType.Not, expression, typeof(bool));
+            var result = visitor.VisitExpression(expression) as BinaryExpression;
+
+            Assert.That(result, Is.Not.Null, "Expected BinaryExpression to be returned.");
+            Assert.That(result.Left, Is.SameAs(flag));
+            Assert.That(result.Right, Is.InstanceOf<ConstantExpression>());
+            Assert.That(((ConstantExpression)result.Right).Value, Is.EqualTo(true));
+        }
+
     }
 }

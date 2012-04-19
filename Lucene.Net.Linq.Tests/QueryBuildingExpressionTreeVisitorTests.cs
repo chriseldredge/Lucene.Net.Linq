@@ -65,61 +65,6 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
-        public void BinaryEqualsExpression()
-        {
-            // where r.Name == "Example"
-            builder.VisitExpression(Expression.MakeBinary(
-                ExpressionType.Equal,
-                MemberAccessName,
-                Expression.Constant("Example")));
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example"));
-            Assert.That(builder.Query, Is.InstanceOf<TermQuery>());
-        }
-
-        [Test]
-        public void BinaryEqualsExpression_MemberAccessInQueryValue()
-        {
-            var searchParams = new Record { Name = "Example" };
-
-            // where r.Name == searchParams.Name
-            var expression = Expression.MakeBinary(
-                ExpressionType.Equal,
-                MemberAccessName,
-                Expression.MakeMemberAccess(Expression.Constant(searchParams), typeof(Record).GetProperty("Name")));
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example"));
-        }
-
-        [Test]
-        public void BinaryNotEqualsExpression()
-        {
-            // where r.Name != "Example"
-            var expression = Expression.MakeBinary(
-                ExpressionType.NotEqual,
-                MemberAccessName,
-                Expression.Constant("Example"));
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("-Name:Example *:*"));
-        }
-
-        [Test]
-        public void BinaryEqualsExpression_Transitive()
-        {
-            // where "Example" == r.Name
-            builder.VisitExpression(Expression.MakeBinary(
-                ExpressionType.Equal,
-                Expression.Constant("Example"),
-                MemberAccessName));
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("Name:Example"));
-        }
-
-        [Test]
         public void ThrowsOnUnRecognizedExpressionType()
         {
             var expression = (Expression) Expression.MakeBinary(
