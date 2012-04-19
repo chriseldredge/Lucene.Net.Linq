@@ -48,13 +48,13 @@ namespace Lucene.Net.Linq.Transformation
         {
             var instance = new QueryModelTransformer();
 
-            var copy = queryModel.Clone();
-
+#if DEBUG
+            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
+#endif
             queryModel.Accept(instance);
 
 #if DEBUG
-            System.Diagnostics.Trace.WriteLine("Pre-transformed QueryModel: " + copy, "Lucene.Net.Linq");
-            System.Diagnostics.Trace.WriteLine("Transformed QueryModel:     " + queryModel, "Lucene.Net.Linq");
+            System.Diagnostics.Trace.WriteLine("Transformed QueryModel:  " + queryModel, "Lucene.Net.Linq");
 #endif
         }
 
