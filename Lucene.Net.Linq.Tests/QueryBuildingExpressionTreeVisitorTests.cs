@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Search;
 using NUnit.Framework;
@@ -44,9 +45,6 @@ namespace Lucene.Net.Linq.Tests
     {
         private QueryBuildingExpressionTreeVisitor builder;
 
-        private static readonly Expression MemberAccessName =
-            new LuceneQueryFieldExpression(typeof(string), "Name");
-
         private static readonly Expression MemberAccessId =
             new LuceneQueryFieldExpression(typeof (int), "Id");
 
@@ -75,6 +73,36 @@ namespace Lucene.Net.Linq.Tests
             TestDelegate call = () => builder.VisitExpression(expression);
 
             Assert.That(call, Throws.Exception.InstanceOf<NotSupportedException>());
+        }
+
+        [Test]
+        public void GreaterThan()
+        {
+            var expression = new LuceneQueryExpression(
+                new LuceneQueryFieldExpression(typeof (int), "Count"),
+                Expression.Constant(5),
+                BooleanClause.Occur.MUST,
+                QueryType.GreaterThan);
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Count:{5 TO " + int.MaxValue + "]"));
+        }
+
+        [Test]
+        public void LessThan_DateTime()
+        {
+            var dateTime = new DateTime(2012, 4, 18, 11, 22, 33);
+
+            var expression = new LuceneQueryExpression(
+                new LuceneQueryFieldExpression(typeof(DateTime), "Published"),
+                Expression.Constant(dateTime),
+                BooleanClause.Occur.MUST,
+                QueryType.LessThan);
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Published:[" + DateTime.MinValue.ToUniversalTime().Ticks + " TO " + dateTime.ToUniversalTime().Ticks + "}"));
         }
     }
 

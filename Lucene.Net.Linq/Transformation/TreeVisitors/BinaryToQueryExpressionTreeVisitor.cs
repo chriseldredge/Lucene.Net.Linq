@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq.Parsing;
 
@@ -10,11 +11,18 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
     {
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
         {
-            BooleanClause.Occur occur;
+            var queryType = QueryType.Default;
+            var occur = BooleanClause.Occur.MUST;
+
             switch (expression.NodeType)
             {
+                case ExpressionType.GreaterThan:
+                    queryType = QueryType.GreaterThan;
+                    break;
+                case ExpressionType.LessThan:
+                    queryType = QueryType.LessThan;
+                    break;
                 case ExpressionType.Equal:
-                    occur = BooleanClause.Occur.MUST;
                     break;
                 case ExpressionType.NotEqual:
                     occur = BooleanClause.Occur.MUST_NOT;
@@ -41,7 +49,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 throw new NotSupportedException("Expected Left or Right to be LuceneQueryFieldExpression");
             }
 
-            return new LuceneQueryExpression(fieldExpression, pattern, occur);
+            return new LuceneQueryExpression(fieldExpression, pattern, occur, queryType);
         }
     }
 }

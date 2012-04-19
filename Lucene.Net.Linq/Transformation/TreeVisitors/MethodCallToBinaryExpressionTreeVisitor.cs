@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Search;
+using Lucene.Net.Search;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
@@ -11,17 +13,16 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
     {
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
         {
-            if (!(expression.Object is LuceneQueryFieldExpression))
+            var queryField = expression.Object as LuceneQueryFieldExpression;
+
+            if (queryField == null)
                 return base.VisitMethodCallExpression(expression);
 
             if (expression.Method.Name == "StartsWith")
             {
-                bool prefixCoded;
-                // TODO: evaluate expression ahead of time so it will always be a ConstantExpression.
-                var right = QueryBuildingExpressionTreeVisitor.EvaluateExpression(expression.Arguments[0], out prefixCoded) + "*";
-                
-                return Expression.MakeBinary(ExpressionType.Equal, expression.Object, Expression.Constant(right));
+                return new LuceneQueryExpression(queryField, expression.Arguments[0], BooleanClause.Occur.MUST, QueryType.Prefix);
             }
+            
             return base.VisitMethodCallExpression(expression);
         }
     }

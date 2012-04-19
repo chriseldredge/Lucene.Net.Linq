@@ -69,6 +69,7 @@
     <Compile Include="QueryBuildingExpressionTreeVisitorTests.cs" />
     <Compile Include="QueryModelTransformerTests.cs" />
     <Compile Include="Transformation\QueryModelTransformerTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\BinaryToQueryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitorTests.cs" />

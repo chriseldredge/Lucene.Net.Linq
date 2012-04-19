@@ -62,6 +62,7 @@
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
     <Compile Include="QueryLocatingVisitor.cs" />
     <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
+    <Compile Include="Search\QueryType.cs" />
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
     <Compile Include="Transformation\TreeVisitors\BinaryToQueryExpressionTreeVisitor.cs" />
