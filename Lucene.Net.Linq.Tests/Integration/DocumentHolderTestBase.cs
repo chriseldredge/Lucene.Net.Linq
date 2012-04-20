@@ -25,6 +25,12 @@ namespace Lucene.Net.Linq.Tests.Integration
                 set { SetNumeric<int>("Scalar", value); }
             }
 
+            public long Long
+            {
+                get { return GetNumeric<long>("Long").GetValueOrDefault(); }
+                set { SetNumeric<long>("Long", value); }
+            }
+
             public int? NullableScalar
             {
                 get { return GetNumeric<int>("NullableScalar"); }

@@ -74,7 +74,7 @@ namespace Lucene.Net.Linq.Tests
 
             doc.Name = null;
 
-            Assert.That(doc.Document.GetFields().Cast<Fieldable>().Select(f => f.Name()), Is.Empty);
+            Assert.That(doc.Document.GetFields().Select(f => f.Name()), Is.Empty);
         }
 
         [Test]
@@ -84,7 +84,17 @@ namespace Lucene.Net.Linq.Tests
 
             doc.Name = "New Name";
 
-            Assert.That(doc.Document.GetFields().Cast<Fieldable>().Select(f => f.Name()), Is.EquivalentTo(new[] {"Name"}));
+            Assert.That(doc.Document.GetFields().Select(f => f.Name()), Is.EquivalentTo(new[] {"Name"}));
+        }
+
+        [Test]
+        public void SetNumericReplacesField()
+        {
+            var doc = new MappedDocument { NullableInt = 10 };
+
+            doc.NullableInt = 12;
+
+            Assert.That(doc.Document.GetFields().Select(f => f.Name()), Is.EquivalentTo(new[] { "NullableInt" }));
         }
 
         [Test]

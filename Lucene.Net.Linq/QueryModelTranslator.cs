@@ -93,10 +93,10 @@ namespace Lucene.Net.Linq
 
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
-            foreach (var x in orderByClause.Orderings)
+            foreach (var ordering in orderByClause.Orderings)
             {
-                var field = (LuceneQueryFieldExpression)x.Expression;
-                var reverse = x.OrderingDirection == OrderingDirection.Desc;
+                var field = (LuceneQueryFieldExpression)ordering.Expression;
+                var reverse = ordering.OrderingDirection == OrderingDirection.Desc;
 
                 var sortType = GetSortType(field.Type);
 

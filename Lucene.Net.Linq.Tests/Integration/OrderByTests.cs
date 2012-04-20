@@ -1,9 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Lucene.Net.Analysis;
+using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Search;
+using Lucene.Net.Store;
+using Lucene.Net.Util;
 using NUnit.Framework;
+using Directory = Lucene.Net.Store.Directory;
+using Version = System.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {
@@ -68,6 +76,21 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = from d in documents orderby d.Scalar select d.Scalar;
 
             Assert.That(result.ToArray(), Is.EqualTo(new int[] { 1, 2, 3 }));
+        }
+
+        [Test]
+        public void OrderBy_Long()
+        {
+            writer.DeleteAll();
+            AddDocument(new MappedDocument {Long = 23155163});
+            AddDocument(new MappedDocument {Long = 4667});
+            AddDocument(new MappedDocument {Long = 22468359});
+
+            var documents = provider.AsQueryable<MappedDocument>();
+
+            var result = from d in documents orderby d.Long select d.Long;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { 4667L, 22468359L, 23155163L }));
         }
 
         [Test]

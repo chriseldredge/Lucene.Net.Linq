@@ -140,19 +140,19 @@ namespace Lucene.Net.Linq
 
             if (number is int || number is bool)
             {
-                field.SetIntValue((int)Convert.ChangeType(value, typeof(int)));    
+                field = field.SetIntValue((int)Convert.ChangeType(value, typeof(int)));    
             }
             else if (number is long)
             {
-                field.SetLongValue((long)Convert.ChangeType(value, typeof(long)));
+                field = field.SetLongValue((long)Convert.ChangeType(value, typeof(long)));
             }
             else if (number is double)
             {
-                field.SetDoubleValue((double)Convert.ChangeType(value, typeof(double)));
+                field = field.SetDoubleValue((double)Convert.ChangeType(value, typeof(double)));
             }
             else if (number is float)
             {
-                field.SetDoubleValue((float)Convert.ChangeType(value, typeof(float)));
+                field = field.SetDoubleValue((float)Convert.ChangeType(value, typeof(float)));
             }
             else
             {
