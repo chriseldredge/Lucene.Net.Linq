@@ -41,8 +41,8 @@ namespace Lucene.Net.Linq.Search
             {
                 // TODO: handle non-string TBackingField
                 var strings = FieldCache_Fields.DEFAULT.GetStrings(reader, field);
-
-                return strings.Select(s => converter.ConvertFrom(s)).Cast<TComparable>().ToArray();
+                var longs = FieldCache_Fields.DEFAULT.GetLongs(reader, field);
+                return strings.Select(s => s == null ? default(TComparable) : converter.ConvertFrom(s)).Cast<TComparable>().ToArray();
             }
         }
     }
