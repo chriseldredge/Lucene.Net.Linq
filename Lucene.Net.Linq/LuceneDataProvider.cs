@@ -52,12 +52,12 @@ namespace Lucene.Net.Linq
             IndexWriter.Commit();
         }
 
-        public IQueryable<T> AsMappedQueryable<T>() where T : new()
+        public IQueryable<T> AsQueryable<T>() where T : new()
         {
-            return AsMappedQueryable(() => new T());
+            return AsQueryable(() => new T());
         }
 
-        public IQueryable<T> AsMappedQueryable<T>(Func<T> factory)
+        public IQueryable<T> AsQueryable<T>(Func<T> factory)
         {
             var executor = new QueryExecutor<T>(directory, new Context(analyzer, version), factory, new ReflectionDocumentMapper<T>());
             return new LuceneQueryable<T>(queryParser, executor);

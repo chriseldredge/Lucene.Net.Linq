@@ -27,7 +27,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void OrderBy_String()
         {
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Name select d.Name;
 
@@ -37,7 +37,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void OrderBy_String_Desc()
         {
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Name descending select d.Name;
 
@@ -47,7 +47,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void OrderBy_Int()
         {
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Scalar select d.Scalar;
 
@@ -63,7 +63,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Long = 4667 });
             AddDocument(new SampleDocument { Long = 22468359 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Long select d.Long;
 
@@ -73,7 +73,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void OrderBy_Bool()
         {
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Flag select d.Flag;
 
@@ -83,7 +83,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void OrderBy_Comparable()
         {
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from d in documents orderby d.Version select d.Version.Major;
 

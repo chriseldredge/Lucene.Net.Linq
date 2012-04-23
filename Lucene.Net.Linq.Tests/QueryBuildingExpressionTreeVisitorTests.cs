@@ -59,9 +59,9 @@ namespace Lucene.Net.Linq.Tests
             builder = new QueryBuildingExpressionTreeVisitor(new Context(new WhitespaceAnalyzer(), version), this);
         }
 
-        public IFieldMappingInfo GetMappingInfo(string fieldName)
+        public IFieldMappingInfo GetMappingInfo(string propertyName)
         {
-            return new FakeFieldMappingInfo {FieldName = fieldName};
+            return new FakeFieldMappingInfo {FieldName = propertyName};
         }
 
         class FakeFieldMappingInfo : IFieldMappingInfo

@@ -8,7 +8,7 @@ namespace Lucene.Net.Linq.Mapping
 {
     public interface IFieldMappingInfoProvider
     {
-        IFieldMappingInfo GetMappingInfo(string fieldName);
+        IFieldMappingInfo GetMappingInfo(string propertyName);
     }
 
     public interface IDocumentMapper<in T> : IFieldMappingInfoProvider
@@ -35,13 +35,13 @@ namespace Lucene.Net.Linq.Mapping
                     continue;
                 }
                 var mappingContext = FieldMappingInfoBuilder.Build<T>(p);
-                fieldMap.Add(mappingContext.FieldName, mappingContext);
+                fieldMap.Add(mappingContext.PropertyInfo.Name, mappingContext);
             }
         }
 
-        public IFieldMappingInfo GetMappingInfo(string fieldName)
+        public IFieldMappingInfo GetMappingInfo(string propertyName)
         {
-            return fieldMap[fieldName];
+            return fieldMap[propertyName];
         }
 
         public void ToObject(Document source, T target)

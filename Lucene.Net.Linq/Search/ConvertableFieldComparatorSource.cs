@@ -20,12 +20,12 @@ namespace Lucene.Net.Linq.Search
 
         public override FieldComparator NewComparator(string fieldname, int numHits, int sortPos, bool reversed)
         {
-            var genericType = typeof(ConvertableFieldComparator<,>).MakeGenericType(type, typeof(string));
+            var genericType = typeof(ConvertableFieldComparator<>).MakeGenericType(type);
             var ctr = genericType.GetConstructor(new[] { typeof(int), typeof(string), typeof(TypeConverter) });
             return (FieldComparator)ctr.Invoke(new object[] { numHits, fieldname, fieldMappingInfo.Converter });
         }
 
-        public class ConvertableFieldComparator<TComparable, TBackingField> : FieldComparator<TComparable> where TComparable : IComparable
+        public class ConvertableFieldComparator<TComparable> : FieldComparator<TComparable> where TComparable : IComparable
         {
             private readonly TypeConverter converter;
 
@@ -37,7 +37,6 @@ namespace Lucene.Net.Linq.Search
 
             protected override TComparable[] GetCurrentReaderValues(IndexReader reader, int docBase)
             {
-                // TODO: handle non-string TBackingField
                 var strings = FieldCache_Fields.DEFAULT.GetStrings(reader, field);
                 return strings.Select(s => s == null ? default(TComparable) : converter.ConvertFrom(s)).Cast<TComparable>().ToArray();
             }

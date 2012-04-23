@@ -37,7 +37,6 @@ namespace Lucene.Net.Linq.Util
 
             if (lowerBound is int)
             {
-                
                 return NumericRangeQuery.NewIntRange(fieldName, (int)lowerBound, (int)upperBound, minInclusive, maxInclusive);
             }
             if (lowerBound is long)
@@ -60,6 +59,7 @@ namespace Lucene.Net.Linq.Util
         /// Converts supported value types such as DateTime to an underlying ValueType that is supported by
         /// <c ref="NumericRangeQuery"/>.
         /// </summary>
+        [Obsolete]
         internal static ValueType ToNumericFieldValue(this ValueType value)
         {
             // TODO: replace with converters
@@ -77,8 +77,6 @@ namespace Lucene.Net.Linq.Util
 
         internal static string ToPrefixCoded(this ValueType value)
         {
-            value = ToNumericFieldValue(value);
-            
             if (value is int)
             {
                 return NumericUtils.IntToPrefixCoded((int)value);
@@ -101,7 +99,7 @@ namespace Lucene.Net.Linq.Util
         
         internal static NumericField SetValue(this NumericField field, ValueType value)
         {
-            value = value.ToNumericFieldValue();
+            //value = value.ToNumericFieldValue();
 
             if (value is int)
             {

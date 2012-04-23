@@ -34,9 +34,9 @@ namespace Lucene.Net.Linq
             CurrentDocument = item;
         }
 
-        public override IFieldMappingInfo GetMappingInfo(string fieldName)
+        public override IFieldMappingInfo GetMappingInfo(string propertyName)
         {
-            return mapper.GetMappingInfo(fieldName);
+            return mapper.GetMappingInfo(propertyName);
         }
     }
 
@@ -98,7 +98,7 @@ namespace Lucene.Net.Linq
             }
         }
 
-        public abstract IFieldMappingInfo GetMappingInfo(string fieldName);
+        public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
 
         protected abstract void SetCurrentDocument(Document doc);
 

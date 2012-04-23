@@ -21,7 +21,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             var d = new SampleDocument {Name = "My Document"};
             AddDocument(d);
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents select doc;
 
@@ -40,7 +40,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             var d = new AlternateDocument { AlternateName = "My Document" };
             provider.AddDocument(d);
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents select doc;
 
@@ -56,7 +56,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             AddDocument(d);
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents select doc.NullableScalar;
 
@@ -69,7 +69,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12});
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Name == "My" select doc;
 
@@ -82,7 +82,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", Flag = true });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
 // Not redundant because it generates a different Espression tree
 // ReSharper disable RedundantBoolCompare
@@ -98,7 +98,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = documents.Where(d => d.NullableScalar == 12).Where(d => d.Name == "My");
 
@@ -111,7 +111,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents select new { DocName = doc.Name }).Where(d => d.DocName == "My");
 
@@ -124,7 +124,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents select doc.Name).Where(d => d == "My");
 
@@ -137,7 +137,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents select Convert(doc)).Where(d => d.Name == "My");
 
@@ -160,9 +160,22 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Id == "X.Z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_FieldNameDifferentFromProperty()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Alias = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Alias = "X.Z.1.3" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Alias == "X.Z.1.3" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
@@ -173,7 +186,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3", Long = 423434L });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Long == 423434L select doc;
 
@@ -186,7 +199,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Id == "x.z.1.3" select doc;
 
@@ -199,7 +212,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Id.ToLower() == "x.z.1.3" select doc;
 
@@ -212,7 +225,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where (doc.Id != null ? doc.Id.ToLower() : null) == "x.z.1.3" select doc;
 
@@ -225,7 +238,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Documents Bill", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "Bills Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Name == "\"Bills Document\"" select doc;
 
@@ -238,7 +251,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
 
@@ -251,7 +264,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
 
@@ -264,7 +277,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Name.StartsWith("my") select doc;
 
@@ -277,7 +290,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents where doc.Name != "\"My Document\"" select doc).ToList();
 
@@ -291,7 +304,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents where doc.Name != null select doc).ToList();
 
@@ -305,7 +318,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents where doc.Name == null select doc).ToList();
 
@@ -319,7 +332,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents where doc.Name == "" select doc).ToList();
 
@@ -333,7 +346,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.NullableScalar == 12 select doc;
 
@@ -346,7 +359,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 11});
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.NullableScalar != 11 select doc;
 
@@ -360,7 +373,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = (from doc in documents where doc.NullableScalar != null select doc).ToList();
 
@@ -373,7 +386,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "Other Document" });
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.NullableScalar == null select doc;
 

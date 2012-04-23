@@ -55,7 +55,12 @@
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
+    <Compile Include="Mapping\CollectionReflectionFieldMapper.cs" />
+    <Compile Include="Converters\DateTimeOffsetToTicksConverter.cs" />
+    <Compile Include="Converters\DateTimeToTicksConverter.cs" />
     <Compile Include="Mapping\FieldAttribute.cs" />
+    <Compile Include="Mapping\NumericFieldMappingInfoBuilder.cs" />
+    <Compile Include="Mapping\NumericReflectionFieldMapper.cs" />
     <Compile Include="Mapping\ReflectionFieldMapper.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilder.cs" />
     <Compile Include="Mapping\ReflectionDocumentMapper.cs" />

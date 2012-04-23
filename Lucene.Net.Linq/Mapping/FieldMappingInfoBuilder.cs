@@ -25,7 +25,7 @@ namespace Lucene.Net.Linq.Mapping
 
             if (numericFieldAttribute != null)
             {
-                mapper = BuildNumeric<T>(p, type, numericFieldAttribute);
+                mapper = NumericFieldMappingInfoBuilder.BuildNumeric<T>(p, type, numericFieldAttribute);
             }
             else
             {
@@ -48,54 +48,10 @@ namespace Lucene.Net.Linq.Mapping
             var store = metadata != null ? metadata.Store : true;
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
 
-
             return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName);
         }
 
-        private static ReflectionFieldMapper<T> BuildNumeric<T>(PropertyInfo p, Type type, NumericFieldAttribute metadata)
-        {
-            var fieldName = metadata.Field ?? p.Name;
-            var typeToValueTypeConverter = (TypeConverter) null;
-            var valueTypeToStringConverter = (TypeConverter)null;
-
-            if (metadata.Converter != null)
-            {
-                typeToValueTypeConverter = (TypeConverter)Activator.CreateInstance(metadata.Converter);
-                valueTypeToStringConverter = GetConverterConverter(typeToValueTypeConverter);
-            }
-            else
-            {
-                valueTypeToStringConverter = GetConverter(p, type, null);
-            }
-            
-
-            return new NumericReflectionFieldMapper<T>(p, metadata.Store, typeToValueTypeConverter, valueTypeToStringConverter, fieldName,
-                                                       metadata.PrecisionStep);
-        }
-
-        private static TypeConverter GetConverterConverter(TypeConverter typeToValueTypeConverter)
-        {
-            if (typeToValueTypeConverter.CanConvertTo(typeof(long)))
-            {
-                return TypeDescriptor.GetConverter(typeof (long));
-            }
-            if (typeToValueTypeConverter.CanConvertTo(typeof(int)))
-            {
-                return TypeDescriptor.GetConverter(typeof(int));
-            }
-            if (typeToValueTypeConverter.CanConvertTo(typeof(double)))
-            {
-                return TypeDescriptor.GetConverter(typeof(double));
-            }
-            if (typeToValueTypeConverter.CanConvertTo(typeof(float)))
-            {
-                return TypeDescriptor.GetConverter(typeof(float));
-            }
-
-            throw new NotSupportedException("TypeConverter of type " + typeToValueTypeConverter.GetType() + " does not convert values to any of long, int, double or float.");
-        }
-
-        private static TypeConverter GetConverter(PropertyInfo p, Type type, BaseFieldAttribute metadata)
+        internal static TypeConverter GetConverter(PropertyInfo p, Type type, BaseFieldAttribute metadata)
         {
             if (metadata != null && metadata.Converter != null)
             {

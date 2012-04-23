@@ -9,7 +9,6 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
-using Lucene.Net.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq
@@ -75,12 +74,15 @@ namespace Lucene.Net.Linq
 
             var q = (LuceneQueryExpression) expression;
 
+            var mapping = fieldMappingInfoProvider.GetMappingInfo(q.QueryField.FieldName);
+
             bool isPrefixEncoded;
             var pattern = EvaluateExpressionToString(q, out isPrefixEncoded);
 
             var occur = q.Occur;
             Query query = null;
-            var fieldName = q.QueryField.FieldName;
+            var fieldName = mapping.FieldName;
+
             if (string.IsNullOrEmpty(pattern))
             {
                 pattern = "*";
@@ -153,8 +155,6 @@ namespace Lucene.Net.Linq
 
             isPrefixCoded = mapping.IsNumericField;
             return mapping.ConvertToQueryExpression(result);
-
-            return result == null ? null : result.ToString();
         }
     }
 }

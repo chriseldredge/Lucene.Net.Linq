@@ -42,6 +42,9 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             [Field(Converter = typeof(VersionConverter))]
             public System.Version Version { get; set; }
+
+            [Field("backing_field")]
+            public string Alias { get; set; }
         }
 
         protected void AddDocument(SampleDocument document)

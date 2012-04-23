@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "a", Scalar = 1, Version = new Version(20, 0, 0) });
             AddDocument(new SampleDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
 
-            var documents = provider.AsMappedQueryable<SampleDocument>();
+            var documents = provider.AsQueryable<SampleDocument>();
             docNames = from doc in documents orderby doc.Name select doc.Name;
         }
 

@@ -128,6 +128,7 @@ namespace Lucene.Net.Linq
         {
             type = Nullable.GetUnderlyingType(type) ?? type;
 
+            // TODO: get from field mapping info
             type = (type == typeof (DateTimeOffset) || type == typeof (DateTime)) ? typeof (long) : type;
 
             if (type == typeof(string))

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Documents;
@@ -13,7 +12,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
     {
         private PropertyInfo info;
 
-        [NumericFieldAttribute(Converter = typeof(SampleValueTypeConverter))]
+        [NumericField(Converter = typeof(SampleValueTypeConverter))]
         public SampleValueType CustomValueType { get; set; }
 
         [SetUp]
