@@ -1,4 +1,5 @@
 ﻿using System;
+using Lucene.Net.Documents;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
@@ -61,6 +62,7 @@ namespace Lucene.Net.Linq.Util
         /// </summary>
         internal static ValueType ToNumericFieldValue(this ValueType value)
         {
+            // TODO: replace with converters
             if (value is DateTime)
             {
                 return ((DateTime)value).ToUniversalTime().Ticks;
@@ -68,10 +70,6 @@ namespace Lucene.Net.Linq.Util
             if (value is DateTimeOffset)
             {
                 return ((DateTimeOffset)value).Ticks;
-            }
-            if (value is bool)
-            {
-                return ((bool)value) ? 1 : 0;
             }
 
             return value;
@@ -99,6 +97,30 @@ namespace Lucene.Net.Linq.Util
             }
 
             throw new NotSupportedException("ValueType " + value.GetType() + " not supported.");
+        }
+        
+        internal static NumericField SetValue(this NumericField field, ValueType value)
+        {
+            value = value.ToNumericFieldValue();
+
+            if (value is int)
+            {
+                return field.SetIntValue((int) value);
+            }
+            if (value is long)
+            {
+                return field.SetLongValue((long)value);
+            }
+            if (value is double)
+            {
+                return field.SetDoubleValue((double)value);
+            }
+            if (value is float)
+            {
+                return field.SetFloatValue((float)value);
+            }
+
+            throw new ArgumentException("Unable to store ValueType " + value.GetType() + " as NumericField.", "value");
         }
     }
 }

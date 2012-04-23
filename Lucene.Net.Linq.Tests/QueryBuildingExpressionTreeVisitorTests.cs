@@ -1,7 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Reflection;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Search;
@@ -21,7 +24,7 @@ namespace Lucene.Net.Linq.Tests
         public void SetUp()
         {
             analyzer = new PorterStemAnalyzer(version);
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(analyzer, version));
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(analyzer, version), null);
         }
 
         [Test]
@@ -41,7 +44,7 @@ namespace Lucene.Net.Linq.Tests
     }
 
     [TestFixture]
-    public class QueryBuildingExpressionTreeVisitorTests
+    public class QueryBuildingExpressionTreeVisitorTests : IFieldMappingInfoProvider
     {
         private QueryBuildingExpressionTreeVisitor builder;
 
@@ -53,7 +56,28 @@ namespace Lucene.Net.Linq.Tests
         [SetUp]
         public void SetUp()
         {
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new WhitespaceAnalyzer(), version));
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new WhitespaceAnalyzer(), version), this);
+        }
+
+        public IFieldMappingInfo GetMappingInfo(string fieldName)
+        {
+            return new FakeFieldMappingInfo {FieldName = fieldName};
+        }
+
+        class FakeFieldMappingInfo : IFieldMappingInfo
+        {
+            public string FieldName { get; set; }
+            public TypeConverter Converter { get; set; }
+            public PropertyInfo PropertyInfo { get; set; }
+            public string ConvertToQueryExpression(object value)
+            {
+                return value.ToString();
+            }
+
+            public bool IsNumericField
+            {
+                get { return false; }
+            }
         }
 
         [Test]

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq;
@@ -13,14 +14,16 @@ namespace Lucene.Net.Linq
     public class QueryModelTranslator : QueryModelVisitorBase
     {
         private readonly Context context;
+        private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
         private readonly IList<SortField> sorts = new List<SortField>();
         private Query query;
         private int maxResults = int.MaxValue;
         private int skipResults;
 
-        internal QueryModelTranslator(Context context)
+        internal QueryModelTranslator(Context context, IFieldMappingInfoProvider fieldMappingInfoProvider)
         {
             this.context = context;
+            this.fieldMappingInfoProvider = fieldMappingInfoProvider;
         }
 
         public void Build(QueryModel queryModel)
@@ -75,7 +78,7 @@ namespace Lucene.Net.Linq
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            var visitor = new QueryBuildingExpressionTreeVisitor(context);
+            var visitor = new QueryBuildingExpressionTreeVisitor(context, fieldMappingInfoProvider);
             visitor.VisitExpression(whereClause.Predicate);
 
             if (query == null)
@@ -97,7 +100,7 @@ namespace Lucene.Net.Linq
             {
                 var field = (LuceneQueryFieldExpression)ordering.Expression;
                 var reverse = ordering.OrderingDirection == OrderingDirection.Desc;
-
+                
                 var sortType = GetSortType(field.Type);
 
                 if (sortType >= 0)
@@ -106,19 +109,19 @@ namespace Lucene.Net.Linq
                 }
                 else
                 {
-                    sorts.Add(new SortField(field.FieldName, GetCustomSort(field.Type), reverse));
+                    sorts.Add(new SortField(field.FieldName, GetCustomSort(field), reverse));
                 }
             }
         }
 
-        private FieldComparatorSource GetCustomSort(Type type)
+        private FieldComparatorSource GetCustomSort(LuceneQueryFieldExpression expression)
         {
-            if (typeof(IComparable).IsAssignableFrom(type))
+            if (typeof(IComparable).IsAssignableFrom(expression.Type))
             {
-                return new ConvertableFieldComparatorSource(type);
+                return new ConvertableFieldComparatorSource(expression.Type, fieldMappingInfoProvider.GetMappingInfo(expression.FieldName));
             }
 
-            throw new NotSupportedException("Unsupported sort field type: " + type);
+            throw new NotSupportedException("Unsupported sort field type: " + expression.Type);
         }
 
         private static int GetSortType(Type type)
@@ -129,7 +132,7 @@ namespace Lucene.Net.Linq
 
             if (type == typeof(string))
                 return SortField.STRING;
-            if (type == typeof(int) || type == typeof(bool))
+            if (type == typeof(int))
                 return SortField.INT;
             if (type == typeof(long))
                 return SortField.LONG;

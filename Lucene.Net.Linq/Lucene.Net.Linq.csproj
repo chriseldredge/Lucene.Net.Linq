@@ -50,13 +50,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
-    <Compile Include="DocumentHolder.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
-    <Compile Include="IDocumentHolder.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
+    <Compile Include="Mapping\FieldAttribute.cs" />
+    <Compile Include="Mapping\ReflectionFieldMapper.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilder.cs" />
+    <Compile Include="Mapping\ReflectionDocumentMapper.cs" />
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitor.cs" />
@@ -72,7 +74,9 @@
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
+    <Compile Include="Util\IndexModeUtils.cs" />
     <Compile Include="Util\LinqExtensions.cs" />
+    <Compile Include="Util\MemberInfoUtils.cs" />
     <Compile Include="Util\NumericUtils.cs" />
     <Compile Include="Util\ReflectionUtils.cs" />
   </ItemGroup>

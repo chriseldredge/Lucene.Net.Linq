@@ -54,17 +54,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DocumentHolderPropertyAccessHookTests.cs" />
-    <Compile Include="DocumentHolderMultiValueTests.cs" />
-    <Compile Include="DocumentHolderTests.cs" />
-    <Compile Include="Integration\DocumentHolderTestBase.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\SelectTests.cs" />
-    <Compile Include="Integration\DocumentHolderTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
-    <Compile Include="Integration\WhereTests.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />
+    <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
+    <Compile Include="VersionConverter.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderCollectionComplexTypeTests.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderCollectionTests.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryBuildingExpressionTreeVisitorTests.cs" />
     <Compile Include="QueryModelTransformerTests.cs" />

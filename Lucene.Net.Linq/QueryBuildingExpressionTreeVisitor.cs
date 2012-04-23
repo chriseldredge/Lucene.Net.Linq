@@ -4,23 +4,26 @@ using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq
 {
-    
     public class QueryBuildingExpressionTreeVisitor : ExpressionTreeVisitor
     {
         private readonly Context context;
+        private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
         private readonly Stack<Query> queries = new Stack<Query>();
 
-        internal QueryBuildingExpressionTreeVisitor(Context context)
+        internal QueryBuildingExpressionTreeVisitor(Context context, IFieldMappingInfoProvider fieldMappingInfoProvider)
         {
             this.context = context;
+            this.fieldMappingInfoProvider = fieldMappingInfoProvider;
         }
 
         public Query Query
@@ -72,13 +75,13 @@ namespace Lucene.Net.Linq
 
             var q = (LuceneQueryExpression) expression;
 
-            bool isPrefixCoded;
-            var pattern = EvaluateExpressionToString(q.QueryPattern, out isPrefixCoded);
+            bool isPrefixEncoded;
+            var pattern = EvaluateExpressionToString(q, out isPrefixEncoded);
 
             var occur = q.Occur;
             Query query = null;
             var fieldName = q.QueryField.FieldName;
-            if (pattern == null)
+            if (string.IsNullOrEmpty(pattern))
             {
                 pattern = "*";
                 occur = Negate(occur);
@@ -89,21 +92,19 @@ namespace Lucene.Net.Linq
             }
             else if (q.QueryType == QueryType.GreaterThan || q.QueryType == QueryType.GreaterThanOrEqual)
             {
-                var boundary = EvaluateExpression(q.QueryPattern, out isPrefixCoded);
+                var boundary = EvaluateExpression(q);
                 var range = q.QueryType == QueryType.GreaterThan ? RangeType.Exclusive : RangeType.Inclusive;
                 query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, (ValueType) boundary, null, range, RangeType.Inclusive);
             }
             else if (q.QueryType == QueryType.LessThan || q.QueryType == QueryType.LessThanOrEqual)
             {
-                var boundary = EvaluateExpression(q.QueryPattern, out isPrefixCoded);
+                var boundary = EvaluateExpression(q);
                 var range = q.QueryType == QueryType.LessThan ? RangeType.Exclusive : RangeType.Inclusive;
-                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, null, (ValueType)boundary, RangeType.Inclusive, range);
+                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, null, (ValueType) boundary, RangeType.Inclusive, range);
             }
 
-            //TODO: allow client to use non-encoded textual queries on ints?
-
             if (query == null)
-                query = isPrefixCoded ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
+                query =  isPrefixEncoded ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
 
             var booleanQuery = new BooleanQuery();
 
@@ -138,26 +139,20 @@ namespace Lucene.Net.Linq
             return result;
         }
 
-        private static object EvaluateExpression(Expression expression, out bool isPrefixCoded)
+        private object EvaluateExpression(LuceneQueryExpression expression)
         {
-            isPrefixCoded = false;
-
-            var lambda = Expression.Lambda(expression).Compile();
-            var result = lambda.DynamicInvoke();
-
-            if (result is ValueType)
-            {
-                isPrefixCoded = true;
-            }
-
-            return result;
+            var lambda = Expression.Lambda(expression.QueryPattern).Compile();
+            return lambda.DynamicInvoke();
         }
 
-        private static string EvaluateExpressionToString(Expression expression, out bool isPrefixCoded)
+        private string EvaluateExpressionToString(LuceneQueryExpression expression, out bool isPrefixCoded)
         {
-            var result = EvaluateExpression(expression, out isPrefixCoded);
+            var result = EvaluateExpression(expression);
 
-            if (isPrefixCoded) return ((ValueType) result).ToPrefixCoded();
+            var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
+
+            isPrefixCoded = mapping.IsNumericField;
+            return mapping.ConvertToQueryExpression(result);
 
             return result == null ? null : result.ToString();
         }

@@ -1,83 +1,385 @@
-﻿using System;
-using System.Linq;
-using Lucene.Net.Documents;
+﻿using System.Linq;
+using Lucene.Net.Analysis;
+using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {
     [TestFixture]
     public class SelectTests : IntegrationTestBase
     {
-        [Test]
-        public void SelectDocument()
+        protected override Analyzer GetAnalyzer(Version version)
         {
-            AddDocument("a");
-
-            var sample = provider.AsQueryable();
-
-            var result = from s in sample select s;
-
-            Assert.That(result.First().Get("id"), Is.EqualTo("a"));
+            var a = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
+            return a;
         }
 
         [Test]
-        public void SelectWithIdentityMethod()
+        public void Select()
         {
-            AddDocument("a");
-            AddDocument("b");
+            var d = new SampleDocument {Name = "My Document"};
+            AddDocument(d);
 
-            var sample = provider.AsQueryable();
+            var documents = provider.AsMappedQueryable<SampleDocument>();
 
-            var result = from s in sample select IdentityMethod(s);
+            var result = from doc in documents select doc;
 
-            Assert.That(result.ToArray().Select(d => d.Get("id")), Is.EqualTo(new[] {"a", "b"}));
+            Assert.That(result.FirstOrDefault().Name, Is.EqualTo(d.Name));
+        }
+
+        class AlternateDocument
+        {
+            [Field("Name")]
+            public string AlternateName { get; set; }
         }
 
         [Test]
-        public void SelectWithTransformingMethod()
+        public void StoresAndRetrievesByFieldName()
         {
-            AddDocument("a");
+            var d = new AlternateDocument { AlternateName = "My Document" };
+            provider.AddDocument(d);
 
-            var sample = provider.AsQueryable();
+            var documents = provider.AsMappedQueryable<SampleDocument>();
 
-            var result = from s in sample select TransformingMethod(s);
+            var result = from doc in documents select doc;
 
-            Assert.That(result.First(), Is.EqualTo("a"));
+            Assert.That(result.FirstOrDefault().Name, Is.EqualTo(d.AlternateName));
         }
 
         [Test]
-        public void SelectField()
+        public void SelectScalar()
         {
-            AddDocument("a");
+            const int scalar = 99;
 
-            var sample = provider.AsQueryable();
+            var d = new SampleDocument {Name = "a", NullableScalar = scalar};
 
-            var result = from s in sample select s.Get("id");
+            AddDocument(d);
 
-            Assert.That(result.First(), Is.EqualTo("a"));
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents select doc.NullableScalar;
+
+            Assert.That(result.FirstOrDefault(), Is.EqualTo(scalar));
         }
 
         [Test]
-        public void SelectComplex()
+        public void Where()
         {
-            AddDocument("a");
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12});
 
-            var sample = provider.AsQueryable();
+            var documents = provider.AsMappedQueryable<SampleDocument>();
 
-            var result = from s in sample select s.Get("id") + " suffix";
+            var result = from doc in documents where doc.Name == "My" select doc;
 
-            Assert.That(result.First(), Is.EqualTo("a suffix"));
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
-        private static Document IdentityMethod(Document document)
+        [Test]
+        public void Where_FlagEqualTrue()
         {
-            return document;
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", Flag = true });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+// Not redundant because it generates a different Espression tree
+// ReSharper disable RedundantBoolCompare
+            var result = from doc in documents where doc.Flag == true select doc;
+// ReSharper restore RedundantBoolCompare
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
-        private static object TransformingMethod(Document document)
+        [Test]
+        public void Where_Multiple()
         {
-            return document.Get("id");
+            AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = documents.Where(d => d.NullableScalar == 12).Where(d => d.Name == "My");
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
+
+        [Test]
+        public void Where_QueryOnAnonymousProjection()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents select new { DocName = doc.Name }).Where(d => d.DocName == "My");
+
+            Assert.That(result.Single().DocName, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_QueryOnFlatteningProjection()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents select doc.Name).Where(d => d == "My");
+
+            Assert.That(result.Single(), Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_QueryOnLambdaProjection()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents select Convert(doc)).Where(d => d.Name == "My");
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        public class ConvertedDocument
+        {
+            public string Name { get; set; }
+        }
+
+        private ConvertedDocument Convert(SampleDocument doc)
+        {
+            return new ConvertedDocument {Name = doc.Name};
+        }
+
+        [Test]
+        public void Where_ExactMatch()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Id == "X.Z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_Numeric()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3", Long = 423434L });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Long == 423434L select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_ExactMatch_CaseInsensitive()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Id == "x.z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_IgnoresToLower()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Id.ToLower() == "x.z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_IgnoresToLowerWithinNullSafetyCondition()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where (doc.Id != null ? doc.Id.ToLower() : null) == "x.z.1.3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_ExactMatch_Phrase()
+        {
+            AddDocument(new SampleDocument { Name = "Documents Bill", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "Bills Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Name == "\"Bills Document\"" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
+        }
+
+        [Test]
+        public void Where_NotAnalyzed_StartsWith()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_NotAnalyzed_CaseInsensitive()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_StartsWith()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Name.StartsWith("my") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_NotEqual()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents where doc.Name != "\"My Document\"" select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
+        [Test]
+        public void Where_NotNull()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents where doc.Name != null select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
+        [Test]
+        public void Where_Null()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents where doc.Name == null select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void Where_Blank()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = null, NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents where doc.Name == "" select doc).ToList();
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void Where_ScalarEqual()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.NullableScalar == 12 select doc;
+
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
+        }
+
+        [Test]
+        public void Where_ScalarNotEqual()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", NullableScalar = 11});
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.NullableScalar != 11 select doc;
+
+            Assert.That(result.Single().NullableScalar, Is.EqualTo(12));
+        }
+
+
+        [Test]
+        public void Where_ScalarNotNull()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = (from doc in documents where doc.NullableScalar != null select doc).ToList();
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_ScalarNull()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsMappedQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.NullableScalar == null select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
     }
-
+ 
 }

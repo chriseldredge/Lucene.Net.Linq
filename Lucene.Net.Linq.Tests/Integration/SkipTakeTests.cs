@@ -5,18 +5,18 @@ using NUnit.Framework;
 namespace Lucene.Net.Linq.Tests.Integration
 {
     [TestFixture]
-    public class SkipTakeTests : DocumentHolderTestBase
+    public class SkipTakeTests : IntegrationTestBase
     {
         private IQueryable<string> docNames;
 
         [SetUp]
         public void AddDocuments()
         {
-            AddDocument(new MappedDocument { Name = "c", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
-            AddDocument(new MappedDocument { Name = "a", Scalar = 1, Version = new Version(20, 0, 0) });
-            AddDocument(new MappedDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
+            AddDocument(new SampleDocument { Name = "c", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
+            AddDocument(new SampleDocument { Name = "a", Scalar = 1, Version = new Version(20, 0, 0) });
+            AddDocument(new SampleDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
 
-            var documents = provider.AsQueryable<MappedDocument>();
+            var documents = provider.AsMappedQueryable<SampleDocument>();
             docNames = from doc in documents orderby doc.Name select doc.Name;
         }
 

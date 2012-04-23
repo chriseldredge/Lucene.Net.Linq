@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
@@ -12,37 +13,34 @@ using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 
 namespace Lucene.Net.Linq
 {
-    internal class DocumentQueryExecutor : LuceneQueryExecutor<Document>
+    internal class QueryExecutor<TDocument> : LuceneQueryExecutor<TDocument>
     {
-        public DocumentQueryExecutor(Directory directory, Context context) : base(directory, context)
+        private readonly Func<TDocument> newItem;
+        private readonly IDocumentMapper<TDocument> mapper;
+
+        public QueryExecutor(Directory directory, Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
+            : base(directory, context)
         {
+            this.newItem = newItem;
+            this.mapper = mapper;
         }
 
         protected override void SetCurrentDocument(Document doc)
         {
-            CurrentDocument = doc;
+            var item = newItem();
+
+            mapper.ToObject(doc, item);
+
+            CurrentDocument = item;
+        }
+
+        public override IFieldMappingInfo GetMappingInfo(string fieldName)
+        {
+            return mapper.GetMappingInfo(fieldName);
         }
     }
 
-    internal class DocumentHolderQueryExecutor<TDocument> : LuceneQueryExecutor<TDocument> where TDocument : IDocumentHolder
-    {
-        private readonly Func<TDocument> documentFactory;
-
-        public DocumentHolderQueryExecutor(Directory directory, Context context, Func<TDocument> documentFactory) : base(directory, context)
-        {
-            this.documentFactory = documentFactory;
-        }
-
-        protected override void  SetCurrentDocument(Document doc)
-        {
-            var holder = documentFactory();
-            holder.Document = doc;
-
-            CurrentDocument = holder;
-        }
-    }
-
-    internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor
+    internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
         private readonly Directory directory;
         private readonly Context context;
@@ -71,7 +69,7 @@ namespace Lucene.Net.Linq
         {
             QueryModelTransformer.TransformQueryModel(queryModel);
 
-            var builder = new QueryModelTranslator(context);
+            var builder = new QueryModelTranslator(context, this);
             builder.Build(queryModel);
 
 #if DEBUG
@@ -99,6 +97,8 @@ namespace Lucene.Net.Linq
                 }
             }
         }
+
+        public abstract IFieldMappingInfo GetMappingInfo(string fieldName);
 
         protected abstract void SetCurrentDocument(Document doc);
 

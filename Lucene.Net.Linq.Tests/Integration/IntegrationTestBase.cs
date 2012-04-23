@@ -1,7 +1,6 @@
-﻿using System;
-using Lucene.Net.Analysis;
-using Lucene.Net.Documents;
+﻿using Lucene.Net.Analysis;
 using Lucene.Net.Index;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
@@ -21,7 +20,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             directory = new RAMDirectory();
             writer = new IndexWriter(directory, GetAnalyzer(version), IndexWriter.MaxFieldLength.UNLIMITED);
             
-            provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), version);
+            provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), version, writer);
         }
 
         protected virtual Analyzer GetAnalyzer(Version version)
@@ -29,31 +28,26 @@ namespace Lucene.Net.Linq.Tests.Integration
             return new PorterStemAnalyzer(version);
         }
 
-        protected Document AddDocument(string id)
+        public class SampleDocument
         {
-            return AddDocument(id, null);
+            public string Name { get; set; }
+            public string Id { get; set; }
+            public int Scalar { get; set; }
+
+            [NumericField]
+            public long Long { get; set; }
+
+            public int? NullableScalar { get; set; }
+            public bool Flag { get; set; }
+
+            [Field(Converter = typeof(VersionConverter))]
+            public System.Version Version { get; set; }
         }
 
-        protected Document AddDocument(string id, string text)
+        protected void AddDocument(SampleDocument document)
         {
-            var doc = new Document();
-            
-            doc.Add(new Field("id", id, Field.Store.YES, Field.Index.ANALYZED));
-
-            if (text != null)
-            {
-                doc.Add(new Field("text", text, Field.Store.YES, Field.Index.ANALYZED));
-            }
-
-            AddDocument(doc);
-
-            return doc;
-        }
-
-        protected void AddDocument(Document document)
-        {
-            writer.AddDocument(document);
-            writer.Commit();
+            var d = new LuceneDataProvider(directory, GetAnalyzer(version), version, writer);
+            d.AddDocument(document);
         }
     }
 }

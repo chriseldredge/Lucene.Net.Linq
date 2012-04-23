@@ -19,7 +19,7 @@ namespace Lucene.Net.Linq.Tests
         [SetUp]
         public void SetUp()
         {
-            transformer = new QueryModelTranslator(new Context(new WhitespaceAnalyzer(), Version.LUCENE_29));
+            transformer = new QueryModelTranslator(new Context(new WhitespaceAnalyzer(), Version.LUCENE_29), null);
         }
 
         [Test]
