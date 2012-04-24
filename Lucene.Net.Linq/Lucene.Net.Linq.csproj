@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Context.cs" />
+    <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneQueryable.cs" />
@@ -73,6 +74,7 @@
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="QueryModelTranslator.cs" />
     <Compile Include="Transformation\TreeVisitors\BinaryToQueryExpressionTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\ConcatToCompositeOrderingExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />
@@ -83,7 +85,6 @@
     <Compile Include="Util\LinqExtensions.cs" />
     <Compile Include="Util\MemberInfoUtils.cs" />
     <Compile Include="Util\NumericUtils.cs" />
-    <Compile Include="Util\ReflectionUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

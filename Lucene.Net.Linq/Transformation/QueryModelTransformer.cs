@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using Lucene.Net.Linq.Util;
 using Remotion.Linq;
@@ -26,14 +25,15 @@ namespace Lucene.Net.Linq.Transformation
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new MethodCallToBinaryExpressionTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor(),
-                           // TODO: new EvaluateToContantTransformer()
                            new BinaryToQueryExpressionTreeVisitor()
                        },
                    new ExpressionTreeVisitor[]
                        {
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
-                           new NoOpMethodCallRemovingTreeVisitor()
+                           new NoOpMethodCallRemovingTreeVisitor(),
+                           new NullSafetyConditionRemovingTreeVisitor(),
+                           new ConcatToCompositeOrderingExpressionTreeVisitor()
                        })
         {
         }
@@ -48,28 +48,65 @@ namespace Lucene.Net.Linq.Transformation
         {
             var instance = new QueryModelTransformer();
 
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
-#endif
             queryModel.Accept(instance);
 
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Transformed QueryModel:  " + queryModel, "Lucene.Net.Linq");
-#endif
         }
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            whereSelectClauseVisitors.Apply(v => ((Action<Func<Expression, Expression>>) whereClause.TransformExpressions)(v.VisitExpression));
+#if DEBUG
+            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
+#endif
+            foreach (var visitor in whereSelectClauseVisitors)
+            {
+                whereClause.TransformExpressions(visitor.VisitExpression);
+#if DEBUG
+                System.Diagnostics.Trace.WriteLine("Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel, "Lucene.Net.Linq");
+#endif
+            }
 
             base.VisitWhereClause(whereClause, queryModel, index);
         }
 
-        public override void VisitOrdering(Ordering ordering, QueryModel queryModel, OrderByClause orderByClause, int index)
+        public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
-            orderingVisitors.Apply(v => ((Action<Func<Expression, Expression>>)ordering.TransformExpressions)(v.VisitExpression));
+#if DEBUG
+            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
+#endif
+            foreach (var visitor in orderingVisitors)
+            {
+                orderByClause.TransformExpressions(visitor.VisitExpression);
+#if DEBUG
+                System.Diagnostics.Trace.WriteLine("Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel, "Lucene.Net.Linq");
+#endif
+            }
+            
+            ExpandCompositeOrderings(orderByClause);
 
-            base.VisitOrdering(ordering, queryModel, orderByClause, index);
+            base.VisitOrderByClause(orderByClause, queryModel, index);
+        }
+
+        private void ExpandCompositeOrderings(OrderByClause orderByClause)
+        {
+            var orderings = orderByClause.Orderings;
+            var copy = new Ordering[orderings.Count];
+            orderings.CopyTo(copy, 0);
+
+            copy.Apply(o => orderings.Remove(o));
+
+            foreach (var o in copy)
+            {
+                if (o.Expression is LuceneCompositeOrderingExpression)
+                {
+                    var ex = (LuceneCompositeOrderingExpression) o.Expression;
+
+                    ex.Fields.Apply(f => orderings.Add(new Ordering(f, o.OrderingDirection)));
+                }
+                else
+                {
+                    orderings.Add(o);
+                }
+            }
         }
     }
 }
