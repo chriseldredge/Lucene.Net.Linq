@@ -39,6 +39,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             var d = new AlternateDocument { AlternateName = "My Document" };
             provider.AddDocument(d);
+            writer.Commit();
 
             var documents = provider.AsQueryable<SampleDocument>();
 

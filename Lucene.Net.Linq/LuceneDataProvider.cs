@@ -49,7 +49,6 @@ namespace Lucene.Net.Linq
             mapper.ToDocument(item, document);
 
             IndexWriter.AddDocument(document);
-            IndexWriter.Commit();
         }
 
         public IQueryable<T> AsQueryable<T>() where T : new()

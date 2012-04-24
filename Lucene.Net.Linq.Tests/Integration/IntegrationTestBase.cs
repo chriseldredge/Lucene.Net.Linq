@@ -51,6 +51,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             var d = new LuceneDataProvider(directory, GetAnalyzer(version), version, writer);
             d.AddDocument(document);
+            writer.Commit();
         }
     }
 }
