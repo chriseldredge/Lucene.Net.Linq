@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Lucene.Net.Linq.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
@@ -14,6 +13,12 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
     {
         protected override Expression VisitConditionalExpression(ConditionalExpression expression)
         {
+            var result = base.VisitConditionalExpression(expression);
+
+            if (!(result is ConditionalExpression)) return result;
+
+            expression = (ConditionalExpression) result;
+
             if (!(expression.Test is BinaryExpression)) return expression;
 
             var test = (BinaryExpression)expression.Test;
@@ -23,12 +28,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             if (testExpression == null || nonNullResult == null) return expression;
 
-            if (ReflectionUtils.ReflectionEquals(testExpression, nonNullResult))
-            {
-                return nonNullResult;
-            }
-
-            return expression;
+            return nonNullResult;
         }
 
         private static Expression GetNonNullSide(Expression a, Expression b)
@@ -41,7 +41,20 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         private static bool IsNullConstant(Expression expression)
         {
-            return expression is ConstantExpression && ((ConstantExpression) expression).Value == null;
+            var constant = expression as ConstantExpression;
+            
+            if (constant == null) return false;
+            
+            if (constant.Value == null) return true;
+
+            var type = constant.Type;
+
+            if (type == typeof(bool))
+            {
+                return (bool)constant.Value == false;
+            }
+
+            return false;
         }
     }
 }

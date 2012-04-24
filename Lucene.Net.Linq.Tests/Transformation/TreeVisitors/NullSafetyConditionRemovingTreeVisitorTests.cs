@@ -88,7 +88,6 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             Assert.That(result, Is.InstanceOf<ConstantExpression>());
         }
 
-
         [Test]
         public void IgnoresNonNullResult()
         {
@@ -104,7 +103,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         }
 
         [Test]
-        public void IgnoresResultNotEqualToTestArgument()
+        public void NonNullResultNotEqualToTestArgument()
         {
             // y != null ? x : null
             var condition = Expression.Condition(
@@ -114,7 +113,45 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             var result = visitor.VisitExpression(condition);
 
-            Assert.That(result, Is.SameAs(condition), "Should not simplify when true condition returns a different expression.");
+            Assert.That(result, Is.SameAs(X));
         }
+
+        [Test]
+        public void Recursive()
+        {
+            // y == null ? null : (x == null ? null : x.CompareTo(y))
+            var concat = Expression.Call(typeof(string).GetMethod("Concat", new[] {typeof(string), typeof(string)}), X, Y);
+            
+            var nested = Expression.Condition(
+                Expression.MakeBinary(ExpressionType.Equal, X, Null),
+                Null,
+                concat);
+
+            var outer = Expression.Condition(
+                Expression.MakeBinary(ExpressionType.Equal, Y, Null),
+                Null,
+                nested);
+
+            var result = visitor.VisitExpression(outer);
+
+            Assert.That(result, Is.SameAs(concat));
+        }
+
+        [Test]
+        public void Boolean()
+        {
+            // true == false ? null : X
+            var outer = Expression.Condition(
+                Expression.MakeBinary(ExpressionType.Equal,
+                    Expression.Constant(true),
+                    Expression.Constant(false)),
+                Null,
+                X);
+
+            var result = visitor.VisitExpression(outer);
+
+            Assert.That(result, Is.SameAs(X));
+        }
+
     }
 }
