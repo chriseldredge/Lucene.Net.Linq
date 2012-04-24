@@ -10,6 +10,8 @@ using Lucene.Net.Store;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
+using Remotion.Linq.Clauses.ResultOperators;
+using Remotion.Linq.Clauses.StreamedData;
 
 namespace Lucene.Net.Linq
 {
@@ -55,7 +57,20 @@ namespace Lucene.Net.Linq
 
         public T ExecuteScalar<T>(QueryModel queryModel)
         {
-            return default(T);
+            var builder = PrepareQuery(queryModel);
+
+            using (var searcher = new IndexSearcher(directory, true))
+            {
+                var skipResults = builder.SkipResults;
+                var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
+
+                var hits = searcher.Search(builder.Query, null, maxResults, builder.Sort);
+
+                var projection = GetScalarProjector<T>(builder.ResultSetOperator, hits);
+                var projector = projection.Compile();
+
+                return projector(hits);
+            }
         }
 
         public T ExecuteSingle<T>(QueryModel queryModel, bool returnDefaultWhenEmpty)
@@ -67,18 +82,7 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
-            QueryModelTransformer.TransformQueryModel(queryModel);
-
-            var builder = new QueryModelTranslator(context, this);
-            builder.Build(queryModel);
-
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query + " sort: " + builder.Sort, "Lucene.Net.Linq");
-#endif
-
-            var mapping = new QuerySourceMapping();
-            mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());
-            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
+            var builder = PrepareQuery(queryModel);
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
@@ -98,6 +102,23 @@ namespace Lucene.Net.Linq
             }
         }
 
+        private QueryModelTranslator PrepareQuery(QueryModel queryModel)
+        {
+            QueryModelTransformer.TransformQueryModel(queryModel);
+
+            var builder = new QueryModelTranslator(context, this);
+            builder.Build(queryModel);
+
+#if DEBUG
+            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query + " sort: " + builder.Sort, "Lucene.Net.Linq");
+#endif
+
+            var mapping = new QuerySourceMapping();
+            mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());
+            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
+            return builder;
+        }
+
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
 
         protected abstract void SetCurrentDocument(Document doc);
@@ -111,5 +132,25 @@ namespace Lucene.Net.Linq
         {
             return Expression.Lambda<Func<TDocument, T>>(queryModel.SelectClause.Selector, Expression.Parameter(typeof(TDocument)));
         }
+
+        protected virtual Expression<Func<TopFieldDocs, T>> GetScalarProjector<T>(ResultOperatorBase op, TopFieldDocs docs)
+        {
+            Expression call = Expression.Call(Expression.Constant(this), GetType().GetMethod("DoCount"), Expression.Constant(docs));
+            if (op is LongCountResultOperator)
+            {
+                call = Expression.Convert(call, typeof(long));
+            }
+            else if (!(op is CountResultOperator))
+            {
+                throw new NotSupportedException("The result operator type " + op.GetType() + " is not supported.");
+            }
+            return Expression.Lambda<Func<TopFieldDocs, T>>(call, Expression.Parameter(typeof(TopFieldDocs)));
+        }
+
+        public int DoCount(TopFieldDocs d)
+        {
+            return d.ScoreDocs.Length;
+        }
+
     }
 }

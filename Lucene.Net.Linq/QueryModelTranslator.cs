@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
@@ -51,17 +52,18 @@ namespace Lucene.Net.Linq
             get { return skipResults; }
         }
 
+        public ResultOperatorBase ResultSetOperator { get; set; }
+
         public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
         {
             //TODO: resultOperator.ExecuteInMemory() on unsupported ones.
-
+            
             if (resultOperator is TakeResultOperator)
             {
                 var take = (TakeResultOperator) resultOperator;
                 maxResults = Math.Min(take.GetConstantCount(), maxResults);
             }
-
-            if (resultOperator is SkipResultOperator)
+            else if (resultOperator is SkipResultOperator)
             {
                 var skip = (SkipResultOperator)resultOperator;
                 var additionalSkip = skip.GetConstantCount();
@@ -71,6 +73,10 @@ namespace Lucene.Net.Linq
                 {
                     maxResults -= additionalSkip;
                 }
+            }
+            else
+            {
+                ResultSetOperator = resultOperator;
             }
 
             base.VisitResultOperator(resultOperator, queryModel, index);
