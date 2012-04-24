@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq.Clauses.Expressions;
@@ -55,6 +56,11 @@ namespace Lucene.Net.Linq.Expressions
             var newPattern = visitor.VisitExpression(QueryPattern);
 
             return (newPattern == QueryPattern && newField == QueryField) ? this : new LuceneQueryExpression(newField, newPattern, Occur);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("LuceneQuery[{0}]({1}{2}:{3})", QueryType, Occur, QueryField.FieldName, pattern);
         }
 
     }
