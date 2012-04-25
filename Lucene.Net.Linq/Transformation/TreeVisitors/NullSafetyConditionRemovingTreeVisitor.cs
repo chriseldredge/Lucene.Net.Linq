@@ -1,5 +1,5 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
@@ -33,28 +33,10 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         private static Expression GetNonNullSide(Expression a, Expression b)
         {
-            if (IsNullConstant(a)) return b;
-            if (IsNullConstant(b)) return a;
+            if (a.IsNullConstant()) return b;
+            if (b.IsNullConstant()) return a;
 
             return null;
-        }
-
-        private static bool IsNullConstant(Expression expression)
-        {
-            var constant = expression as ConstantExpression;
-            
-            if (constant == null) return false;
-            
-            if (constant.Value == null) return true;
-
-            var type = constant.Type;
-
-            if (type == typeof(bool))
-            {
-                return (bool)constant.Value == false;
-            }
-
-            return false;
         }
     }
 }

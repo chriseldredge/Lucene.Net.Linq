@@ -9,11 +9,10 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
-using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq
+namespace Lucene.Net.Linq.Translation.TreeVisitors
 {
-    public class QueryBuildingExpressionTreeVisitor : ExpressionTreeVisitor
+    internal class QueryBuildingExpressionTreeVisitor : LuceneExpressionTreeVisitor
     {
         private readonly Context context;
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
@@ -65,21 +64,13 @@ namespace Lucene.Net.Linq
             }
         }
 
-        protected override Expression VisitExtensionExpression(Remotion.Linq.Clauses.Expressions.ExtensionExpression expression)
+        protected override Expression VisitLuceneQueryExpression(LuceneQueryExpression expression)
         {
-            if (!(expression is LuceneQueryExpression))
-            {
-                return base.VisitExtensionExpression(expression);
-            }
+            var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
-            var q = (LuceneQueryExpression) expression;
+            var pattern = EvaluateExpressionToString(expression);
 
-            var mapping = fieldMappingInfoProvider.GetMappingInfo(q.QueryField.FieldName);
-
-            bool isPrefixEncoded;
-            var pattern = EvaluateExpressionToString(q, out isPrefixEncoded);
-
-            var occur = q.Occur;
+            var occur = expression.Occur;
             Query query = null;
             var fieldName = mapping.FieldName;
 
@@ -88,25 +79,21 @@ namespace Lucene.Net.Linq
                 pattern = "*";
                 occur = Negate(occur);
             }
-            else if (q.QueryType == QueryType.Prefix)
+            else if (expression.QueryType == QueryType.Prefix)
             {
                 pattern += "*";
             }
-            else if (q.QueryType == QueryType.GreaterThan || q.QueryType == QueryType.GreaterThanOrEqual)
+            else if (expression.QueryType == QueryType.GreaterThan || expression.QueryType == QueryType.GreaterThanOrEqual)
             {
-                var boundary = EvaluateExpression(q);
-                var range = q.QueryType == QueryType.GreaterThan ? RangeType.Exclusive : RangeType.Inclusive;
-                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, (ValueType) boundary, null, range, RangeType.Inclusive);
+                query = CreateRangeQuery(mapping, expression.QueryType, expression, null);
             }
-            else if (q.QueryType == QueryType.LessThan || q.QueryType == QueryType.LessThanOrEqual)
+            else if (expression.QueryType == QueryType.LessThan || expression.QueryType == QueryType.LessThanOrEqual)
             {
-                var boundary = EvaluateExpression(q);
-                var range = q.QueryType == QueryType.LessThan ? RangeType.Exclusive : RangeType.Inclusive;
-                query = NumericRangeUtils.CreateNumericRangeQuery(fieldName, null, (ValueType) boundary, RangeType.Inclusive, range);
+                query = CreateRangeQuery(mapping, expression.QueryType, null, expression);
             }
 
             if (query == null)
-                query =  isPrefixEncoded ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
+                query =  mapping.IsNumericField ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
 
             var booleanQuery = new BooleanQuery();
 
@@ -114,7 +101,35 @@ namespace Lucene.Net.Linq
 
             queries.Push(booleanQuery);
 
-            return base.VisitExtensionExpression(expression);
+            return base.VisitLuceneQueryExpression(expression);
+        }
+
+        private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType queryType, LuceneQueryExpression lowerBoundExpression, LuceneQueryExpression upperBoundExpression)
+        {
+            var lowerRange = RangeType.Inclusive;
+            var upperRange = (queryType == QueryType.LessThan || queryType == QueryType.GreaterThan) ? RangeType.Exclusive : RangeType.Inclusive;
+
+            if (upperBoundExpression == null)
+            {
+                lowerRange = upperRange;
+                upperRange = RangeType.Inclusive;
+            }
+
+            if (mapping.IsNumericField)
+            {
+                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpression(lowerBoundExpression);
+                var upperBound = upperBoundExpression == null ? null : EvaluateExpression(upperBoundExpression);
+                return NumericRangeUtils.CreateNumericRangeQuery(mapping.FieldName, (ValueType)lowerBound, (ValueType)upperBound, lowerRange, upperRange);
+            }
+            else
+            {
+                var minInclusive = lowerRange == RangeType.Inclusive;
+                var maxInclusive = upperRange == RangeType.Inclusive;
+
+                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpressionToString(lowerBoundExpression);
+                var upperBound = upperBoundExpression == null ? null : EvaluateExpressionToString(upperBoundExpression);
+                return new TermRangeQuery(mapping.FieldName, lowerBound, upperBound, minInclusive, maxInclusive);
+            }
         }
 
         private static BooleanClause.Occur Negate(BooleanClause.Occur occur)
@@ -147,13 +162,12 @@ namespace Lucene.Net.Linq
             return lambda.DynamicInvoke();
         }
 
-        private string EvaluateExpressionToString(LuceneQueryExpression expression, out bool isPrefixCoded)
+        private string EvaluateExpressionToString(LuceneQueryExpression expression)
         {
             var result = EvaluateExpression(expression);
 
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
-            isPrefixCoded = mapping.IsNumericField;
             return mapping.ConvertToQueryExpression(result);
         }
     }

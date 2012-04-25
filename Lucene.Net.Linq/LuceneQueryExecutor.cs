@@ -5,13 +5,13 @@ using System.Linq.Expressions;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Transformation;
+using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
 using Remotion.Linq.Clauses.ResultOperators;
-using Remotion.Linq.Clauses.StreamedData;
 
 namespace Lucene.Net.Linq
 {

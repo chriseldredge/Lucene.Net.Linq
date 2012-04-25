@@ -7,6 +7,7 @@ using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
+using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
@@ -76,7 +77,7 @@ namespace Lucene.Net.Linq.Tests
 
             public bool IsNumericField
             {
-                get { return false; }
+                get { return true; }
             }
         }
 

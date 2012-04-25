@@ -1,20 +1,12 @@
 ﻿using System.Linq;
-using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {
     [TestFixture]
     public class SelectTests : IntegrationTestBase
     {
-        protected override Analyzer GetAnalyzer(Version version)
-        {
-            var a = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
-            return a;
-        }
-
         [Test]
         public void Select()
         {
@@ -281,6 +273,19 @@ namespace Lucene.Net.Linq.Tests.Integration
             var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where doc.Name.StartsWith("my") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_Compare()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Id = "b" });
+            AddDocument(new SampleDocument { Name = "My Document", Id = "z" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where string.Compare(doc.Id, "b") > 0 select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }

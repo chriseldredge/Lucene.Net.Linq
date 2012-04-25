@@ -64,6 +64,8 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="VersionConverter.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionComplexTypeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionTests.cs" />

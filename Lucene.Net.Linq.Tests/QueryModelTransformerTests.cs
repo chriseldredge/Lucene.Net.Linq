@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
 using NUnit.Framework;
 using Remotion.Linq;

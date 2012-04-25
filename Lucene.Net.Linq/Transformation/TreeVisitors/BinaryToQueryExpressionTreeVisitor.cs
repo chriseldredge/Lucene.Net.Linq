@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Search;
@@ -10,21 +9,11 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class BinaryToQueryExpressionTreeVisitor : ExpressionTreeVisitor
     {
-        private static readonly IDictionary<ExpressionType, QueryType> typeMap =
-            new Dictionary<ExpressionType, QueryType>
-                {
-                    {ExpressionType.GreaterThan, QueryType.GreaterThan},
-                    {ExpressionType.GreaterThanOrEqual, QueryType.GreaterThanOrEqual},
-                    {ExpressionType.LessThan, QueryType.LessThan},
-                    {ExpressionType.LessThanOrEqual, QueryType.LessThanOrEqual},
-                    {ExpressionType.Equal, QueryType.Default},
-                    {ExpressionType.NotEqual, QueryType.Default},
-                };
-
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
         {
             QueryType queryType;
-            if (!typeMap.TryGetValue(expression.NodeType, out queryType))
+
+            if (!expression.NodeType.TryGetQueryType(out queryType))
             {
                 return base.VisitBinaryExpression(expression);
             }

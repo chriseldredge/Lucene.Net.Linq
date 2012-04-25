@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 
-namespace Lucene.Net.Linq
+namespace Lucene.Net.Linq.Translation
 {
     public class QueryModelTranslator : QueryModelVisitorBase
     {
