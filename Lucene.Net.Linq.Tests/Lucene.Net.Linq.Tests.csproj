@@ -57,6 +57,7 @@
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
+    <Compile Include="Integration\SampleProgram.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
