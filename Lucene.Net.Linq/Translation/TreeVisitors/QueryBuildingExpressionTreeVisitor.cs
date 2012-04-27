@@ -75,7 +75,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
-            var pattern = EvaluateExpressionToString(expression, mapping);
+            var pattern = GetPattern(expression, mapping);
 
             var occur = expression.Occur;
             Query query = null;
@@ -86,19 +86,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 pattern = "*";
                 occur = Negate(occur);
             }
-            else if (expression.QueryType == QueryType.Prefix)
-            {
-                pattern += "*";
-            }
-            else if (expression.QueryType == QueryType.Suffix || expression.QueryType == QueryType.Wildcard)
-            {
-                pattern = "*" + pattern;
-                if (expression.QueryType == QueryType.Wildcard)
-                {
-                    pattern += "*";
-                }
-            }
-            else if (expression.QueryType == QueryType.GreaterThan || expression.QueryType == QueryType.GreaterThanOrEqual)
+
+            if (expression.QueryType == QueryType.GreaterThan || expression.QueryType == QueryType.GreaterThanOrEqual)
             {
                 query = CreateRangeQuery(mapping, expression.QueryType, expression, null);
             }
@@ -119,6 +108,27 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return base.VisitLuceneQueryExpression(expression);
         }
 
+        private string GetPattern(LuceneQueryExpression expression, IFieldMappingInfo mapping)
+        {
+            var pattern = EvaluateExpressionToString(expression, mapping);
+
+            switch (expression.QueryType)
+            {
+                case QueryType.Prefix:
+                    pattern += "*";
+                    break;
+                case QueryType.Wildcard:
+                case QueryType.Suffix:
+                    pattern = "*" + pattern;
+                    if (expression.QueryType == QueryType.Wildcard)
+                    {
+                        pattern += "*";
+                    }
+                    break;
+            }
+            return pattern;
+        }
+
         private void AddMultiFieldQuery(LuceneQueryExpression expression)
         {
             var query = new BooleanQuery();
@@ -127,7 +137,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                                                    fieldMappingInfoProvider.AllFields.ToArray(),
                                                    context.Analyzer);
             
-            query.Add(new BooleanClause(parser.Parse(EvaluateExpressionToString(expression, null)), expression.Occur));
+            query.Add(new BooleanClause(parser.Parse(GetPattern(expression, null)), expression.Occur));
 
             queries.Push(query);
         }
