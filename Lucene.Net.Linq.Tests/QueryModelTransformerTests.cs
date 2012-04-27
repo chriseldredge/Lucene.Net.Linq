@@ -4,6 +4,7 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
 using NUnit.Framework;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -20,7 +21,7 @@ namespace Lucene.Net.Linq.Tests
         [SetUp]
         public void SetUp()
         {
-            transformer = new QueryModelTranslator(new Context(new WhitespaceAnalyzer(), Version.LUCENE_29), null);
+            transformer = new QueryModelTranslator(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), Version.LUCENE_29, null, new object()), null);
         }
 
         [Test]

@@ -7,7 +7,6 @@ using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
-using Lucene.Net.Store;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
@@ -20,8 +19,8 @@ namespace Lucene.Net.Linq
         private readonly Func<TDocument> newItem;
         private readonly IDocumentMapper<TDocument> mapper;
 
-        public QueryExecutor(Directory directory, Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
-            : base(directory, context)
+        public QueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
+            : base(context)
         {
             this.newItem = newItem;
             this.mapper = mapper;
@@ -44,14 +43,12 @@ namespace Lucene.Net.Linq
 
     internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
-        private readonly Directory directory;
         private readonly Context context;
 
         public TDocument CurrentDocument { get; protected set; }
 
-        protected LuceneQueryExecutor(Directory directory, Context context)
+        protected LuceneQueryExecutor(Context context)
         {
-            this.directory = directory;
             this.context = context;
         }
 
@@ -59,8 +56,11 @@ namespace Lucene.Net.Linq
         {
             var builder = PrepareQuery(queryModel);
 
-            using (var searcher = new IndexSearcher(directory, true))
+            var searcherHandle = context.CheckoutSearcher(this);
+
+            using (searcherHandle)
             {
+                var searcher = searcherHandle.Searcher;
                 var skipResults = builder.SkipResults;
                 var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
 
@@ -86,9 +86,12 @@ namespace Lucene.Net.Linq
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
-            
-            using (var searcher = new IndexSearcher(directory, true))
+
+            var searcherHandle = context.CheckoutSearcher(this);
+
+            using (searcherHandle)
             {
+                var searcher = searcherHandle.Searcher;
                 var skipResults = builder.SkipResults;
                 var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
                 

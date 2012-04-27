@@ -9,6 +9,7 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
 
@@ -25,7 +26,7 @@ namespace Lucene.Net.Linq.Tests
         public void SetUp()
         {
             analyzer = new PorterStemAnalyzer(version);
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(analyzer, version), null);
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), analyzer, version, null, new object()), null);
         }
 
         [Test]
@@ -57,7 +58,7 @@ namespace Lucene.Net.Linq.Tests
         [SetUp]
         public void SetUp()
         {
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new WhitespaceAnalyzer(), version), this);
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), version, null, new object()), this);
         }
 
         public IFieldMappingInfo GetMappingInfo(string propertyName)

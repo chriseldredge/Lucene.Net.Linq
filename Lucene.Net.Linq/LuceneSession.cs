@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Documents;
-using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
@@ -12,18 +11,17 @@ namespace Lucene.Net.Linq
     internal class LuceneSession<T> : ISession<T>
     {
         private readonly object sessionLock = new object();
-        private readonly object transactionLock;
-
+        
         private readonly IDocumentMapper<T> mapper;
-        private readonly IIndexWriter writer;
+        private readonly Context context;
+        
         private readonly List<Document> additions = new List<Document>();
         private readonly List<Query> deletions = new List<Query>();
 
-        internal LuceneSession(IDocumentMapper<T> mapper, IIndexWriter writer, object transactionLock)
+        public LuceneSession(IDocumentMapper<T> mapper, Context context)
         {
             this.mapper = mapper;
-            this.writer = writer;
-            this.transactionLock = transactionLock;
+            this.context = context;
         }
 
         public void Add(params T[] items)
@@ -64,7 +62,7 @@ namespace Lucene.Net.Linq
                     return;
                 }
 
-                lock (transactionLock)
+                lock (context.TransactionLock)
                 {
                     try
                     {
@@ -72,12 +70,12 @@ namespace Lucene.Net.Linq
                     }
                     catch (OutOfMemoryException)
                     {
-                        writer.Dispose();
+                        context.IndexWriter.Dispose();
                         throw;
                     }
                     catch (Exception)
                     {
-                        writer.Rollback();
+                        context.IndexWriter.Rollback();
                         throw;
                     }
                 }
@@ -86,6 +84,8 @@ namespace Lucene.Net.Linq
 
         private void CommitInternal()
         {
+            var writer = context.IndexWriter;
+
             if (DeleteAllFlag)
             {
                 writer.DeleteAll();
@@ -104,6 +104,8 @@ namespace Lucene.Net.Linq
             writer.Commit();
 
             ClearPendingChanges();
+
+            context.Reload();
         }
 
         private void ClearPendingChanges()

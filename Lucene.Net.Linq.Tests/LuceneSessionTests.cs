@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
-using Lucene.Net.Analysis;
+﻿using System.Linq;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Search;
-using Lucene.Net.Store;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -18,14 +15,17 @@ namespace Lucene.Net.Linq.Tests
         private LuceneSession<Record> session;
         private IDocumentMapper<Record> mapper;
         private IIndexWriter writer;
+        private Context context;
 
         [SetUp]
         public void SetUp()
         {
             mapper = MockRepository.GenerateStrictMock<IDocumentMapper<Record>>();
             writer = MockRepository.GenerateStrictMock<IIndexWriter>();
-            
-            session = new LuceneSession<Record>(mapper, writer, new object());
+
+            context = MockRepository.GenerateStub<Context>(null, null, null, writer, new object());
+
+            session = new LuceneSession<Record>(mapper, context);
         }
 
         [Test]
@@ -88,6 +88,21 @@ namespace Lucene.Net.Linq.Tests
             Verify();
 
             Assert.That(session.Additions, Is.Empty, "Commit should clear pending deletions.");
+        }
+
+        [Test]
+        public void Commit_ReloadsSearcher()
+        {
+            var doc1 = new Document();
+
+            session.Add(doc1);
+
+            writer.Expect(w => w.AddDocument(doc1));
+            writer.Expect(w => w.Commit());
+
+            session.Commit();
+
+            context.AssertWasCalled(c => c.Reload());
         }
 
         [Test]
