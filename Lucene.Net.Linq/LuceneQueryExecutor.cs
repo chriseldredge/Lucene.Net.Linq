@@ -96,7 +96,7 @@ namespace Lucene.Net.Linq
 
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
-                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].Doc));
+                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].doc));
                     yield return projector(CurrentDocument);
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Lucene.Net.Util;
+using Attribute = System.Attribute;
 
 namespace Lucene.Net.Linq.Mapping
 {
