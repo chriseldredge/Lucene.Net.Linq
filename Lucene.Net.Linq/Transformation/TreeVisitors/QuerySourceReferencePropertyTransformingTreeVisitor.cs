@@ -13,15 +13,15 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
     internal class QuerySourceReferencePropertyTransformingTreeVisitor : ExpressionTreeVisitor
     {
         private MemberExpression parent;
-        private LuceneQueryFieldExpression result;
+        private LuceneQueryFieldExpression queryField;
 
         protected override Expression VisitMemberExpression(MemberExpression expression)
         {
             parent = expression;
             
-            var x = base.VisitMemberExpression(expression);
+            var result = base.VisitMemberExpression(expression);
 
-            return result ?? x;
+            return queryField ?? result;
         }
 
         protected override Expression VisitQuerySourceReferenceExpression(QuerySourceReferenceExpression expression)
@@ -33,7 +33,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 throw new NotSupportedException("Only MemberExpression of type PropertyInfo may be used on QuerySourceReferenceExpression.");
             }
 
-            result = new LuceneQueryFieldExpression(propertyInfo.PropertyType, propertyInfo.Name);
+            queryField = new LuceneQueryFieldExpression(propertyInfo.PropertyType, propertyInfo.Name);
             return base.VisitQuerySourceReferenceExpression(expression);
         }
     }

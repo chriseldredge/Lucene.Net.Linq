@@ -72,6 +72,7 @@
     <Compile Include="Mapping\ReflectionDocumentMapper.cs" />
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitor.cs" />
