@@ -16,6 +16,12 @@ namespace Lucene.Net.Linq.Expressions
             this.fieldName = fieldName;
         }
 
+        internal LuceneQueryFieldExpression(Type type, ExpressionType expressionType, string fieldName)
+            : base(type, expressionType)
+        {
+            this.fieldName = fieldName;
+        }
+
         protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
         {
             // no children.

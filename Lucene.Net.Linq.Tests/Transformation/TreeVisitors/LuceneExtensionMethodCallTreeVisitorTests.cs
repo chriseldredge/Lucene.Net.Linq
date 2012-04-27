@@ -30,5 +30,21 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             Assert.That(result, Is.InstanceOf<LuceneOrderByRelevanceExpression>());
         }
+
+        [Test]
+        public void AnyField()
+        {
+            var doc = new object();
+
+            // [doc].AnyField() == "foo"
+            var expression = Expression.MakeBinary(
+                ExpressionType.Equal,
+                Expression.Call(typeof(LuceneMethods), "AnyField", new[] { doc.GetType() }, Expression.Constant(doc)),
+                Expression.Constant("foo"));
+
+            var result = visitor.VisitExpression(expression) as BinaryExpression;
+
+            Assert.That(result.Left, Is.InstanceOf<LuceneQueryAnyFieldExpression>());
+        }
     }
 }

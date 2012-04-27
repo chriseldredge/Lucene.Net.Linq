@@ -66,9 +66,16 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
         protected override Expression VisitLuceneQueryExpression(LuceneQueryExpression expression)
         {
+            if (expression.QueryField is LuceneQueryAnyFieldExpression)
+            {
+                AddMultiFieldQuery(expression);
+
+                return base.VisitLuceneQueryExpression(expression);
+            }
+
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
-            var pattern = EvaluateExpressionToString(expression);
+            var pattern = EvaluateExpressionToString(expression, mapping);
 
             var occur = expression.Occur;
             Query query = null;
@@ -112,6 +119,19 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return base.VisitLuceneQueryExpression(expression);
         }
 
+        private void AddMultiFieldQuery(LuceneQueryExpression expression)
+        {
+            var query = new BooleanQuery();
+
+            var parser = new MultiFieldQueryParser(context.Version,
+                                                   fieldMappingInfoProvider.AllFields.ToArray(),
+                                                   context.Analyzer);
+            
+            query.Add(new BooleanClause(parser.Parse(EvaluateExpressionToString(expression, null)), expression.Occur));
+
+            queries.Push(query);
+        }
+
         private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType queryType, LuceneQueryExpression lowerBoundExpression, LuceneQueryExpression upperBoundExpression)
         {
             var lowerRange = RangeType.Inclusive;
@@ -134,8 +154,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 var minInclusive = lowerRange == RangeType.Inclusive;
                 var maxInclusive = upperRange == RangeType.Inclusive;
 
-                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpressionToString(lowerBoundExpression);
-                var upperBound = upperBoundExpression == null ? null : EvaluateExpressionToString(upperBoundExpression);
+                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpressionToString(lowerBoundExpression, mapping);
+                var upperBound = upperBoundExpression == null ? null : EvaluateExpressionToString(upperBoundExpression, mapping);
                 return new TermRangeQuery(mapping.FieldName, lowerBound, upperBound, minInclusive, maxInclusive);
             }
         }
@@ -170,13 +190,11 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return lambda.DynamicInvoke();
         }
 
-        private string EvaluateExpressionToString(LuceneQueryExpression expression)
+        private string EvaluateExpressionToString(LuceneQueryExpression expression, IFieldMappingInfo mapping)
         {
             var result = EvaluateExpression(expression);
 
-            var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
-
-            return mapping.ConvertToQueryExpression(result);
+            return mapping == null ? result.ToString() : mapping.ConvertToQueryExpression(result);
         }
     }
 }

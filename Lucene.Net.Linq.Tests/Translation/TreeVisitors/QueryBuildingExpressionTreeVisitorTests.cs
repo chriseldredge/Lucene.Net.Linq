@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -64,6 +65,11 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         public IFieldMappingInfo GetMappingInfo(string propertyName)
         {
             return new FakeFieldMappingInfo {FieldName = propertyName};
+        }
+
+        public IEnumerable<string> AllFields
+        {
+            get { return new[] {"Id"}; }
         }
 
         class FakeFieldMappingInfo : IFieldMappingInfo

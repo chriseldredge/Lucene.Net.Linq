@@ -39,6 +39,11 @@ namespace Lucene.Net.Linq
         {
             return mapper.GetMappingInfo(propertyName);
         }
+
+        public override IEnumerable<string> AllFields
+        {
+            get { return mapper.AllFields; }
+        }
     }
 
     internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
@@ -123,6 +128,7 @@ namespace Lucene.Net.Linq
         }
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
+        public abstract IEnumerable<string> AllFields { get; }
 
         protected abstract void SetCurrentDocument(Document doc);
 

@@ -402,6 +402,19 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
         }
 
+        [Test]
+        public void Where_AnyField()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.AnyField() == "other" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+        }
+
     }
  
 }

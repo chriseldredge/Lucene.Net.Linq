@@ -20,6 +20,7 @@ namespace Lucene.Net.Linq.Transformation
             : this(new ExpressionTreeVisitor[]
                        {
                            new SubQueryContainsTreeVisitor(),
+                           new LuceneExtensionMethodCallTreeVisitor(),
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new FlagToBinaryConditionTreeVisitor(),

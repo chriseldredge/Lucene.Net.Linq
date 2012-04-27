@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Abstractions\IIndexWriter.cs" />
     <Compile Include="Context.cs" />
+    <Compile Include="Expressions\LuceneQueryAnyFieldExpression.cs" />
     <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
     <Compile Include="Expressions\LuceneOrderByRelevanceExpression.cs" />

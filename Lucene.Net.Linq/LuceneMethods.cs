@@ -16,7 +16,16 @@ namespace Lucene.Net.Linq
         /// </summary>
         public static Expression Score<T>(this T mappedDocument)
         {
-            return LuceneOrderByRelevanceExpression.Instance;
+            throw new NotImplementedException("Unreachable code. This method should not be invoked.");
+        }
+
+        ///<summary>
+        /// Expression to be used in where clauses to search
+        /// for documents where any field matches a given pattern.
+        ///</summary>
+        public static string AnyField<T>(this T mappedDocument)
+        {
+            throw new NotImplementedException("Unreachable code. This method should not be invoked.");
         }
     }
 }

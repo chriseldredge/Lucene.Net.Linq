@@ -9,21 +9,28 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class LuceneExtensionMethodCallTreeVisitor : ExpressionTreeVisitor
     {
-        private static readonly MethodInfo method;
+        private static readonly MethodInfo AnyFieldMethod;
+        private static readonly MethodInfo ScoreMethod;
 
         static LuceneExtensionMethodCallTreeVisitor()
         {
-            method = typeof (LuceneMethods).GetMethods().Where(m => m.Name == "Score").Single();
+            AnyFieldMethod = typeof(LuceneMethods).GetMethods().Where(m => m.Name == "AnyField").Single();
+            ScoreMethod = typeof (LuceneMethods).GetMethods().Where(m => m.Name == "Score").Single();
 
-            if (method == null)
+            if (AnyFieldMethod == null || ScoreMethod == null)
             {
-                throw new InvalidOperationException("Failed to load MethodInfo for LuceneMethods.Score");
+                throw new InvalidOperationException("Failed to load MethodInfo for extension methods on LuceneMethods.");
             }
         }
 
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
         {
-            if (IsScoreExtensionMethod(expression.Method))
+            if (MethodsEqual(expression.Method, AnyFieldMethod))
+            {
+                return LuceneQueryAnyFieldExpression.Instance;
+            }
+
+            if (MethodsEqual(expression.Method, ScoreMethod))
             {
                 return LuceneOrderByRelevanceExpression.Instance;
             }
@@ -31,9 +38,9 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             return base.VisitMethodCallExpression(expression);
         }
 
-        private bool IsScoreExtensionMethod(MethodInfo methodInfo)
+        private bool MethodsEqual(MethodInfo methodInfo, MethodInfo baseMethod)
         {
-            return methodInfo.IsGenericMethod && methodInfo == method.MakeGenericMethod(methodInfo.GetGenericArguments());
+            return methodInfo.IsGenericMethod && methodInfo == baseMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
         }
     }
 }

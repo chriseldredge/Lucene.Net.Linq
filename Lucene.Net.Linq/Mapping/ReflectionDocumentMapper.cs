@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Util;
@@ -9,6 +10,7 @@ namespace Lucene.Net.Linq.Mapping
     public interface IFieldMappingInfoProvider
     {
         IFieldMappingInfo GetMappingInfo(string propertyName);
+        IEnumerable<string> AllFields { get; }
     }
 
     public interface IDocumentMapper<in T> : IFieldMappingInfoProvider
@@ -59,6 +61,11 @@ namespace Lucene.Net.Linq.Mapping
             {
                 mapping.Value.CopyToDocument(source, target);
             }
+        }
+
+        public IEnumerable<string> AllFields
+        {
+            get { return fieldMap.Values.Select(m => m.FieldName); }
         }
     }
 }
