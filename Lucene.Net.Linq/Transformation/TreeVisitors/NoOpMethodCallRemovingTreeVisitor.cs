@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
@@ -9,9 +10,18 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
     /// </summary>
     internal class NoOpMethodCallRemovingTreeVisitor : ExpressionTreeVisitor
     {
+        private static readonly ISet<string> NoOpMethods =
+            new HashSet<string>
+                {
+                    "ToLower",
+                    "ToLowerInvariant",
+                    "ToUpper",
+                    "ToUpeprInvariant"
+                };
+
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
         {
-            if (expression.Method.Name == "ToLower")
+            if (NoOpMethods.Contains(expression.Method.Name))
             {
                 return expression.Object;
             }

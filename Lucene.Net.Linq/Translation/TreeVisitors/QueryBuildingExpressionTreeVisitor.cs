@@ -83,6 +83,14 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             {
                 pattern += "*";
             }
+            else if (expression.QueryType == QueryType.Suffix || expression.QueryType == QueryType.Wildcard)
+            {
+                pattern = "*" + pattern;
+                if (expression.QueryType == QueryType.Wildcard)
+                {
+                    pattern += "*";
+                }
+            }
             else if (expression.QueryType == QueryType.GreaterThan || expression.QueryType == QueryType.GreaterThanOrEqual)
             {
                 query = CreateRangeQuery(mapping, expression.QueryType, expression, null);

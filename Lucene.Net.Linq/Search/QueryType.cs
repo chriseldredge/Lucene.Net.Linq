@@ -7,6 +7,8 @@ namespace Lucene.Net.Linq.Search
     {
         Default,
         Prefix,
+        Suffix,
+        Wildcard,
         GreaterThan,
         GreaterThanOrEqual,
         LessThan,
