@@ -4,6 +4,7 @@ LINQ to Lucene.Net
 Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a Lucene.Net index.
 
 * Automatically converts PONOs to Documents and back
+* Add, delete and update documents in atomic transaction
 * Term queries
 * Prefix queries
 * Range queries and numeric range queries
@@ -74,7 +75,11 @@ Next, create LuceneDataProvider and run some queries:
             var provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), Version.LUCENE_29, writer);
 
             // add some documents
-            provider.AddDocument(new Article { Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow});
+            using (var session = provider.OpenSession<Article>())
+            {
+                session.Add(new Article { Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow });
+                session.Commit();
+            }
 
             writer.Commit();
 
@@ -101,8 +106,6 @@ Upcoming features
 -----------------
 
 * Support for more LINQ expressions
-* Session/Transaction management to add, replace and delete documents, commit and optimize index
-* Reuse IndexSearcher for performance
 * Sort result by score/relevance. Currently this happens only when no orderby is specified.
 
 Known issues 
