@@ -7,7 +7,7 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Search
 {
-    public class ConvertableFieldComparatorSource : FieldComparatorSource
+    internal class ConvertableFieldComparatorSource : FieldComparatorSource
     {
         private readonly Type type;
         private readonly IFieldMappingInfo fieldMappingInfo;

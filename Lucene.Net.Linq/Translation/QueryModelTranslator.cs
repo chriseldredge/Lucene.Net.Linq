@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
@@ -12,7 +13,7 @@ using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq.Translation
 {
-    public class QueryModelTranslator : QueryModelVisitorBase
+    internal class QueryModelTranslator : QueryModelVisitorBase
     {
         private readonly Context context;
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
@@ -104,6 +105,12 @@ namespace Lucene.Net.Linq.Translation
         {
             foreach (var ordering in orderByClause.Orderings)
             {
+                if (ordering.Expression is LuceneOrderByRelevanceExpression)
+                {
+                    sorts.Add(SortField.FIELD_SCORE);
+                    continue;
+                }
+
                 var field = (LuceneQueryFieldExpression)ordering.Expression;
                 var reverse = ordering.OrderingDirection == OrderingDirection.Desc;
                 

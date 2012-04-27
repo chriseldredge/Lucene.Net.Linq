@@ -55,8 +55,10 @@
     <Compile Include="Context.cs" />
     <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
+    <Compile Include="Expressions\LuceneOrderByRelevanceExpression.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="LuceneDataProvider.cs" />
+    <Compile Include="LuceneMethods.cs" />
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
@@ -72,6 +74,7 @@
     <Compile Include="Mapping\ReflectionDocumentMapper.cs" />
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />

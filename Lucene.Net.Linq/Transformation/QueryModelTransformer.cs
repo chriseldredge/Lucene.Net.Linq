@@ -32,6 +32,7 @@ namespace Lucene.Net.Linq.Transformation
                        },
                    new ExpressionTreeVisitor[]
                        {
+                           new LuceneExtensionMethodCallTreeVisitor(),
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),

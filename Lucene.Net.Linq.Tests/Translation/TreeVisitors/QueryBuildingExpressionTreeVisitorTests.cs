@@ -13,7 +13,7 @@ using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
 
-namespace Lucene.Net.Linq.Tests
+namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
 {
     [TestFixture]
     public class QueryBuildingExpressionTreeVisitorTests_QueryParsing

@@ -89,5 +89,33 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.ToArray(), Is.EqualTo(new[] { 3, 20, 100 }));
         }
+
+        [Test]
+        public void OrderBy_Score()
+        {
+            AddDocument(new SampleDocument { Name = "apple apple apple apple apple apple ", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
+            AddDocument(new SampleDocument { Name = "banana banana banana banana apple banana banana banana ", Scalar = 1, Flag = false, Version = new Version(20, 0, 0) });
+            AddDocument(new SampleDocument { Name = "apple pie apple sauce", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from d in documents where d.Name == "apple" orderby d.Score() select d.Scalar;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] {3, 2, 1}));
+        }
+
+        [Test]
+        public void OrderBy_Score_ExtensionMethod()
+        {
+            AddDocument(new SampleDocument { Name = "apple apple apple apple apple apple ", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
+            AddDocument(new SampleDocument { Name = "banana banana banana banana apple banana banana banana ", Scalar = 1, Flag = false, Version = new Version(20, 0, 0) });
+            AddDocument(new SampleDocument { Name = "apple pie apple sauce", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from d in documents where d.Name == "apple" select d.Scalar;
+
+            Assert.That(result.OrderBy(d => d.Score()).ToArray(), Is.EqualTo(new[] { 3, 2, 1 }));
+        }
     }
 }

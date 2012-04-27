@@ -3,6 +3,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Search;
 using NUnit.Framework;
 using Rhino.Mocks;

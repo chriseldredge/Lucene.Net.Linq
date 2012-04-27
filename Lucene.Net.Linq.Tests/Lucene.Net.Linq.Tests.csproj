@@ -70,6 +70,7 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />
@@ -78,8 +79,8 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryBuildingExpressionTreeVisitorTests.cs" />
-    <Compile Include="QueryModelTransformerTests.cs" />
+    <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitorTests.cs" />
+    <Compile Include="Translation\QueryModelTranslatorTests.cs" />
     <Compile Include="Transformation\QueryModelTransformerTests.cs" />
     <Compile Include="Transformation\TreeVisitors\BinaryToQueryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitorTests.cs" />

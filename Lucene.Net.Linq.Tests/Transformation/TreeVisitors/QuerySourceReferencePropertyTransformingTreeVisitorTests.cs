@@ -1,5 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using NUnit.Framework;
 using Remotion.Linq.Clauses;

@@ -2,6 +2,7 @@
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
@@ -10,7 +11,7 @@ using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Version = Lucene.Net.Util.Version;
 
-namespace Lucene.Net.Linq.Tests
+namespace Lucene.Net.Linq.Tests.Translation
 {
     [TestFixture]
     public class QueryModelTranslatorTests
