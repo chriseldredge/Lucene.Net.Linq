@@ -25,7 +25,7 @@ namespace Lucene.Net.Linq.Tests
             mapper = MockRepository.GenerateStrictMock<IDocumentMapper<Record>>();
             writer = MockRepository.GenerateStrictMock<IIndexWriter>();
             
-            session = new LuceneSession<Record>(mapper, writer);
+            session = new LuceneSession<Record>(mapper, writer, new object());
         }
 
         [Test]

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Documents;
-using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Util;
@@ -12,16 +11,19 @@ namespace Lucene.Net.Linq
 {
     internal class LuceneSession<T> : ISession<T>
     {
-        private readonly object sync = new object();
+        private readonly object sessionLock = new object();
+        private readonly object transactionLock;
+
         private readonly IDocumentMapper<T> mapper;
         private readonly IIndexWriter writer;
         private readonly List<Document> additions = new List<Document>();
         private readonly List<Query> deletions = new List<Query>();
 
-        internal LuceneSession(IDocumentMapper<T> mapper, IIndexWriter writer)
+        internal LuceneSession(IDocumentMapper<T> mapper, IIndexWriter writer, object transactionLock)
         {
             this.mapper = mapper;
             this.writer = writer;
+            this.transactionLock = transactionLock;
         }
 
         public void Add(params T[] items)
@@ -38,13 +40,13 @@ namespace Lucene.Net.Linq
 
         internal void Add(params Document[] docs)
         {
-            lock (sync)
+            lock (sessionLock)
                 additions.AddRange(docs);
         }
 
         public void Delete(params Query[] items)
         {
-            lock (sync)
+            lock (sessionLock)
                 deletions.AddRange(items);
         }
 
@@ -55,44 +57,53 @@ namespace Lucene.Net.Linq
 
         public void Commit()
         {
-            lock (sync)
+            lock (sessionLock)
             {
                 if (!PendingChanges)
                 {
                     return;
                 }
 
-                try
+                lock (transactionLock)
                 {
-                    if (DeleteAllFlag)
+                    try
                     {
-                        writer.DeleteAll();
+                        CommitInternal();
                     }
-                    else if (deletions.Count > 0)
+                    catch (OutOfMemoryException)
                     {
-                        writer.DeleteDocuments(deletions.ToArray());
+                        writer.Dispose();
+                        throw;
                     }
-
-                    if (additions.Count > 0)
+                    catch (Exception)
                     {
-                        additions.Apply(writer.AddDocument);
+                        writer.Rollback();
+                        throw;
                     }
-
-                    writer.Commit();
                 }
-                catch (OutOfMemoryException)
-                {
-                    writer.Dispose();
-                    throw;
-                }
-                catch(Exception)
-                {
-                    writer.Rollback();
-                    throw;
-                }
-
-                ClearPendingChanges();
             }
+        }
+
+        private void CommitInternal()
+        {
+            if (DeleteAllFlag)
+            {
+                writer.DeleteAll();
+            }
+
+            else if (deletions.Count > 0)
+            {
+                writer.DeleteDocuments(deletions.ToArray());
+            }
+
+            if (additions.Count > 0)
+            {
+                additions.Apply(writer.AddDocument);
+            }
+
+            writer.Commit();
+
+            ClearPendingChanges();
         }
 
         private void ClearPendingChanges()

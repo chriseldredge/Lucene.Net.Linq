@@ -14,6 +14,7 @@ namespace Lucene.Net.Linq
     {
         public static readonly Version DefaultVersion = Version.LUCENE_29;
 
+        private readonly object transactionLock;
         private readonly Directory directory;
         private readonly Analyzer analyzer;
         private readonly Version version;
@@ -21,16 +22,17 @@ namespace Lucene.Net.Linq
         private readonly IIndexWriter indexWriter;
 
         public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version, IndexWriter indexWriter)
-            : this(directory, analyzer, version, new IndexWriterAdapter(indexWriter))
+            : this(directory, analyzer, version, new IndexWriterAdapter(indexWriter), new object())
         {
         }
 
-        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter)
+        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
         {
             this.directory = directory;
             this.analyzer = analyzer;
             this.version = version;
             this.indexWriter = indexWriter;
+            this.transactionLock = transactionLock;
 
             queryParser = QueryParser.CreateDefault();
         }
@@ -49,7 +51,7 @@ namespace Lucene.Net.Linq
         public ISession<T> OpenSession<T>()
         {
             var mapper = new ReflectionDocumentMapper<T>();
-            return new LuceneSession<T>(mapper, indexWriter);
+            return new LuceneSession<T>(mapper, indexWriter, transactionLock);
         }
     }
 }
