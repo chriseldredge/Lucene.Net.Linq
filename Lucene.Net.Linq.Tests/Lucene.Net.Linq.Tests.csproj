@@ -62,6 +62,7 @@
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
+    <Compile Include="LuceneSessionTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeOffsetTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />

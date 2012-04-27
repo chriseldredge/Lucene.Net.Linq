@@ -30,8 +30,11 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void StoresAndRetrievesByFieldName()
         {
             var d = new AlternateDocument { AlternateName = "My Document" };
-            provider.AddDocument(d);
-            writer.Commit();
+            using (var session = provider.OpenSession<AlternateDocument>())
+            {
+                session.Add(d);
+                session.Commit();
+            }
 
             var documents = provider.AsQueryable<SampleDocument>();
 

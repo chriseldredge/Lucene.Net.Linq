@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\Lucene.Net.Linq.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,13 +51,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstractions\IIndexWriter.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
+    <Compile Include="ISession.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
     <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
+    <Compile Include="LuceneSession.cs" />
     <Compile Include="Mapping\CollectionReflectionFieldMapper.cs" />
     <Compile Include="Converters\DateTimeOffsetToTicksConverter.cs" />
     <Compile Include="Converters\DateTimeToTicksConverter.cs" />
@@ -92,7 +96,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Lucene.Net.Linq.nuspec" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -18,9 +18,11 @@
             var provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), Version.LUCENE_29, writer);
 
             // add some documents
-            provider.AddDocument(new Article { Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow});
-
-            writer.Commit();
+            using (var session = provider.OpenSession<Article>())
+            {
+                session.Add(new Article { Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow });
+                session.Commit();
+            }
 
             var articles = provider.AsQueryable<Article>();
 

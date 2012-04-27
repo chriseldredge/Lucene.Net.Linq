@@ -49,9 +49,11 @@ namespace Lucene.Net.Linq.Tests.Integration
 
         protected void AddDocument(SampleDocument document)
         {
-            var d = new LuceneDataProvider(directory, GetAnalyzer(version), version, writer);
-            d.AddDocument(document);
-            writer.Commit();
+            using (var session = provider.OpenSession<SampleDocument>())
+            {
+                session.Add(document);
+                session.Commit();
+            }
         }
     }
 }

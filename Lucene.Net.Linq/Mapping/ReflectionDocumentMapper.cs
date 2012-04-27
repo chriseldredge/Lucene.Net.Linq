@@ -14,6 +14,7 @@ namespace Lucene.Net.Linq.Mapping
     public interface IDocumentMapper<in T> : IFieldMappingInfoProvider
     {
         void ToObject(Document source, T target);
+        void ToDocument(T source, Document target);
     }
 
     internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
