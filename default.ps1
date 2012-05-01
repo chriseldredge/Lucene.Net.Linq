@@ -40,7 +40,7 @@ task Compile -depends Init {
 
 task Test -depends Compile -precondition { return $run_tests }{
   cd $debug_build_dir
-  Exec { & $nunitconsole "Lucene.Net.Linq.Tests.dll" "/noshadow" } "nunit failed."
+  Exec { & $nunitconsole "Lucene.Net.Linq.Tests.dll" "/noshadow" "/result=Lucene.Net.Linq.Tests.xml" } "nunit failed."
 }
 
 task Package -depends Compile, Test {
