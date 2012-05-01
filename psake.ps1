@@ -47,6 +47,9 @@ invoke-psake $buildFile $taskList $framework $docs $parameters $properties
 
 if (!$psake.build_success)
 {
-	exit 1
+	echo "psake failed."
+	$exitcode = 1
+	$host.SetShouldExit($exitcode)
+	exit
 }
 
