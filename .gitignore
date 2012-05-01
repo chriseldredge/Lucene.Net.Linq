@@ -4,3 +4,5 @@
 *.dotCover
 bin
 obj
+build/
+*.cache
