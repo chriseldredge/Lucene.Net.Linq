@@ -45,5 +45,8 @@ if (-not(test-path $buildFile))
 
 invoke-psake $buildFile $taskList $framework $docs $parameters $properties
 
-exit ($psake.build_success ? 0 : 1)
+if (!$psake.build_success)
+{
+	exit 1
+}
 

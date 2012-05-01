@@ -20,8 +20,8 @@ include .\psake_ext.ps1
 task default -depends Package
 
 task Clean {
-  remove-item -force -recurse $build_dir
-  remove-item -force -recurse $release_dir
+  if (Test-Path $build_dir) { remove-item -force -recurse $build_dir }
+  if (Test-Path $release_dir) { remove-item -force -recurse $release_dir }
 }
 
 task Init -depends Clean {
