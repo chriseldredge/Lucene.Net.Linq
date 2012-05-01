@@ -51,6 +51,6 @@ task Package -depends Compile, Test {
   {
 	$dir =  $($spec.Directory)
 	cd $dir
-    Exec { nuget pack -o $release_dir -Version $version -Symbols } "nuget pack failed."
+    Exec { nuget pack -o $release_dir -Properties Configuration=Release`;OutDir=$release_build_dir\ -Version $version -Symbols } "nuget pack failed."
   }
 }
