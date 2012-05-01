@@ -43,7 +43,7 @@ task Test -depends Compile -precondition { return $run_tests }{
   Exec { & $nunitconsole "Lucene.Net.Linq.Tests.dll" "/noshadow" } "nunit failed."
 }
 
-task Package { # -depends Compile, Test
+task Package -depends Compile, Test {
 
   $spec_files = @(Get-ChildItem $packageinfo_dir "*.nuspec" -Recurse)
 
