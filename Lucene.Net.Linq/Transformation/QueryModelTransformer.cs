@@ -59,15 +59,12 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
-#endif
+            Log.Trace(() => "Original QueryModel:     " + queryModel);
+
             foreach (var visitor in whereSelectClauseVisitors)
             {
                 whereClause.TransformExpressions(visitor.VisitExpression);
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine("Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel, "Lucene.Net.Linq");
-#endif
+                Log.Trace(() => "Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel);
             }
 
             base.VisitWhereClause(whereClause, queryModel, index);
@@ -75,15 +72,12 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Original QueryModel:     " + queryModel, "Lucene.Net.Linq");
-#endif
+            Log.Trace(() => "Original QueryModel:     " + queryModel);
+
             foreach (var visitor in orderingVisitors)
             {
                 orderByClause.TransformExpressions(visitor.VisitExpression);
-#if DEBUG
-                System.Diagnostics.Trace.WriteLine("Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel, "Lucene.Net.Linq");
-#endif
+                Log.Trace(() => "Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel);
             }
             
             ExpandCompositeOrderings(orderByClause);

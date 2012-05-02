@@ -6,6 +6,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Linq.Translation;
+using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -117,9 +118,7 @@ namespace Lucene.Net.Linq
             var builder = new QueryModelTranslator(context, this);
             builder.Build(queryModel);
 
-#if DEBUG
-            System.Diagnostics.Trace.WriteLine("Lucene query: " + builder.Query + " sort: " + builder.Sort, "Lucene.Net.Linq");
-#endif
+            Log.Trace(() => "Lucene query: " + builder.Query + " sort: " + builder.Sort);
 
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());
