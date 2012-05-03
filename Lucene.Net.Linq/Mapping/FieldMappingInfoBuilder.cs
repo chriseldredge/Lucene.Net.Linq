@@ -45,7 +45,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             var fieldName = (metadata != null ? metadata.Field : null) ?? p.Name;
             var converter = GetConverter(p, type, metadata);
-            var store = metadata != null ? metadata.Store : true;
+            var store = metadata != null ? metadata.Store : StoreMode.Yes;
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
 
             return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName);

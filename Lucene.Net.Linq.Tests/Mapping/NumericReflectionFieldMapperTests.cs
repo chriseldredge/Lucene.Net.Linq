@@ -29,7 +29,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void StoreLong()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), true, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
 
             var sample = new Sample {Long = 1234L};
             var document = new Document();
@@ -42,7 +42,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void UsesPrecisionStep()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), true, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
 
             var sample = new Sample { Long = 1234L };
             var document = new Document();
@@ -55,7 +55,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void ConvertsFieldValue()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), true, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
 
             var result = mapper.ConvertFieldValue(new Field("Int", "100", Field.Store.YES, Field.Index.NO));
 
@@ -67,7 +67,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var valueTypeConverter = new SampleConverter();
 
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), true, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
 
             var result = mapper.ConvertFieldValue(new Field("Complex", "100", Field.Store.YES, Field.Index.NO));
 

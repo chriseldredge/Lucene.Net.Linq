@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Util;
@@ -23,16 +24,16 @@ namespace Lucene.Net.Linq.Mapping
     public class ReflectionFieldMapper<T> : IFieldMapper<T>
     {
         protected readonly PropertyInfo propertyInfo;
-        protected readonly bool store;
-        protected readonly IndexMode indexMode;
+        protected readonly StoreMode store;
+        protected readonly IndexMode index;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
 
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, bool store, IndexMode indexMode, TypeConverter converter, string fieldName)
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode indexMode, TypeConverter converter, string fieldName)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
-            this.indexMode = indexMode;
+            this.index = indexMode;
             this.converter = converter;
             this.fieldName = fieldName;
         }
@@ -42,14 +43,14 @@ namespace Lucene.Net.Linq.Mapping
             get { return propertyInfo; }
         }
 
-        public bool Store
+        public StoreMode Store
         {
             get { return store; }
         }
 
         public IndexMode IndexMode
         {
-            get { return indexMode; }
+            get { return index; }
         }
 
         public TypeConverter Converter
@@ -124,13 +125,25 @@ namespace Lucene.Net.Linq.Mapping
 
             if (fieldValue != null)
             {
-                target.Add(new Field(fieldName, fieldValue, FieldStore, indexMode.ToFieldIndex()));
+                target.Add(new Field(fieldName, fieldValue, FieldStore, index.ToFieldIndex()));
             }
         }
 
         protected Field.Store FieldStore
         {
-            get { return store ? Field.Store.YES : Field.Store.NO; }
+            get
+            {
+                switch(store)
+                {
+                    case StoreMode.Yes:
+                        return Field.Store.YES;
+                    case StoreMode.No:
+                        return Field.Store.NO;
+                    case StoreMode.Compress:
+                        return Field.Store.COMPRESS;
+                }
+                throw new InvalidOperationException("Unrecognized FieldStore value " + store);
+            }
         }
     }
 }

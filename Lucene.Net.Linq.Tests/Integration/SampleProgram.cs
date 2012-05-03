@@ -59,11 +59,11 @@ namespace Sample
         // Stores the field as text
         public int IssueNumber { get; set; }
 
-        [Field(IndexMode.NotIndexed, Store = true)]
+        [Field(IndexMode.NotIndexed, Store = StoreMode.Yes)]
         public string BodyText { get; set; }
 
         // Maps to field "text"
-        [Field("text", Store = false)]
+        [Field("text", Store = StoreMode.No)]
         public string SearchText
         {
             get { return string.Join(" ", new[] { Author, Title, BodyText }); }

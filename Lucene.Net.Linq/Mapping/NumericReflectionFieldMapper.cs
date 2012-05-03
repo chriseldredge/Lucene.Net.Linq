@@ -11,7 +11,7 @@ namespace Lucene.Net.Linq.Mapping
         private readonly TypeConverter typeToValueTypeConverter;
         private readonly int precisionStep;
 
-        public NumericReflectionFieldMapper(PropertyInfo propertyInfo, bool store, TypeConverter typeToValueTypeConverter, TypeConverter valueTypeToStringConverter, string field, int precisionStep)
+        public NumericReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, TypeConverter typeToValueTypeConverter, TypeConverter valueTypeToStringConverter, string field, int precisionStep)
             : base(propertyInfo, store, IndexMode.Analyzed, valueTypeToStringConverter, field)
         {
             this.typeToValueTypeConverter = typeToValueTypeConverter;
