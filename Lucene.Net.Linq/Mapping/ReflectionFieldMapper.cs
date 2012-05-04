@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Util;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -18,6 +19,7 @@ namespace Lucene.Net.Linq.Mapping
         TypeConverter Converter { get; }
         PropertyInfo PropertyInfo { get; }
         bool IsNumericField { get; }
+        int SortFieldType { get; }
         string ConvertToQueryExpression(object value);
     }
 
@@ -64,6 +66,8 @@ namespace Lucene.Net.Linq.Mapping
         }
 
         public virtual bool IsNumericField { get { return false; } }
+
+        public virtual int SortFieldType { get { return (Converter != null) ? -1 : SortField.STRING; } }
 
         public virtual void CopyFromDocument(Document source, T target)
         {

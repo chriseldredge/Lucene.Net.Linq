@@ -22,7 +22,6 @@ namespace Lucene.Net.Linq.Mapping
                 valueTypeToStringConverter = FieldMappingInfoBuilder.GetConverter(p, type, null);
             }
 
-
             return new NumericReflectionFieldMapper<T>(p, metadata.Store, typeToValueTypeConverter, valueTypeToStringConverter, fieldName,
                                                        metadata.PrecisionStep);
         }

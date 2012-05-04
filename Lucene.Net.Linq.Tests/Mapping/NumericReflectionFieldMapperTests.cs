@@ -1,9 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Reflection;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Search;
 using Lucene.Net.Util;
 using NUnit.Framework;
 
@@ -74,11 +73,42 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(result, Is.InstanceOf<Complex>());
         }
 
+        [Test]
+        public void SortType_Int()
+        {
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+
+            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.INT));
+        }
+
+        [Test]
+        public void SortType_Long()
+        {
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
+
+            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.LONG));
+        }
+
+        [Test]
+        public void SortType_Complex()
+        {
+            var valueTypeConverter = new SampleConverter();
+
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
+
+            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.INT));
+        }
+
         public class SampleConverter : TypeConverter
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
                 return sourceType == typeof (int);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                return destinationType == typeof(int);
             }
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)

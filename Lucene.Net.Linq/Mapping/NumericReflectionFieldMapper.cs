@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Util;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
     public class NumericReflectionFieldMapper<T> : ReflectionFieldMapper<T>
     {
+        private static readonly IEnumerable<Type> supportedValueTypes = new List<Type>{typeof(long), typeof(int), typeof(double), typeof(float)};
+
         private readonly TypeConverter typeToValueTypeConverter;
         private readonly int precisionStep;
 
@@ -26,6 +31,22 @@ namespace Lucene.Net.Linq.Mapping
         public override bool IsNumericField
         {
             get { return true; }
+        }
+
+        public override int SortFieldType
+        {
+            get
+            {
+                if (typeToValueTypeConverter == null)
+                {
+                    return propertyInfo.PropertyType.ToSortField();
+                }
+
+                var targetType = GetUnderlyingValueType();
+
+                return targetType.ToSortField();
+
+            }
         }
 
         protected internal override object ConvertFieldValue(Field field)
@@ -68,24 +89,14 @@ namespace Lucene.Net.Linq.Mapping
         {
             if (typeToValueTypeConverter == null) return value;
 
-            if (typeToValueTypeConverter.CanConvertTo(typeof(long)))
-            {
-                return typeToValueTypeConverter.ConvertTo(value, typeof(long));
-            }
-            if (typeToValueTypeConverter.CanConvertTo(typeof(int)))
-            {
-                return typeToValueTypeConverter.ConvertTo(value, typeof(int));
-            }
-            if (converter.CanConvertTo(typeof(double)))
-            {
-                return typeToValueTypeConverter.ConvertTo(value, typeof(double));
-            }
-            if (typeToValueTypeConverter.CanConvertTo(typeof(float)))
-            {
-                return typeToValueTypeConverter.ConvertTo(value, typeof(float));
-            }
+            var type = GetUnderlyingValueType();
 
-            return value;
+            return type != null ? typeToValueTypeConverter.ConvertTo(value, type) : value;
+        }
+
+        private Type GetUnderlyingValueType()
+        {
+            return supportedValueTypes.FirstOrDefault(t => typeToValueTypeConverter.CanConvertTo(t));
         }
     }
 }

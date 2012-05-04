@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
@@ -112,46 +111,29 @@ namespace Lucene.Net.Linq.Translation
                 }
 
                 var field = (LuceneQueryFieldExpression)ordering.Expression;
+                var mapping = fieldMappingInfoProvider.GetMappingInfo(field.FieldName);
                 var reverse = ordering.OrderingDirection == OrderingDirection.Desc;
-                
-                var sortType = GetSortType(field.Type);
 
-                if (sortType >= 0)
+                if (mapping.SortFieldType >= 0)
                 {
-                    sorts.Add(new SortField(field.FieldName, sortType, reverse));    
+                    sorts.Add(new SortField(mapping.FieldName, mapping.SortFieldType, reverse));    
                 }
                 else
                 {
-                    sorts.Add(new SortField(field.FieldName, GetCustomSort(field), reverse));
+                    sorts.Add(new SortField(mapping.FieldName, GetCustomSort(mapping), reverse));
                 }
             }
         }
 
-        private FieldComparatorSource GetCustomSort(LuceneQueryFieldExpression expression)
+        private FieldComparatorSource GetCustomSort(IFieldMappingInfo fieldMappingInfo)
         {
-            if (typeof(IComparable).IsAssignableFrom(expression.Type))
+            var propertyType = fieldMappingInfo.PropertyInfo.PropertyType;
+            if (typeof(IComparable).IsAssignableFrom(propertyType))
             {
-                return new ConvertableFieldComparatorSource(expression.Type, fieldMappingInfoProvider.GetMappingInfo(expression.FieldName));
+                return new ConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
             }
 
-            throw new NotSupportedException("Unsupported sort field type: " + expression.Type);
-        }
-
-        private static int GetSortType(Type type)
-        {
-            type = Nullable.GetUnderlyingType(type) ?? type;
-
-            // TODO: get from field mapping info
-            type = (type == typeof (DateTimeOffset) || type == typeof (DateTime)) ? typeof (long) : type;
-
-            if (type == typeof(string))
-                return SortField.STRING;
-            if (type == typeof(int))
-                return SortField.INT;
-            if (type == typeof(long))
-                return SortField.LONG;
-
-            return -1;
+            throw new NotSupportedException("Unsupported sort field type: " + propertyType);
         }
     }
 }

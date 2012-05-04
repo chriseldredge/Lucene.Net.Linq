@@ -2,6 +2,8 @@
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
@@ -9,6 +11,7 @@ using Lucene.Net.Store;
 using NUnit.Framework;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
+using Rhino.Mocks;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Translation
@@ -16,13 +19,26 @@ namespace Lucene.Net.Linq.Tests.Translation
     [TestFixture]
     public class QueryModelTranslatorTests
     {
+        private IFieldMappingInfoProvider mappingInfo;
         private QueryModelTranslator transformer;
         private readonly QueryModel queryModel = new QueryModel(new MainFromClause("i", typeof(Record), Expression.Constant("r")), new SelectClause(Expression.Constant("a")) );
+        private IFieldMappingInfo numericMappingInfo;
+        private IFieldMappingInfo nonNumericMappingInfo;
 
         [SetUp]
         public void SetUp()
         {
-            transformer = new QueryModelTranslator(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), Version.LUCENE_29, null, new object()), null);
+            mappingInfo = MockRepository.GenerateStub<IFieldMappingInfoProvider>();
+
+            transformer = new QueryModelTranslator(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), Version.LUCENE_29, null, new object()), mappingInfo);
+
+            numericMappingInfo = MockRepository.GenerateStub<IFieldMappingInfo>();
+            numericMappingInfo.Stub(i => i.IsNumericField).Return(true);
+            numericMappingInfo.Stub(i => i.SortFieldType).Return(SortField.LONG);
+            
+            nonNumericMappingInfo = MockRepository.GenerateStub<IFieldMappingInfo>();
+            nonNumericMappingInfo.Stub(i => i.IsNumericField).Return(false);
+            nonNumericMappingInfo.Stub(i => i.SortFieldType).Return(SortField.STRING);
         }
 
         [Test]
@@ -38,6 +54,8 @@ namespace Lucene.Net.Linq.Tests.Translation
         {
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Asc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Name")).Return(nonNumericMappingInfo);
+            nonNumericMappingInfo.Stub(i => i.FieldName).Return("Name");
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
@@ -50,6 +68,8 @@ namespace Lucene.Net.Linq.Tests.Translation
         {
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(DateTimeOffset?), "Date"), OrderingDirection.Asc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Date")).Return(numericMappingInfo);
+            numericMappingInfo.Stub(i => i.FieldName).Return("Date");
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
@@ -58,15 +78,51 @@ namespace Lucene.Net.Linq.Tests.Translation
         }
 
         [Test]
-        public void ConvertsToSort_Desc()
+        public void ConvertsDateTimeToSortNonNumeric()
         {
             var orderByClause = new OrderByClause();
-            orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Desc));
+            orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(DateTimeOffset?), "Date"), OrderingDirection.Asc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Date")).Return(nonNumericMappingInfo);
+            nonNumericMappingInfo.Stub(i => i.FieldName).Return("Date");
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Desc, SortField.STRING);
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.STRING);
+        }
+
+        [Test]
+        public void ConvertsToSort_Desc()
+        {
+            var orderByClause = new OrderByClause();
+            orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Desc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Name")).Return(nonNumericMappingInfo);
+            nonNumericMappingInfo.Stub(i => i.FieldName).Return("the_name_field");
+
+            transformer.VisitOrderByClause(orderByClause, queryModel, 0);
+
+            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.STRING);
+        }
+
+        [Test]
+        public void ConvertsToSort_CustomSort()
+        {
+            var mapping = MockRepository.GenerateStub<IFieldMappingInfo>();
+            mapping.Stub(i => i.IsNumericField).Return(false);
+            mapping.Stub(i => i.SortFieldType).Return(-1);
+            mapping.Stub(i => i.PropertyInfo).Return(typeof (Record).GetProperty("Name"));
+
+            var orderByClause = new OrderByClause();
+            orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Desc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Name")).Return(mapping);
+            mapping.Stub(i => i.FieldName).Return("the_name_field");
+
+            transformer.VisitOrderByClause(orderByClause, queryModel, 0);
+
+            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.CUSTOM);
+            Assert.That(transformer.Sort.GetSort()[0].GetComparatorSource(), Is.InstanceOf<ConvertableFieldComparatorSource>());
         }
 
         [Test]
@@ -75,17 +131,27 @@ namespace Lucene.Net.Linq.Tests.Translation
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Asc));
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(int), "Id"), OrderingDirection.Desc));
+            mappingInfo.Expect(m => m.GetMappingInfo("Name")).Return(nonNumericMappingInfo);
+            mappingInfo.Expect(m => m.GetMappingInfo("Id")).Return(numericMappingInfo);
+            nonNumericMappingInfo.Stub(i => i.FieldName).Return("Name");
+            numericMappingInfo.Stub(i => i.FieldName).Return("Id");
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
             AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
-            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.INT);
+            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
         }
 
         [Test]
         public void ConvertsToSort_MultipleClauses()
         {
+            mappingInfo.Expect(m => m.GetMappingInfo("Name")).Return(nonNumericMappingInfo);
+            mappingInfo.Expect(m => m.GetMappingInfo("Id")).Return(numericMappingInfo);
+            nonNumericMappingInfo.Stub(i => i.FieldName).Return("Name");
+            numericMappingInfo.Stub(i => i.FieldName).Return("Id");
+            
+
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Asc));
 
@@ -98,13 +164,13 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
             AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
-            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.INT);
+            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
         }
 
         private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)
         {
             Assert.That(sortField.GetField(), Is.EqualTo(expectedFieldName));
-            Assert.That(sortField.GetType(), Is.EqualTo(expectedType));
+            Assert.That(sortField.GetType(), Is.EqualTo(expectedType), "SortField type for field " + expectedFieldName);
             Assert.That(sortField.GetReverse(), Is.EqualTo(expectedDirection == OrderingDirection.Desc), "Reverse");
         }
 

@@ -99,8 +99,6 @@ namespace Lucene.Net.Linq.Util
         
         internal static NumericField SetValue(this NumericField field, ValueType value)
         {
-            //value = value.ToNumericFieldValue();
-
             if (value is int)
             {
                 return field.SetIntValue((int) value);
@@ -119,6 +117,31 @@ namespace Lucene.Net.Linq.Util
             }
 
             throw new ArgumentException("Unable to store ValueType " + value.GetType() + " as NumericField.", "value");
+        }
+    }
+
+    internal static class TypeExtensions
+    {
+        internal static int ToSortField(this Type valueType)
+        {
+            if (valueType == typeof(long))
+            {
+                return SortField.LONG;
+            }
+            if (valueType == typeof(int))
+            {
+                return SortField.INT;
+            }
+            if (valueType == typeof(double))
+            {
+                return SortField.DOUBLE;
+            }
+            if (valueType == typeof(float))
+            {
+                return SortField.FLOAT;
+            }
+
+            return SortField.CUSTOM;
         }
     }
 }

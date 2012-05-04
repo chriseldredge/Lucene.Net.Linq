@@ -9,20 +9,20 @@ namespace Lucene.Net.Linq.Search
 {
     internal class ConvertableFieldComparatorSource : FieldComparatorSource
     {
-        private readonly Type type;
-        private readonly IFieldMappingInfo fieldMappingInfo;
+        private Type type;
+        private TypeConverter converter;
 
-        public ConvertableFieldComparatorSource(Type type, IFieldMappingInfo fieldMappingInfo)
+        public ConvertableFieldComparatorSource(Type type, TypeConverter converter)
         {
             this.type = type;
-            this.fieldMappingInfo = fieldMappingInfo;
+            this.converter = converter;
         }
 
         public override FieldComparator NewComparator(string fieldname, int numHits, int sortPos, bool reversed)
         {
             var genericType = typeof(ConvertableFieldComparator<>).MakeGenericType(type);
             var ctr = genericType.GetConstructor(new[] { typeof(int), typeof(string), typeof(TypeConverter) });
-            return (FieldComparator)ctr.Invoke(new object[] { numHits, fieldname, fieldMappingInfo.Converter });
+            return (FieldComparator)ctr.Invoke(new object[] { numHits, fieldname, converter });
         }
 
         public class ConvertableFieldComparator<TComparable> : FieldComparator<TComparable> where TComparable : IComparable

@@ -2,12 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using Lucene.Net.Linq.Converters;
 using Lucene.Net.Linq.Util;
+using DateTimeConverter = Lucene.Net.Linq.Converters.DateTimeConverter;
 
 namespace Lucene.Net.Linq.Mapping
 {
     internal class FieldMappingInfoBuilder
     {
+        internal const string DefaultDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
+
         internal static IFieldMapper<T> Build<T>(PropertyInfo p)
         {
             var metadata = p.GetCustomAttribute<FieldAttribute>(true);
@@ -51,11 +55,17 @@ namespace Lucene.Net.Linq.Mapping
             return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName);
         }
 
-        internal static TypeConverter GetConverter(PropertyInfo p, Type type, BaseFieldAttribute metadata)
+        internal static TypeConverter GetConverter(PropertyInfo p, Type type, FieldAttribute metadata)
         {
             if (metadata != null && metadata.Converter != null)
             {
                 return (TypeConverter)Activator.CreateInstance(metadata.Converter);
+            }
+
+            //TODO: support DateTime? and DateTimeOffset/DateTimeOffset?
+            if (p.PropertyType == typeof(DateTime))
+            {
+                return new DateTimeConverter(typeof(DateTime), (metadata != null ? metadata.Format : null) ?? DefaultDateTimeFormat);
             }
 
             if (p.PropertyType == typeof(string)) return null;

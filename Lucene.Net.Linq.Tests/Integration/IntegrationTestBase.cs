@@ -40,7 +40,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             public int? NullableScalar { get; set; }
             public bool Flag { get; set; }
 
-            [Field(Converter = typeof(VersionConverter))]
+            [Field("backing_version", Converter = typeof(VersionConverter))]
             public System.Version Version { get; set; }
 
             [Field("backing_field")]

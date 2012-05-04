@@ -80,9 +80,17 @@ namespace Lucene.Net.Linq.Mapping
         }
 
         /// <summary>
-        /// >How the field should be indexed for searching and sorting.
+        /// How the field should be indexed for searching and sorting.
         /// </summary>
         public IndexMode IndexMode { get { return indexMode; } }
+
+        /// <summary>
+        /// Overrides default format pattern to use when converting ValueType
+        /// to string. If both <c cref="Format">Format</c> and
+        /// <c cref="BaseFieldAttribute.Converter">Converter</c> are specified, <c>Converter</c>
+        /// will take precedence and <c>Format</c> will be ignored.
+        /// </summary>
+        public string Format { get; set; }
     }
 
     /// <summary>

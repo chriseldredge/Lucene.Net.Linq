@@ -86,6 +86,11 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             {
                 get { return true; }
             }
+
+            public int SortFieldType
+            {
+                get { return -1; }
+            }
         }
 
         [Test]
