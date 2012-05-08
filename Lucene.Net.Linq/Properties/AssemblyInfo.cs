@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Lucene.Net.Linq")]
 [assembly: AssemblyDescription("Connects LINQ to Lucene.Net.")]
 [assembly: AssemblyProduct("Lucene.Net.Linq")]
-[assembly: AssemblyCopyright("Copyright © The Motley Fool 2012")]
+[assembly: AssemblyCopyright("Copyright 2012 The Motley Fool, LLC")]
 
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(true)]

@@ -1,17 +1,18 @@
 <?xml version="1.0"?>
-<package >
+<package>
 	<metadata>
 		<id>Lucene.Net.Linq</id>
 		<title>LINQ to Lucene</title>
 		<version>$version$</version>
+		<owners>The Motley Fool, LLC</owners>
 		<authors>Chris Eldredge</authors>
-		<copyright>Copyright © 2012 The Motley Fool</copyright>
+		<copyright>Copyright 2012 The Motley Fool, LLC</copyright>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
 		<projectUrl>https://github.com/chriseldredge/Lucene.Net.Linq</projectUrl>
-		<licenseUrl>http://www.apache.org/licenses/LICENSE-2.0.html</licenseUrl>
+		<licenseUrl>https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/LICENSE.txt</licenseUrl>
 		<iconUrl>https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/branding/logo/lucene-net-icon-128x128.png</iconUrl>
-		<tags>lucene.net lucene linq odata</tags>
+		<tags>lucene.net lucene linq odata search nosql</tags>
 	</metadata>
 </package>

@@ -1,0 +1,12 @@
+Copyright 2012 The Motley Fool, LLC
+ 
+This library is licensed both under the GNU Lesser General Public License (LGPL), version 2.1
+and the Apache License, version 2.0. You may not use this software except in compliance with those Licenses. 
+
+You may obtain a copy of the Apache License at: http://www.apache.org/licenses/LICENSE-2.0
+
+You may obtain a copy of the GNU Lesser General Public License at: http://www.gnu.org/licenses/lgpl-2.1-standalone.html
+
+Unless required by applicable law or agreed to in writing, software distributed under these Licenses is
+distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the Licenses for the specific language governing permissions and limitations. 

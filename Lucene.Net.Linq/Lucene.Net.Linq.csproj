@@ -109,7 +109,9 @@
     <Compile Include="Util\NumericUtils.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Lucene.Net.Linq.nuspec" />
+    <None Include="Lucene.Net.Linq.nuspec">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
