@@ -8,11 +8,11 @@
 		<authors>Chris Eldredge</authors>
 		<copyright>Copyright 2012 The Motley Fool, LLC</copyright>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
-		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
-		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
-		<projectUrl>https://github.com/chriseldredge/Lucene.Net.Linq</projectUrl>
+		<projectUrl>https://github.com/themotleyfool/Lucene.Net.Linq</projectUrl>
 		<licenseUrl>https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/LICENSE.txt</licenseUrl>
 		<iconUrl>https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/branding/logo/lucene-net-icon-128x128.png</iconUrl>
 		<tags>lucene.net lucene linq odata search nosql</tags>
+		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
+		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
 	</metadata>
 </package>
