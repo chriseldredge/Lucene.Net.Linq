@@ -143,5 +143,11 @@ namespace Lucene.Net.Linq.Util
 
             return SortField.CUSTOM;
         }
+
+        internal static Type GetUnderlyingType(this Type type)
+        {
+            return Nullable.GetUnderlyingType(type) ?? type;
+        }
+
     }
 }

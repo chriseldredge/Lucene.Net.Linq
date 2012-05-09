@@ -6,12 +6,10 @@ namespace Lucene.Net.Linq.Converters
 {
     public class DateTimeConverter : TypeConverter
     {
-        private readonly Type type;
         private readonly string format;
 
-        public DateTimeConverter(Type type, string format)
+        public DateTimeConverter(string format)
         {
-            this.type = type;
             this.format = format;
         }
 

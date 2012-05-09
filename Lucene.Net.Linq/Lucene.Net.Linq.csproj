@@ -59,6 +59,7 @@
     <Compile Include="Abstractions\IIndexWriter.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
+    <Compile Include="Converters\FormatConverter.cs" />
     <Compile Include="Expressions\LuceneQueryAnyFieldExpression.cs" />
     <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />

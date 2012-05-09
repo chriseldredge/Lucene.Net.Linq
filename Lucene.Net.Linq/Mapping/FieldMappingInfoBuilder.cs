@@ -62,10 +62,18 @@ namespace Lucene.Net.Linq.Mapping
                 return (TypeConverter)Activator.CreateInstance(metadata.Converter);
             }
 
-            //TODO: support DateTime? and DateTimeOffset/DateTimeOffset?
-            if (p.PropertyType == typeof(DateTime))
+            var formatSpecified = metadata != null && metadata.Format != null;
+            var format = (metadata != null ? metadata.Format : null) ?? DefaultDateTimeFormat;
+            var propType = p.PropertyType.GetUnderlyingType();
+            
+            if (propType == typeof(DateTime))
             {
-                return new DateTimeConverter(typeof(DateTime), (metadata != null ? metadata.Format : null) ?? DefaultDateTimeFormat);
+                return new DateTimeConverter(format);
+            }
+            
+            if (formatSpecified || propType == typeof(DateTimeOffset))
+            {
+                return new FormatConverter(propType, format);
             }
 
             if (p.PropertyType == typeof(string)) return null;

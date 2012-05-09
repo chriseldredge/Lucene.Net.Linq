@@ -17,6 +17,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void SetUp()
         {
             doc = new Document();
+
+            TimeStamp = DateTime.MinValue;
+            SillyTime = DateTime.MinValue;
+            OptionalTimeStamp = null;
+            OptionalTimeStampOffset = null;
         }
 
         [Field]
@@ -25,10 +30,17 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Field(Format = SillyFormat)]
         public DateTime SillyTime { get; set; }
 
+        [Field("TimeStamp")]
+        public DateTime? OptionalTimeStamp { get; set; }
+
+        [Field("TimeStamp")]
+        public DateTimeOffset? OptionalTimeStampOffset { get; set; }
+
         [Test]
-        public void DefaultDateTimeUsesSolrFormat_FromDocument()
+        public void DefaultDateTimeUsesSolrFormat_FromDocument([Values("TimeStamp", "OptionalTimeStamp", "OptionalTimeStampOffset")] string propertyName)
         {
-            var mapper = CreateMapper(() => TimeStamp);
+            PropertyInfo prop;
+            var mapper = CreateMapper(propertyName, out prop);
 
             var ts = DateTime.SpecifyKind(new DateTime(2013, 1, 2, 3, 40, 50), DateTimeKind.Utc);
 
@@ -36,20 +48,36 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper.CopyFromDocument(doc, this);
 
-            Assert.That(TimeStamp.Kind, Is.EqualTo(DateTimeKind.Utc));
-            Assert.That(TimeStamp, Is.EqualTo(ts));
+            if (propertyName == "OptionalTimeStampOffset")
+            {
+                Assert.That(prop.GetValue(this, null), Is.EqualTo(new DateTimeOffset(ts)));
+            }
+            else
+            {
+                Assert.That(prop.GetValue(this, null), Is.EqualTo(ts));    
+            }
+            
         }
 
         [Test]
-        public void DefaultDateTimeUsesSolrFormat_ToDocument()
+        public void DefaultDateTimeUsesSolrFormat_ToDocument([Values("TimeStamp", "OptionalTimeStamp", "OptionalTimeStampOffset")] string propertyName)
         {
-            TimeStamp = new DateTime(2012, 4, 23, 4, 56, 27);
+            PropertyInfo prop;
+            var mapper = CreateMapper(propertyName, out prop);
+            var dateTime = new DateTime(2012, 4, 23, 4, 56, 27);
 
-            var mapper = CreateMapper(() => TimeStamp);
+            if (Nullable.GetUnderlyingType(prop.PropertyType) == typeof(DateTimeOffset))
+            {
+                prop.SetValue(this, new DateTimeOffset(dateTime.ToUniversalTime(), TimeSpan.Zero), null);    
+            }
+            else
+            {
+                prop.SetValue(this, dateTime, null);
+            }
 
             mapper.CopyToDocument(this, doc);
 
-            Assert.That(doc.Get("TimeStamp"), Is.EqualTo(TimeStamp.ToUniversalTime().ToString(FieldMappingInfoBuilder.DefaultDateTimeFormat)));
+            Assert.That(doc.Get("TimeStamp"), Is.EqualTo(dateTime.ToUniversalTime().ToString(FieldMappingInfoBuilder.DefaultDateTimeFormat)));
         }
 
         [Test]
@@ -83,6 +111,12 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var info = ((MemberExpression) expression.Body).Member;
             return FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderDateFormatTests>((PropertyInfo)info);
+        }
+
+        private IFieldMapper<FieldMappingInfoBuilderDateFormatTests> CreateMapper(string propertyName, out PropertyInfo info)
+        {
+            info = GetType().GetProperty(propertyName);
+            return FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderDateFormatTests>(info);
         }
 
     }
