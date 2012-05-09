@@ -14,7 +14,6 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
         {
             if (expression.Object is QuerySourceReferenceExpression && expression.Method.Name == "Get")
             {
-                // TODO: evaluate argument.
                 var fieldName = (string)((ConstantExpression)expression.Arguments[0]).Value;
                 return new LuceneQueryFieldExpression(typeof(string), fieldName);
             }

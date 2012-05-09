@@ -33,7 +33,6 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 if (query is BooleanQuery)
                 {
                     var booleanQuery = (BooleanQuery)query.Clone();
-                    // TODO: need to check recursively?
                     if (booleanQuery.GetClauses().All(c => c.GetOccur() == BooleanClause.Occur.MUST_NOT))
                     {
                         booleanQuery.Add(new MatchAllDocsQuery(), BooleanClause.Occur.SHOULD);

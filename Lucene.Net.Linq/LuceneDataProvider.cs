@@ -24,8 +24,18 @@ namespace Lucene.Net.Linq
         private readonly Context context;
 
         /// <summary>
+        /// Constructs a new read-only instance without supplying an IndexWriter.
+        /// </summary>
+        /// <param name="directory"></param>
+        /// <param name="analyzer"></param>
+        /// <param name="version"></param>
+        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version)
+            : this(directory, analyzer, version, null, new object())
+        {
+        }
+
+        /// <summary>
         /// Constructs a new instance.
-        /// usage of <paramref name="indexWriter"/>.
         /// </summary>
         /// <param name="directory"></param>
         /// <param name="analyzer"></param>
@@ -83,6 +93,11 @@ namespace Lucene.Net.Linq
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
         public ISession<T> OpenSession<T>()
         {
+            if (context.IsReadOnly)
+            {
+                throw new InvalidOperationException("This data provider is read-only. To enable writes, construct " + typeof(LuceneDataProvider) + " with an IndexWriter.");
+            }
+
             var mapper = new ReflectionDocumentMapper<T>();
             return new LuceneSession<T>(mapper, context);
         }

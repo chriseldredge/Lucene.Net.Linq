@@ -87,6 +87,11 @@ namespace Lucene.Net.Linq
             }
         }
 
+        public bool IsReadOnly
+        {
+            get { return IndexWriter ==  null; }
+        }
+
         protected virtual IndexSearcher CreateSearcher()
         {
             return new IndexSearcher(directory, true);
