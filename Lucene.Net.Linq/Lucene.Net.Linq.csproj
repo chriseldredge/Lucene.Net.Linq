@@ -84,6 +84,7 @@
     <Compile Include="Mapping\StoreMode.cs" />
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Search\Function\DelegatingCustomScoreQuery.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Search.Function;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Linq.Util;
@@ -29,11 +30,17 @@ namespace Lucene.Net.Linq
 
         protected override void SetCurrentDocument(Document doc)
         {
+            var item = ConvertDocument(doc);
+
+            CurrentDocument = item;
+        }
+
+        protected override TDocument ConvertDocument(Document doc)
+        {
             var item = newItem();
 
             mapper.ToObject(doc, item);
-
-            CurrentDocument = item;
+            return item;
         }
 
         public override IFieldMappingInfo GetMappingInfo(string propertyName)
@@ -50,6 +57,7 @@ namespace Lucene.Net.Linq
     internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
         private readonly Context context;
+        private Func<TDocument, float> customScoreFunction;
 
         public TDocument CurrentDocument { get; protected set; }
 
@@ -100,8 +108,14 @@ namespace Lucene.Net.Linq
                 var searcher = searcherHandle.Searcher;
                 var skipResults = builder.SkipResults;
                 var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
-                
-                var hits = searcher.Search(builder.Query, null, maxResults + skipResults, builder.Sort);
+                var query = builder.Query;
+
+                if (customScoreFunction != null)
+                {
+                    query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocument, customScoreFunction);
+                }
+
+                var hits = searcher.Search(query, null, maxResults + skipResults, builder.Sort);
 
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
@@ -129,6 +143,7 @@ namespace Lucene.Net.Linq
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
         public abstract IEnumerable<string> AllFields { get; }
 
+        protected abstract TDocument ConvertDocument(Document doc);
         protected abstract void SetCurrentDocument(Document doc);
 
         protected virtual Expression GetCurrentRowExpression()
@@ -160,5 +175,19 @@ namespace Lucene.Net.Linq
             return d.ScoreDocs.Length;
         }
 
+        public void AddCustomScoreFunction(Func<TDocument, float> customScoreFunction)
+        {
+            if (this.customScoreFunction == null)
+            {
+                this.customScoreFunction = customScoreFunction;
+                return;
+            }
+
+            var first = this.customScoreFunction;
+
+            Func<TDocument, float> combined = doc => first(doc) * customScoreFunction(doc);
+
+            this.customScoreFunction = combined;
+        }
     }
 }
