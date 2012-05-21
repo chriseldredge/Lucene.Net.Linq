@@ -74,6 +74,10 @@ namespace Lucene.Net.Linq.Translation
                     maxResults -= additionalSkip;
                 }
             }
+            else if (resultOperator is FirstResultOperator)
+            {
+                maxResults = 1;
+            }
             else
             {
                 ResultSetOperator = resultOperator;

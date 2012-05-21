@@ -163,11 +163,21 @@ namespace Lucene.Net.Linq
             {
                 call = Expression.Convert(call, typeof(long));
             }
+            else if (op is AnyResultOperator)
+            {
+                call = Expression.Call(Expression.Constant(this), GetType().GetMethod("DoAny"), Expression.Constant(docs));
+            }
             else if (!(op is CountResultOperator))
             {
                 throw new NotSupportedException("The result operator type " + op.GetType() + " is not supported.");
             }
+            
             return Expression.Lambda<Func<TopFieldDocs, T>>(call, Expression.Parameter(typeof(TopFieldDocs)));
+        }
+
+        public bool DoAny(TopFieldDocs d)
+        {
+            return d.TotalHits != 0;
         }
 
         public int DoCount(TopFieldDocs d)

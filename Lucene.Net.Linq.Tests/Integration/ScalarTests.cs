@@ -20,6 +20,18 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Any()
+        {
+            Assert.That(documents.Any(), Is.True);
+        }
+
+        [Test]
+        public void Any_Not()
+        {
+            Assert.That(documents.Any(d => d.Name == "nonesuch"), Is.False);
+        }
+
+        [Test]
         public void Count()
         {
             Assert.That(documents.Count(), Is.EqualTo(3), "Count()");
@@ -34,7 +46,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void CountWhere()
         {
-            Assert.That(documents.Where(d => d.Flag).Count(), Is.EqualTo(2), "Count()");
+            Assert.That(documents.Count(d => d.Flag), Is.EqualTo(2), "Count()");
         }
 
         [Test]

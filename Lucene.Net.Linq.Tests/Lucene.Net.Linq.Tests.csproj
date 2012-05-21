@@ -67,6 +67,7 @@
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
+    <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
     <Compile Include="LuceneDataProviderTests.cs" />
     <Compile Include="LuceneSessionTests.cs" />
