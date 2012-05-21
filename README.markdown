@@ -12,6 +12,7 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 * Native pagination using Skip and Take
 * Support storing and querying NumericField 
 * Automatically convert complex types for storing, querying and sorting
+* Custom boost functions using IQueryable<T>.Boost() extension method
 * Sort by standard string, NumericField or any type that implements IComparable
 * Sort by item.Score() extension method to sort by relevance
 * Specify custom format for DateTime stored as strings
@@ -106,7 +107,6 @@ generally be analyzed using a stemming analyzer, but fields like Id, IssueNumber
 Upcoming features
 -----------------
 
-* Ability to provide boost options for sorting by score
 * Support "primary key" to replace existing documents to prevent duplicates
 * Ability to specify optional cache warming queries to run when searcher is reloaded
 * Support for more LINQ expressions

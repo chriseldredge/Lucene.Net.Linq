@@ -14,5 +14,6 @@
 		<tags>lucene.net lucene linq odata search nosql</tags>
 		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
+		<releaseNotes>Adds custom query boost functions. Adds support for First(), FirstOrDefault() and Any() queries.</releaseNotes>
 	</metadata>
 </package>
