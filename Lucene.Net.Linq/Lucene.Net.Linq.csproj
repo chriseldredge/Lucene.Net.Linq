@@ -87,6 +87,7 @@
     <Compile Include="Search\Function\DelegatingCustomScoreQuery.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
+    <Compile Include="Translation\LuceneQueryModel.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitor.cs" />

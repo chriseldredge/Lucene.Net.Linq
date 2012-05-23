@@ -26,6 +26,30 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void First_AfterSkip()
+        {
+            Assert.That(documents.Skip(1).First().Name, Is.EqualTo("a"));
+        }
+
+        [Test]
+        public void Last()
+        {
+            Assert.That(documents.OrderByDescending(d => d.Name).Last().Name, Is.EqualTo("a"));
+        }
+
+        [Test]
+        public void Last_AfterTake()
+        {
+            Assert.That(documents.OrderByDescending(d => d.Name).Take(2).Last().Name, Is.EqualTo("b"));
+        }
+
+        [Test]
+        public void LastOrDefault()
+        {
+            Assert.That(documents.OrderByDescending(d => d.Name).LastOrDefault(d => d.Name == "nonesuch"), Is.Null);
+        }
+
+        [Test]
         public void Single()
         {
             Assert.That(documents.Single(d => d.Name == "c").Name, Is.EqualTo("c"));

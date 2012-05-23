@@ -117,6 +117,17 @@ namespace Lucene.Net.Linq
 
                 var hits = searcher.Search(query, null, maxResults + skipResults, builder.Sort);
 
+                if (builder.Last)
+                {
+                    if (hits.ScoreDocs.Length > 0)
+                    {
+                        SetCurrentDocument(searcher.Doc(hits.ScoreDocs[hits.ScoreDocs.Length-1].doc));
+                        yield return projector(CurrentDocument);
+                    }
+                    
+                    yield break;
+                }
+
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
                     SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].doc));
@@ -125,19 +136,21 @@ namespace Lucene.Net.Linq
             }
         }
 
-        private QueryModelTranslator PrepareQuery(QueryModel queryModel)
+        private LuceneQueryModel PrepareQuery(QueryModel queryModel)
         {
             QueryModelTransformer.TransformQueryModel(queryModel);
 
             var builder = new QueryModelTranslator(context, this);
             builder.Build(queryModel);
 
-            Log.Trace(() => "Lucene query: " + builder.Query + " sort: " + builder.Sort);
+            Log.Trace(() => "Lucene query: " + builder.Model);
 
+            // TODO: move this into QueryModelTransformer
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());
             queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
-            return builder;
+            
+            return builder.Model;
         }
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
@@ -169,6 +182,7 @@ namespace Lucene.Net.Linq
             }
             else if (!(op is CountResultOperator))
             {
+                //TODO: resultOperator.ExecuteInMemory() on unsupported ones.
                 throw new NotSupportedException("The result operator type " + op.GetType() + " is not supported.");
             }
             

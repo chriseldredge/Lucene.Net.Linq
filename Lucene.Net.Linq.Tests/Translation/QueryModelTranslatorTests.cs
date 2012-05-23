@@ -44,9 +44,9 @@ namespace Lucene.Net.Linq.Tests.Translation
         [Test]
         public void NoOrderByClauses()
         {
-            Assert.That(transformer.Sort, Is.Not.Null);
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            Assert.That(transformer.Sort.GetSort(), Is.EqualTo(new Sort().GetSort()));
+            Assert.That(transformer.Model.Sort, Is.Not.Null);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            Assert.That(transformer.Model.Sort.GetSort(), Is.EqualTo(new Sort().GetSort()));
         }
 
         [Test]
@@ -59,8 +59,8 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
         }
 
         [Test]
@@ -73,8 +73,8 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.LONG);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.LONG);
         }
 
         [Test]
@@ -87,8 +87,8 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.STRING);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Date", OrderingDirection.Asc, SortField.STRING);
         }
 
         [Test]
@@ -101,8 +101,8 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.STRING);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.STRING);
         }
 
         [Test]
@@ -120,9 +120,9 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(1));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.CUSTOM);
-            Assert.That(transformer.Sort.GetSort()[0].GetComparatorSource(), Is.InstanceOf<ConvertableFieldComparatorSource>());
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.CUSTOM);
+            Assert.That(transformer.Model.Sort.GetSort()[0].GetComparatorSource(), Is.InstanceOf<ConvertableFieldComparatorSource>());
         }
 
         [Test]
@@ -138,9 +138,9 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 0);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
-            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(2));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
         }
 
         [Test]
@@ -162,9 +162,9 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             transformer.VisitOrderByClause(orderByClause, queryModel, 1);
 
-            Assert.That(transformer.Sort.GetSort().Length, Is.EqualTo(2));
-            AssertSortFieldEquals(transformer.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
-            AssertSortFieldEquals(transformer.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
+            Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(2));
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
+            AssertSortFieldEquals(transformer.Model.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
         }
 
         private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)

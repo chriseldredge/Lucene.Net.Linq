@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
@@ -16,15 +14,13 @@ namespace Lucene.Net.Linq.Translation
     {
         private readonly Context context;
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
-        private readonly IList<SortField> sorts = new List<SortField>();
-        private Query query;
-        private int maxResults = int.MaxValue;
-        private int skipResults;
+        private readonly LuceneQueryModel model;
 
         internal QueryModelTranslator(Context context, IFieldMappingInfoProvider fieldMappingInfoProvider)
         {
             this.context = context;
             this.fieldMappingInfoProvider = fieldMappingInfoProvider;
+            this.model = new LuceneQueryModel();
         }
 
         public void Build(QueryModel queryModel)
@@ -32,55 +28,32 @@ namespace Lucene.Net.Linq.Translation
             queryModel.Accept(this);
         }
 
-        public Query Query
+        public LuceneQueryModel Model
         {
-            get { return query ?? new MatchAllDocsQuery(); }
+            get { return model; }
         }
-
-        public Sort Sort
-        {
-            get { return sorts.Count > 0 ? new Sort(sorts.ToArray()) : new Sort(); }
-        }
-
-        public int MaxResults
-        {
-            get { return maxResults; }
-        }
-
-        public int SkipResults
-        {
-            get { return skipResults; }
-        }
-
-        public ResultOperatorBase ResultSetOperator { get; set; }
 
         public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
         {
-            //TODO: resultOperator.ExecuteInMemory() on unsupported ones.
-            
             if (resultOperator is TakeResultOperator)
             {
-                var take = (TakeResultOperator) resultOperator;
-                maxResults = Math.Min(take.GetConstantCount(), maxResults);
+                model.ApplyTake((TakeResultOperator) resultOperator);
             }
             else if (resultOperator is SkipResultOperator)
             {
-                var skip = (SkipResultOperator)resultOperator;
-                var additionalSkip = skip.GetConstantCount();
-                skipResults += additionalSkip;
-
-                if (maxResults != int.MaxValue)
-                {
-                    maxResults -= additionalSkip;
-                }
+                model.ApplySkip((SkipResultOperator)resultOperator);
             }
             else if (resultOperator is FirstResultOperator)
             {
-                maxResults = 1;
+                model.ApplyFirst();
+            }
+            else if (resultOperator is LastResultOperator)
+            {
+                model.ApplyLast();
             }
             else
             {
-                ResultSetOperator = resultOperator;
+                model.ApplyUnsupported(resultOperator);
             }
 
             base.VisitResultOperator(resultOperator, queryModel, index);
@@ -91,17 +64,7 @@ namespace Lucene.Net.Linq.Translation
             var visitor = new QueryBuildingExpressionTreeVisitor(context, fieldMappingInfoProvider);
             visitor.VisitExpression(whereClause.Predicate);
 
-            if (query == null)
-            {
-                query = visitor.Query;
-                return;
-            }
-
-            var bQuery = new BooleanQuery();
-            bQuery.Add(query, BooleanClause.Occur.MUST);
-            bQuery.Add(visitor.Query, BooleanClause.Occur.MUST);
-
-            query = bQuery;
+            model.AddQuery(visitor.Query);
         }
 
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
@@ -110,7 +73,7 @@ namespace Lucene.Net.Linq.Translation
             {
                 if (ordering.Expression is LuceneOrderByRelevanceExpression)
                 {
-                    sorts.Add(SortField.FIELD_SCORE);
+                    model.AddSortField(SortField.FIELD_SCORE);
                     continue;
                 }
 
@@ -120,11 +83,11 @@ namespace Lucene.Net.Linq.Translation
 
                 if (mapping.SortFieldType >= 0)
                 {
-                    sorts.Add(new SortField(mapping.FieldName, mapping.SortFieldType, reverse));    
+                    model.AddSortField(new SortField(mapping.FieldName, mapping.SortFieldType, reverse));    
                 }
                 else
                 {
-                    sorts.Add(new SortField(mapping.FieldName, GetCustomSort(mapping), reverse));
+                    model.AddSortField(new SortField(mapping.FieldName, GetCustomSort(mapping), reverse));
                 }
             }
         }
@@ -137,7 +100,7 @@ namespace Lucene.Net.Linq.Translation
                 return new ConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
             }
 
-            throw new NotSupportedException("Unsupported sort field type: " + propertyType);
+            throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " + propertyType);
         }
     }
 }
