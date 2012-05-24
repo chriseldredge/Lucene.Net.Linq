@@ -1,8 +1,7 @@
-using System;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Lucene.Net.Linq.Expressions;
+using Remotion.Linq;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
@@ -14,13 +13,8 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         static LuceneExtensionMethodCallTreeVisitor()
         {
-            AnyFieldMethod = typeof(LuceneMethods).GetMethods().Where(m => m.Name == "AnyField").Single();
-            ScoreMethod = typeof (LuceneMethods).GetMethods().Where(m => m.Name == "Score").Single();
-
-            if (AnyFieldMethod == null || ScoreMethod == null)
-            {
-                throw new InvalidOperationException("Failed to load MethodInfo for extension methods on LuceneMethods.");
-            }
+            AnyFieldMethod = ReflectionUtility.GetMethod(() => LuceneMethods.AnyField<object>(null)).GetGenericMethodDefinition();
+            ScoreMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Score<object>(null)).GetGenericMethodDefinition();
         }
 
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
@@ -38,7 +32,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             return base.VisitMethodCallExpression(expression);
         }
 
-        private bool MethodsEqual(MethodInfo methodInfo, MethodInfo baseMethod)
+        internal static bool MethodsEqual(MethodInfo methodInfo, MethodInfo baseMethod)
         {
             return methodInfo.IsGenericMethod && methodInfo == baseMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
         }

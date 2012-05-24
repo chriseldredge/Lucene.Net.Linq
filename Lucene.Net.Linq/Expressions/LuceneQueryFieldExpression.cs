@@ -14,6 +14,7 @@ namespace Lucene.Net.Linq.Expressions
             : base(type, ExpressionType)
         {
             this.fieldName = fieldName;
+            Boost = 1;
         }
 
         internal LuceneQueryFieldExpression(Type type, ExpressionType expressionType, string fieldName)
@@ -29,6 +30,7 @@ namespace Lucene.Net.Linq.Expressions
         }
 
         public string FieldName { get { return fieldName; } }
+        public float Boost { get; set; }
 
         public bool Equals(LuceneQueryFieldExpression other)
         {
@@ -62,7 +64,12 @@ namespace Lucene.Net.Linq.Expressions
 
         public override string ToString()
         {
-            return "LuceneField(" + fieldName + ")";
+            var s = "LuceneField(" + fieldName + ")";
+            if (Math.Abs(Boost - 1.0f) > 0.01f)
+            {
+                return s + "^" + Boost;
+            }
+            return s;
         }
     }
 }

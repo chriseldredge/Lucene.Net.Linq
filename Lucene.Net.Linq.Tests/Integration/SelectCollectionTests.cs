@@ -17,12 +17,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
-        public void EnumerableContains()
+        public void Enumerable_Contains()
         {
             using (var session = provider.OpenSession<TaggedDocument>())
             {
-                session.Add(new TaggedDocument { Name = "First", Tags = new[] {"a", "b"}});
-                session.Add(new TaggedDocument { Name = "Second", Tags = new[] {"c", "d"}});
+                session.Add(new TaggedDocument { Name = "First", Tags = new[] { "a", "b" } });
+                session.Add(new TaggedDocument { Name = "Second", Tags = new[] { "c", "d" } });
                 session.Commit();
             }
 

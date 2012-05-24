@@ -23,17 +23,20 @@ namespace Lucene.Net.Linq.Transformation
                            new LuceneExtensionMethodCallTreeVisitor(),
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
+                           new BoostMethodCallTreeVisitor(0),
                            new FlagToBinaryConditionTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new NoOpConditionRemovingTreeVisitor(),
                            new MethodCallToBinaryExpressionTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor(),
                            new CompareCallToBinaryExpressionTreeVisitor(),
-                           new BinaryToQueryExpressionTreeVisitor()
+                           new BinaryToQueryExpressionTreeVisitor(),
+                           new BoostMethodCallTreeVisitor(1)
                        },
                    new ExpressionTreeVisitor[]
                        {
                            new LuceneExtensionMethodCallTreeVisitor(),
+                           new BoostMethodCallTreeVisitor(1),
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),

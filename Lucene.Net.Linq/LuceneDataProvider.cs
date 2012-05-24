@@ -62,6 +62,7 @@ namespace Lucene.Net.Linq
             this.version = version;
 
             queryParser = QueryParser.CreateDefault();
+
             context = new Context(this.directory, this.analyzer, this.version, indexWriter, transactionLock);
         }
 

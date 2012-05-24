@@ -63,6 +63,17 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             }
         }
 
+        protected override Expression VisitBoostBinaryExpression(BoostBinaryExpression expression)
+        {
+            var result = base.VisitBoostBinaryExpression(expression);
+
+            var query = queries.Peek();
+
+            query.SetBoost(expression.Boost);
+
+            return result;
+        }
+
         protected override Expression VisitLuceneQueryExpression(LuceneQueryExpression expression)
         {
             if (expression.QueryField is LuceneQueryAnyFieldExpression)
@@ -100,6 +111,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var booleanQuery = new BooleanQuery();
 
+            query.SetBoost(expression.Boost);
             booleanQuery.Add(query, occur);
 
             queries.Push(booleanQuery);

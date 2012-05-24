@@ -13,7 +13,7 @@ namespace Lucene.Net.Linq
     /// </summary>
     public static class LuceneMethods
     {
-        private const string UnreachableCode = "Unreachable code. This method should have been translated and not directly invoked.";
+        private const string UnreachableCode = "Unreachable code. This method should have been translated within a LINQ expression and not directly invoked.";
 
         /// <summary>
         /// Expression to be used in orderby clauses to sort results by score.
@@ -22,7 +22,7 @@ namespace Lucene.Net.Linq
         /// </summary>
         public static Expression Score<T>(this T mappedDocument)
         {
-            throw new NotImplementedException(UnreachableCode);
+            throw new InvalidOperationException(UnreachableCode);
         }
 
         ///<summary>
@@ -31,7 +31,7 @@ namespace Lucene.Net.Linq
         ///</summary>
         public static string AnyField<T>(this T mappedDocument)
         {
-            throw new NotImplementedException(UnreachableCode);
+            throw new InvalidOperationException(UnreachableCode);
         }
 
         /// <summary>
@@ -47,6 +47,14 @@ namespace Lucene.Net.Linq
             executor.AddCustomScoreFunction(boostFunction);
 
             return source;
+        }
+
+        /// <summary>
+        /// Applies a boost to a property in a where clause.
+        /// </summary>
+        public static T Boost<T>(this T property, float boostAmount)
+        {
+            throw new InvalidOperationException(UnreachableCode);
         }
     }
 }

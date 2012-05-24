@@ -77,6 +77,7 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderDateFormatTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderTimeSpanTests.cs" />
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitorTests.cs" />

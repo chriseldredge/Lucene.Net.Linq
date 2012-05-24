@@ -45,6 +45,12 @@ namespace Lucene.Net.Linq.Expressions
             get { return occur; }
         }
 
+        public float Boost
+        {
+            get { return field.Boost; }
+            set { field.Boost = value; }
+        }
+
         public QueryType QueryType
         {
             get { return queryType; }
@@ -60,7 +66,7 @@ namespace Lucene.Net.Linq.Expressions
 
         public override string ToString()
         {
-            return string.Format("LuceneQuery[{0}]({1}{2}:{3})", QueryType, Occur, QueryField.FieldName, pattern);
+            return string.Format("LuceneQuery[{0}]({1}{2}:{3}){4}", QueryType, Occur, QueryField.FieldName, pattern, Boost - 1.0f < 0.01f ? "" : "^" + Boost);
         }
 
     }

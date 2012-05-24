@@ -60,6 +60,7 @@
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\FormatConverter.cs" />
+    <Compile Include="Expressions\BoostBinaryExpression.cs" />
     <Compile Include="Expressions\LuceneQueryAnyFieldExpression.cs" />
     <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
     <Compile Include="Expressions\LuceneQueryExpression.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="Search\FieldComparator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Search\Function\DelegatingCustomScoreQuery.cs" />
+    <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="Translation\LuceneQueryModel.cs" />

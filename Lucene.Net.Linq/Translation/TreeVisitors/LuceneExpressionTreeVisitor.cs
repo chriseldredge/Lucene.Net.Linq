@@ -19,11 +19,27 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             {
                 return VisitLuceneQueryFieldExpression((LuceneQueryFieldExpression) expression);
             }
+
             if (expression is LuceneQueryExpression)
             {
                 return VisitLuceneQueryExpression((LuceneQueryExpression) expression);
             }
+
+            if (expression is BoostBinaryExpression)
+            {
+                return VisitBoostBinaryExpression((BoostBinaryExpression) expression);
+            }
+
             return base.VisitExtensionExpression(expression);
+        }
+
+        protected virtual Expression VisitBoostBinaryExpression(BoostBinaryExpression expression)
+        {
+            var binary = VisitExpression(expression.BinaryExpression);
+
+            if (ReferenceEquals(expression.BinaryExpression, binary)) return expression;
+
+            return new BoostBinaryExpression((BinaryExpression) binary, expression.Boost);
         }
 
         protected virtual Expression VisitLuceneQueryExpression(LuceneQueryExpression expression)
