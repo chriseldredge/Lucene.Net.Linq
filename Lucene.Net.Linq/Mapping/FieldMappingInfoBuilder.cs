@@ -14,6 +14,13 @@ namespace Lucene.Net.Linq.Mapping
 
         internal static IFieldMapper<T> Build<T>(PropertyInfo p)
         {
+            var score = p.GetCustomAttribute<QueryScoreAttribute>(true);
+
+            if (score != null)
+            {
+                return new ReflectionScoreMapper<T>(p);
+            }
+
             var metadata = p.GetCustomAttribute<FieldAttribute>(true);
             var numericFieldAttribute = p.GetCustomAttribute<NumericFieldAttribute>(true);
             var type = p.PropertyType;

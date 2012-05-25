@@ -28,18 +28,19 @@ namespace Lucene.Net.Linq
             this.mapper = mapper;
         }
 
-        protected override void SetCurrentDocument(Document doc)
+        protected override void SetCurrentDocument(Document doc, float score)
         {
-            var item = ConvertDocument(doc);
+            var item = ConvertDocument(doc, score);
 
             CurrentDocument = item;
         }
 
-        protected override TDocument ConvertDocument(Document doc)
+        protected override TDocument ConvertDocument(Document doc, float score)
         {
             var item = newItem();
 
-            mapper.ToObject(doc, item);
+            mapper.ToObject(doc, score, item);
+            
             return item;
         }
 
@@ -51,6 +52,11 @@ namespace Lucene.Net.Linq
         public override IEnumerable<string> AllFields
         {
             get { return mapper.AllFields; }
+        }
+
+        protected override bool EnableScoreTracking
+        {
+            get { return mapper.EnableScoreTracking; }
         }
     }
 
@@ -77,6 +83,8 @@ namespace Lucene.Net.Linq
                 var searcher = searcherHandle.Searcher;
                 var skipResults = builder.SkipResults;
                 var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
+
+                // TODO: apply custom score function if specified. (does score matter for any scalars?)
 
                 var hits = searcher.Search(builder.Query, null, maxResults, builder.Sort);
 
@@ -115,22 +123,22 @@ namespace Lucene.Net.Linq
                     query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocument, customScoreFunction);
                 }
 
-                var hits = searcher.Search(query, null, maxResults + skipResults, builder.Sort);
+                if (EnableScoreTracking)
+                {
+                    searcher.SetDefaultFieldSortScoring(true, false);
+                }
 
+                var hits = searcher.Search(query, null, maxResults + skipResults, builder.Sort);
+                
                 if (builder.Last)
                 {
-                    if (hits.ScoreDocs.Length > 0)
-                    {
-                        SetCurrentDocument(searcher.Doc(hits.ScoreDocs[hits.ScoreDocs.Length-1].doc));
-                        yield return projector(CurrentDocument);
-                    }
-                    
-                    yield break;
+                    skipResults = hits.ScoreDocs.Length - 1;
+                    if (skipResults < 0) yield break;
                 }
 
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
-                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].doc));
+                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].doc), hits.ScoreDocs[i].score);
                     yield return projector(CurrentDocument);
                 }
             }
@@ -156,8 +164,9 @@ namespace Lucene.Net.Linq
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
         public abstract IEnumerable<string> AllFields { get; }
 
-        protected abstract TDocument ConvertDocument(Document doc);
-        protected abstract void SetCurrentDocument(Document doc);
+        protected abstract TDocument ConvertDocument(Document doc, float score);
+        protected abstract void SetCurrentDocument(Document doc, float score);
+        protected abstract bool EnableScoreTracking { get; }
 
         protected virtual Expression GetCurrentRowExpression()
         {

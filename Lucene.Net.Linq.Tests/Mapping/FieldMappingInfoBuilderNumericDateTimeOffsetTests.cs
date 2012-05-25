@@ -45,7 +45,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var ts = new DateTimeOffset(new DateTime(2013, 1, 1));
             doc.Add(new Field("TimeStampOffset", ts.ToUniversalTime().Ticks.ToString(), Field.Store.YES, Field.Index.NOT_ANALYZED));
 
-            mapper.CopyFromDocument(doc, this);
+            mapper.CopyFromDocument(doc, 0, this);
 
             Assert.That(TimeStampOffset, Is.EqualTo(ts));
         }

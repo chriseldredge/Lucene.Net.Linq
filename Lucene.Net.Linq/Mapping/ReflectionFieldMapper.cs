@@ -9,7 +9,7 @@ namespace Lucene.Net.Linq.Mapping
 {
     public interface IFieldMapper<in T> : IFieldMappingInfo
     {
-        void CopyFromDocument(Document source, T target);
+        void CopyFromDocument(Document source, float score, T target);
         void CopyToDocument(T source, Document target);
     }
 
@@ -69,7 +69,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual int SortFieldType { get { return (Converter != null) ? -1 : SortField.STRING; } }
 
-        public virtual void CopyFromDocument(Document source, T target)
+        public virtual void CopyFromDocument(Document source, float score, T target)
         {
             var field = source.GetField(fieldName);
 
@@ -148,6 +148,55 @@ namespace Lucene.Net.Linq.Mapping
                 }
                 throw new InvalidOperationException("Unrecognized FieldStore value " + store);
             }
+        }
+    }
+
+    internal class ReflectionScoreMapper<T> : IFieldMapper<T>
+    {
+        private readonly PropertyInfo propertyInfo;
+
+        public ReflectionScoreMapper(PropertyInfo propertyInfo)
+        {
+            this.propertyInfo = propertyInfo;
+        }
+
+        public void CopyToDocument(T source, Document target)
+        {
+        }
+
+        public void CopyFromDocument(Document source, float score, T target)
+        {
+            propertyInfo.SetValue(target, score, null);
+        }
+
+        public string ConvertToQueryExpression(object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int SortFieldType
+        {
+            get { return SortField.SCORE; }
+        }
+
+        public bool IsNumericField
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public PropertyInfo PropertyInfo
+        {
+            get { return propertyInfo; }
+        }
+
+        public TypeConverter Converter
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public string FieldName
+        {
+            get { return null; }
         }
     }
 }

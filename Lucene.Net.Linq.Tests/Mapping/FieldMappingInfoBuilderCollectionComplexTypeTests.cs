@@ -46,7 +46,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             document.Add(new Field("Versions", "5.6", Field.Store.YES, Field.Index.NO));
             document.Add(new Field("Versions", "5.7", Field.Store.YES, Field.Index.NO));
 
-            CreateMapper().CopyFromDocument(document, this);
+            CreateMapper().CopyFromDocument(document, 0, this);
 
             Assert.That(Versions, Is.EqualTo(new[] {new Version(5, 6), new Version(5, 7)}));
         }

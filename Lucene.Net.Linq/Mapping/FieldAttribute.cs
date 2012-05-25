@@ -131,4 +131,13 @@ namespace Lucene.Net.Linq.Mapping
     public class IgnoreFieldAttribute : Attribute
     {
     }
+
+    /// <summary>
+    /// When set on a property, the property will be set with the score (relevance)
+    /// of the document based on the queries and boost settings.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class QueryScoreAttribute : Attribute
+    {
+    }
 }

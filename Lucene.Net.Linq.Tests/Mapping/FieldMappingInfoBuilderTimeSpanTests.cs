@@ -38,7 +38,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             doc.Add(new Field("Elapsed", ts.ToString(TimeSpanFormat), Field.Store.YES, Field.Index.NOT_ANALYZED));
 
-            mapper.CopyFromDocument(doc, this);
+            mapper.CopyFromDocument(doc, 0, this);
 
             Assert.That(prop.GetValue(this, null), Is.EqualTo(ts));    
         }

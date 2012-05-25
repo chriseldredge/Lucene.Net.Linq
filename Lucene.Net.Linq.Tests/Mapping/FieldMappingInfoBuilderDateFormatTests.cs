@@ -46,7 +46,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             doc.Add(new Field("TimeStamp", "2013-01-02T03:40:50", Field.Store.YES, Field.Index.NOT_ANALYZED));
 
-            mapper.CopyFromDocument(doc, this);
+            mapper.CopyFromDocument(doc, 0, this);
 
             if (propertyName == "OptionalTimeStampOffset")
             {
@@ -89,7 +89,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             doc.Add(new Field("SillyTime", ts.ToString(SillyFormat), Field.Store.YES, Field.Index.NOT_ANALYZED));
 
-            mapper.CopyFromDocument(doc, this);
+            mapper.CopyFromDocument(doc, 0, this);
 
             Assert.That(SillyTime.Kind, Is.EqualTo(DateTimeKind.Utc));
             Assert.That(SillyTime, Is.EqualTo(ts));

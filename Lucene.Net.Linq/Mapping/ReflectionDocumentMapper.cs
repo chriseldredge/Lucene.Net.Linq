@@ -15,8 +15,9 @@ namespace Lucene.Net.Linq.Mapping
 
     public interface IDocumentMapper<in T> : IFieldMappingInfoProvider
     {
-        void ToObject(Document source, T target);
+        void ToObject(Document source, float score, T target);
         void ToDocument(T source, Document target);
+        bool EnableScoreTracking { get; }
     }
 
     internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
@@ -47,11 +48,11 @@ namespace Lucene.Net.Linq.Mapping
             return fieldMap[propertyName];
         }
 
-        public void ToObject(Document source, T target)
+        public void ToObject(Document source, float score, T target)
         {
             foreach (var mapping in fieldMap)
             {
-                mapping.Value.CopyFromDocument(source, target);
+                mapping.Value.CopyFromDocument(source, score, target);
             }
         }
 
@@ -66,6 +67,11 @@ namespace Lucene.Net.Linq.Mapping
         public IEnumerable<string> AllFields
         {
             get { return fieldMap.Values.Select(m => m.FieldName); }
+        }
+
+        public bool EnableScoreTracking
+        {
+            get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
         }
     }
 }

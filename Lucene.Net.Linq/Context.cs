@@ -108,7 +108,7 @@ namespace Lucene.Net.Linq
                 this.client = client;
             }
 
-            public Searcher Searcher
+            public IndexSearcher Searcher
             {
                 get { return tracker.Searcher; }
             }
@@ -125,11 +125,11 @@ namespace Lucene.Net.Linq
 
             private readonly object sync = new object();
             private readonly List<WeakReference> searcherReferences = new List<WeakReference>();
-            private readonly Searcher searcher;
+            private readonly IndexSearcher searcher;
             private bool disposePending;
             private bool disposed;
 
-            public SearcherClientTracker(Searcher searcher)
+            public SearcherClientTracker(IndexSearcher searcher)
             {
                 this.searcher = searcher;
 
@@ -139,7 +139,7 @@ namespace Lucene.Net.Linq
                 }
             }
 
-            public Searcher Searcher
+            public IndexSearcher Searcher
             {
                 get { return searcher; }
             }
@@ -203,7 +203,7 @@ namespace Lucene.Net.Linq
 
     internal interface ISearcherHandle : IDisposable
     {
-        Searcher Searcher { get; }
+        IndexSearcher Searcher { get; }
     }
 
 }

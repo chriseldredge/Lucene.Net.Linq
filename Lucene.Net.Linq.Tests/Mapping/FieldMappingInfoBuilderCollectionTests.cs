@@ -54,7 +54,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void IEnumerableOfString_CopyFromDocument_NoFieldsSetsEmpty()
         {
             Strings = new[] { "replace me" };
-            CreateMapper().CopyFromDocument(document, this);
+            CreateMapper().CopyFromDocument(document, 0, this);
             Assert.That(Strings, Is.Empty);
         }
 

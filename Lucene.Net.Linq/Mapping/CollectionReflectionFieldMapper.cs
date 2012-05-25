@@ -14,7 +14,7 @@ namespace Lucene.Net.Linq.Mapping
             this.elementType = elementType;
         }
 
-        public override void CopyFromDocument(Document source, T target)
+        public override void CopyFromDocument(Document source, float score, T target)
         {
             var values = new ArrayList();
 
