@@ -28,9 +28,9 @@ namespace Lucene.Net.Linq.Translation
             get { return sorts.Count > 0 ? new Sort(sorts.ToArray()) : new Sort(); }
         }
 
-        public int MaxResults { get; private set; }
-        public int SkipResults { get; private set; }
-        public bool Last { get; private set; }
+        public int MaxResults { get; set; }
+        public int SkipResults { get; set; }
+        public bool Last { get; set; }
         public ResultOperatorBase ResultSetOperator { get; private set; }
 
         public void AddQuery(Query additionalQuery)
@@ -51,32 +51,6 @@ namespace Lucene.Net.Linq.Translation
         public void AddSortField(SortField field)
         {
             sorts.Add(field);
-        }
-
-        public void ApplyTake(TakeResultOperator take)
-        {
-            MaxResults = Math.Min(take.GetConstantCount(), MaxResults);
-        }
-
-        public void ApplySkip(SkipResultOperator skip)
-        {
-            var additionalSkip = skip.GetConstantCount();
-            SkipResults += additionalSkip;
-
-            if (MaxResults != int.MaxValue)
-            {
-                MaxResults -= additionalSkip;
-            }
-        }
-
-        public void ApplyFirst()
-        {
-            MaxResults = 1;
-        }
-
-        public void ApplyLast()
-        {
-            Last = true;
         }
 
         public void ApplyUnsupported(ResultOperatorBase resultOperator)

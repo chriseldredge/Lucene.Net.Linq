@@ -2,16 +2,18 @@
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.Linq.Translation.ResultOperatorHandlers;
 using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq.Translation
 {
     internal class QueryModelTranslator : QueryModelVisitorBase
     {
+        private static readonly ResultOperatorRegistry resultOperators = ResultOperatorRegistry.CreateDefault();
+
         private readonly Context context;
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
         private readonly LuceneQueryModel model;
@@ -35,21 +37,11 @@ namespace Lucene.Net.Linq.Translation
 
         public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
         {
-            if (resultOperator is TakeResultOperator)
+            var handler = resultOperators.GetItem(resultOperator.GetType());
+
+            if (handler != null)
             {
-                model.ApplyTake((TakeResultOperator) resultOperator);
-            }
-            else if (resultOperator is SkipResultOperator)
-            {
-                model.ApplySkip((SkipResultOperator)resultOperator);
-            }
-            else if (resultOperator is FirstResultOperator)
-            {
-                model.ApplyFirst();
-            }
-            else if (resultOperator is LastResultOperator)
-            {
-                model.ApplyLast();
+                handler.Accept(resultOperator, model);
             }
             else
             {
