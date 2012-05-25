@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Lucene.Net.Linq.Util;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -12,8 +13,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         [SetUp]
         public void AddDocuments()
         {
-            AddDocument(new SampleDocument { Name = "c", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
-            AddDocument(new SampleDocument { Name = "a", Scalar = 1, Version = new Version(20, 0, 0) });
+            AddDocument(new SampleDocument { Name = "c", Scalar = 1, Flag = true, Version = new Version(100, 0, 0) });
+            AddDocument(new SampleDocument { Name = "a", Scalar = 3, Version = new Version(20, 0, 0) });
             AddDocument(new SampleDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
 
             documents = provider.AsQueryable<SampleDocument>();
@@ -54,5 +55,39 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             Assert.That(documents.Skip(1).Count(), Is.EqualTo(2), "Skip(1).Count()");
         }
+
+        [Test]
+        public void Max()
+        {
+            Assert.That(documents.Max(d => d.Scalar), Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Max_Version()
+        {
+            Assert.That(documents.Select(d => d.Version).Max(), Is.EqualTo(new Version(100, 0, 0)));
+        }
+
+        [Test]
+        public void Max_OverridesPreviousSorts()
+        {
+            Assert.That(documents.OrderBy(d => d.Version).Max(d => d.Scalar), Is.EqualTo(3));
+        }
+
+        [Test]
+        public void Min()
+        {
+            Assert.That(documents.Min(d => d.Scalar), Is.EqualTo(1));
+        }
+
+        [Test]
+        public void Min_NoDocuments()
+        {
+            writer.DeleteAll();
+            writer.Commit();
+
+            Assert.That(() => documents.Min(d => d.Scalar), Throws.InvalidOperationException);
+        }
+
     }
 }

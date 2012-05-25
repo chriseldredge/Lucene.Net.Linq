@@ -1,4 +1,7 @@
 using System;
+using System.Linq.Expressions;
+using Lucene.Net.Search;
+using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq.Translation.ResultOperatorHandlers
@@ -38,6 +41,27 @@ namespace Lucene.Net.Linq.Translation.ResultOperatorHandlers
         protected override void AcceptInternal(LastResultOperator resultOperator, LuceneQueryModel model)
         {
             model.Last = true;
+        }
+    }
+
+    internal class MaxResultOperatorHandler : ResultOperatorHandler<MaxResultOperator>
+    {
+        protected override void AcceptInternal(MaxResultOperator resultOperator, LuceneQueryModel model)
+        {
+            model.ResetSorts();
+            model.AddSort(model.SelectClause, OrderingDirection.Desc);
+            model.MaxResults = 1;
+        }
+    }
+
+    internal class MinResultOperatorHandler : ResultOperatorHandler<MinResultOperator>
+    {
+        protected override void AcceptInternal(MinResultOperator resultOperator, LuceneQueryModel model)
+        {
+            model.ResetSorts();
+            model.AddSort(model.SelectClause, OrderingDirection.Asc);
+            model.MaxResults = 1;
+            model.Aggregate = true;
         }
     }
 

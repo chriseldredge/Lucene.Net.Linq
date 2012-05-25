@@ -74,21 +74,21 @@ namespace Lucene.Net.Linq
 
         public T ExecuteScalar<T>(QueryModel queryModel)
         {
-            var builder = PrepareQuery(queryModel);
+            var luceneQueryModel = PrepareQuery(queryModel);
 
             var searcherHandle = context.CheckoutSearcher(this);
 
             using (searcherHandle)
             {
                 var searcher = searcherHandle.Searcher;
-                var skipResults = builder.SkipResults;
-                var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
+                var skipResults = luceneQueryModel.SkipResults;
+                var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc() - skipResults);
 
                 // TODO: apply custom score function if specified. (does score matter for any scalars?)
 
-                var hits = searcher.Search(builder.Query, null, maxResults, builder.Sort);
+                var hits = searcher.Search(luceneQueryModel.Query, null, maxResults, luceneQueryModel.Sort);
 
-                var projection = GetScalarProjector<T>(builder.ResultSetOperator, hits);
+                var projection = GetScalarProjector<T>(luceneQueryModel.ResultSetOperator, hits);
                 var projector = projection.Compile();
 
                 return projector(hits);
@@ -104,7 +104,7 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
-            var builder = PrepareQuery(queryModel);
+            var luceneQueryModel = PrepareQuery(queryModel);
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
@@ -114,9 +114,9 @@ namespace Lucene.Net.Linq
             using (searcherHandle)
             {
                 var searcher = searcherHandle.Searcher;
-                var skipResults = builder.SkipResults;
-                var maxResults = Math.Min(builder.MaxResults, searcher.MaxDoc() - skipResults);
-                var query = builder.Query;
+                var skipResults = luceneQueryModel.SkipResults;
+                var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc() - skipResults);
+                var query = luceneQueryModel.Query;
 
                 if (customScoreFunction != null)
                 {
@@ -128,9 +128,9 @@ namespace Lucene.Net.Linq
                     searcher.SetDefaultFieldSortScoring(true, false);
                 }
 
-                var hits = searcher.Search(query, null, maxResults + skipResults, builder.Sort);
+                var hits = searcher.Search(query, null, maxResults + skipResults, luceneQueryModel.Sort);
                 
-                if (builder.Last)
+                if (luceneQueryModel.Last)
                 {
                     skipResults = hits.ScoreDocs.Length - 1;
                     if (skipResults < 0) yield break;

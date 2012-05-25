@@ -22,7 +22,7 @@ namespace Lucene.Net.Linq.Translation
         {
             this.context = context;
             this.fieldMappingInfoProvider = fieldMappingInfoProvider;
-            this.model = new LuceneQueryModel();
+            this.model = new LuceneQueryModel(fieldMappingInfoProvider);
         }
 
         public void Build(QueryModel queryModel)
@@ -33,6 +33,21 @@ namespace Lucene.Net.Linq.Translation
         public LuceneQueryModel Model
         {
             get { return model; }
+        }
+
+        public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
+        {
+            var visitor = new QueryBuildingExpressionTreeVisitor(context, fieldMappingInfoProvider);
+            visitor.VisitExpression(whereClause.Predicate);
+            
+            model.AddQuery(visitor.Query);
+        }
+
+        public override void VisitSelectClause(SelectClause selectClause, QueryModel queryModel)
+        {
+            model.SelectClause = selectClause.Selector;
+            model.OutputDataInfo = selectClause.GetOutputDataInfo();
+            base.VisitSelectClause(selectClause, queryModel);
         }
 
         public override void VisitResultOperator(ResultOperatorBase resultOperator, QueryModel queryModel, int index)
@@ -51,48 +66,12 @@ namespace Lucene.Net.Linq.Translation
             base.VisitResultOperator(resultOperator, queryModel, index);
         }
 
-        public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
-        {
-            var visitor = new QueryBuildingExpressionTreeVisitor(context, fieldMappingInfoProvider);
-            visitor.VisitExpression(whereClause.Predicate);
-
-            model.AddQuery(visitor.Query);
-        }
-
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
             foreach (var ordering in orderByClause.Orderings)
             {
-                if (ordering.Expression is LuceneOrderByRelevanceExpression)
-                {
-                    model.AddSortField(SortField.FIELD_SCORE);
-                    continue;
-                }
-
-                var field = (LuceneQueryFieldExpression)ordering.Expression;
-                var mapping = fieldMappingInfoProvider.GetMappingInfo(field.FieldName);
-                var reverse = ordering.OrderingDirection == OrderingDirection.Desc;
-
-                if (mapping.SortFieldType >= 0)
-                {
-                    model.AddSortField(new SortField(mapping.FieldName, mapping.SortFieldType, reverse));    
-                }
-                else
-                {
-                    model.AddSortField(new SortField(mapping.FieldName, GetCustomSort(mapping), reverse));
-                }
+                model.AddSort(ordering.Expression, ordering.OrderingDirection);
             }
-        }
-
-        private FieldComparatorSource GetCustomSort(IFieldMappingInfo fieldMappingInfo)
-        {
-            var propertyType = fieldMappingInfo.PropertyInfo.PropertyType;
-            if (typeof(IComparable).IsAssignableFrom(propertyType))
-            {
-                return new ConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
-            }
-
-            throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " + propertyType);
         }
     }
 }
