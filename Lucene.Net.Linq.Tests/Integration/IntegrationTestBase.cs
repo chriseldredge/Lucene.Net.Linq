@@ -47,9 +47,9 @@ namespace Lucene.Net.Linq.Tests.Integration
             public string Alias { get; set; }
         }
 
-        protected void AddDocument(SampleDocument document)
+        protected void AddDocument<T>(T document)
         {
-            using (var session = provider.OpenSession<SampleDocument>())
+            using (var session = provider.OpenSession<T>())
             {
                 session.Add(document);
                 session.Commit();
