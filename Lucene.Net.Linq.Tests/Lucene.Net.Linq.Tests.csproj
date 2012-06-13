@@ -82,6 +82,7 @@
     <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />
     <Compile Include="VersionConverter.cs" />

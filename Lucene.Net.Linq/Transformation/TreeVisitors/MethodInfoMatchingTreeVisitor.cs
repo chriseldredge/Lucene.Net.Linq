@@ -11,7 +11,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         internal void AddMethod(MethodInfo method)
         {
-            methods.Add(method.GetGenericMethodDefinition());
+            methods.Add(method.IsGenericMethod ? method.GetGenericMethodDefinition() : method);
         }
 
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
@@ -20,16 +20,12 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                              ? expression.Method.GetGenericMethodDefinition()
                              : expression.Method;
 
-            if (!methods.Contains(method)) return expression;
+            if (!methods.Contains(method)) 
+                return base.VisitMethodCallExpression(expression);
 
             return VisitSupportedMethodCallExpression(expression);
         }
 
         protected abstract Expression VisitSupportedMethodCallExpression(MethodCallExpression expression);
-
-        internal static bool MethodsEqual(MethodInfo methodInfo, MethodInfo baseMethod)
-        {
-            return methodInfo.IsGenericMethod && methodInfo == baseMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
-        }
     }
 }

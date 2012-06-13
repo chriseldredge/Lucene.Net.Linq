@@ -3,32 +3,23 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Lucene.Net.Linq.Expressions;
 using Remotion.Linq;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
-    internal class BoostMethodCallTreeVisitor : ExpressionTreeVisitor
+    internal class BoostMethodCallTreeVisitor : MethodInfoMatchingTreeVisitor
     {
         private readonly int stage;
-        private static readonly MethodInfo BoostMethod;
-
-        static BoostMethodCallTreeVisitor()
-        {
-            BoostMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Boost<object>(null, 0f)).GetGenericMethodDefinition();
-        }
+        private static readonly MethodInfo BoostMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Boost<object>(null, 0f));
 
         internal BoostMethodCallTreeVisitor(int stage)
         {
             this.stage = stage;
+
+            AddMethod(BoostMethod);
         }
 
-        protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
+        protected override Expression VisitSupportedMethodCallExpression(MethodCallExpression expression)
         {
-            if (!LuceneExtensionMethodCallTreeVisitor.MethodsEqual(expression.Method, BoostMethod))
-            {
-                return base.VisitMethodCallExpression(expression);
-            }
-
             if (stage == 0)
             {
                 return VisitAsField(expression);    
