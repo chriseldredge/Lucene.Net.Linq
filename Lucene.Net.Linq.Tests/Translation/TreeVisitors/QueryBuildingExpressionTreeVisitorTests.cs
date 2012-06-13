@@ -115,7 +115,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [Test]
         public void GreaterThan()
         {
-            var expression = new LuceneQueryExpression(
+            var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof (int), "Count"),
                 Expression.Constant(5),
                 BooleanClause.Occur.MUST,
@@ -129,7 +129,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [Test]
         public void GreaterThanOrEqual()
         {
-            var expression = new LuceneQueryExpression(
+            var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(float), "Count"),
                 Expression.Constant(6f),
                 BooleanClause.Occur.MUST,
@@ -145,7 +145,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         {
             var dateTime = new DateTime(2012, 4, 18, 11, 22, 33);
 
-            var expression = new LuceneQueryExpression(
+            var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(DateTime), "Published"),
                 Expression.Constant(dateTime),
                 BooleanClause.Occur.MUST,
@@ -159,7 +159,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [Test]
         public void LessThanOrEqual()
         {
-            var expression = new LuceneQueryExpression(
+            var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(DateTime), "Average"),
                 Expression.Constant(11.5d),
                 BooleanClause.Occur.MUST,

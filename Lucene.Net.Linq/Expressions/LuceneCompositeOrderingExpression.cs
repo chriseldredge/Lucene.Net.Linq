@@ -7,12 +7,10 @@ namespace Lucene.Net.Linq.Expressions
 {
     internal class LuceneCompositeOrderingExpression : ExtensionExpression
     {
-        public const ExpressionType ExpressionType = (ExpressionType)150003;
-
         private readonly IEnumerable<LuceneQueryFieldExpression> fields;
 
         public LuceneCompositeOrderingExpression(IEnumerable<LuceneQueryFieldExpression> fields)
-            : base(typeof(object), ExpressionType)
+            : base(typeof(object), (ExpressionType)LuceneExpressionType.LuceneCompositeOrderingExpression)
         {
             this.fields = fields;
         }

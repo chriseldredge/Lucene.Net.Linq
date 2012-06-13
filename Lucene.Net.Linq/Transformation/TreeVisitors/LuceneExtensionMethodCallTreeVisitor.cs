@@ -2,39 +2,28 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Lucene.Net.Linq.Expressions;
 using Remotion.Linq;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
-    internal class LuceneExtensionMethodCallTreeVisitor : ExpressionTreeVisitor
+    internal class LuceneExtensionMethodCallTreeVisitor : MethodInfoMatchingTreeVisitor
     {
-        private static readonly MethodInfo AnyFieldMethod;
-        private static readonly MethodInfo ScoreMethod;
+        private static readonly MethodInfo AnyFieldMethod = ReflectionUtility.GetMethod(() => LuceneMethods.AnyField<object>(null));
+        private static readonly MethodInfo ScoreMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Score<object>(null));
 
-        static LuceneExtensionMethodCallTreeVisitor()
+        public LuceneExtensionMethodCallTreeVisitor()
         {
-            AnyFieldMethod = ReflectionUtility.GetMethod(() => LuceneMethods.AnyField<object>(null)).GetGenericMethodDefinition();
-            ScoreMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Score<object>(null)).GetGenericMethodDefinition();
+            AddMethod(AnyFieldMethod);
+            AddMethod(ScoreMethod);
         }
 
-        protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
+        protected override Expression VisitSupportedMethodCallExpression(MethodCallExpression expression)
         {
-            if (MethodsEqual(expression.Method, AnyFieldMethod))
+            if (expression.Method.Name == AnyFieldMethod.Name)
             {
                 return LuceneQueryAnyFieldExpression.Instance;
             }
 
-            if (MethodsEqual(expression.Method, ScoreMethod))
-            {
-                return LuceneOrderByRelevanceExpression.Instance;
-            }
-
-            return base.VisitMethodCallExpression(expression);
-        }
-
-        internal static bool MethodsEqual(MethodInfo methodInfo, MethodInfo baseMethod)
-        {
-            return methodInfo.IsGenericMethod && methodInfo == baseMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
+            return LuceneOrderByRelevanceExpression.Instance;
         }
     }
 }

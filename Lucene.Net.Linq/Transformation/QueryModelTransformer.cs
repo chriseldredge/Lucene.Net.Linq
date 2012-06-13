@@ -21,6 +21,7 @@ namespace Lucene.Net.Linq.Transformation
                        {
                            new SubQueryContainsTreeVisitor(),
                            new LuceneExtensionMethodCallTreeVisitor(),
+                           new ExternallyProvidedQueryExpressionTreeVisitor(),
                            new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new BoostMethodCallTreeVisitor(0),

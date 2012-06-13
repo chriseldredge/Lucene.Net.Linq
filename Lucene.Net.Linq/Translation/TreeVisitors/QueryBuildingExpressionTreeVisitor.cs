@@ -76,11 +76,17 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
         protected override Expression VisitLuceneQueryExpression(LuceneQueryExpression expression)
         {
+            queries.Push(expression.Query);
+            return expression;
+        }
+
+        protected override Expression VisitLuceneQueryPredicateExpression(LuceneQueryPredicateExpression expression)
+        {
             if (expression.QueryField is LuceneQueryAnyFieldExpression)
             {
                 AddMultiFieldQuery(expression);
 
-                return base.VisitLuceneQueryExpression(expression);
+                return base.VisitLuceneQueryPredicateExpression(expression);
             }
 
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
@@ -116,10 +122,10 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             queries.Push(booleanQuery);
 
-            return base.VisitLuceneQueryExpression(expression);
+            return base.VisitLuceneQueryPredicateExpression(expression);
         }
 
-        private string GetPattern(LuceneQueryExpression expression, IFieldMappingInfo mapping)
+        private string GetPattern(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
         {
             var pattern = EvaluateExpressionToString(expression, mapping);
 
@@ -140,7 +146,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return pattern;
         }
 
-        private void AddMultiFieldQuery(LuceneQueryExpression expression)
+        private void AddMultiFieldQuery(LuceneQueryPredicateExpression expression)
         {
             var query = new BooleanQuery();
 
@@ -153,7 +159,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             queries.Push(query);
         }
 
-        private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType queryType, LuceneQueryExpression lowerBoundExpression, LuceneQueryExpression upperBoundExpression)
+        private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType queryType, LuceneQueryPredicateExpression lowerBoundExpression, LuceneQueryPredicateExpression upperBoundExpression)
         {
             var lowerRange = RangeType.Inclusive;
             var upperRange = (queryType == QueryType.LessThan || queryType == QueryType.GreaterThan) ? RangeType.Exclusive : RangeType.Inclusive;
@@ -205,13 +211,13 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return result;
         }
 
-        private object EvaluateExpression(LuceneQueryExpression expression)
+        private object EvaluateExpression(LuceneQueryPredicateExpression expression)
         {
             var lambda = Expression.Lambda(expression.QueryPattern).Compile();
             return lambda.DynamicInvoke();
         }
 
-        private string EvaluateExpressionToString(LuceneQueryExpression expression, IFieldMappingInfo mapping)
+        private string EvaluateExpressionToString(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
         {
             var result = EvaluateExpression(expression);
 

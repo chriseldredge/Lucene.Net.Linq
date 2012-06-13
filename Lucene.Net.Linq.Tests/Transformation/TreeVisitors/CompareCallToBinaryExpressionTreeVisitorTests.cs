@@ -32,9 +32,9 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
                     Expression.Call(methodInfo, field, constant),
                     Expression.Constant(0));
 
-            var result = visitor.VisitExpression(call) as LuceneQueryExpression;
+            var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            Assert.That(result, Is.Not.Null, "Expected LuceneQueryExpression to be returned.");
+            Assert.That(result, Is.Not.Null, "Expected LuceneQueryPredicateExpression to be returned.");
             Assert.That(result.QueryField, Is.SameAs(field));
             Assert.That(result.QueryPattern, Is.EqualTo(constant));
         }
@@ -49,9 +49,9 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
                     Expression.Call(methodInfo, constant, field),
                     Expression.Constant(0));
 
-            var result = visitor.VisitExpression(call) as LuceneQueryExpression;
+            var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            Assert.That(result, Is.Not.Null, "Expected LuceneQueryExpression to be returned.");
+            Assert.That(result, Is.Not.Null, "Expected LuceneQueryPredicateExpression to be returned.");
             Assert.That(result.QueryField, Is.SameAs(field));
             Assert.That(result.QueryPattern, Is.EqualTo(constant));
         }

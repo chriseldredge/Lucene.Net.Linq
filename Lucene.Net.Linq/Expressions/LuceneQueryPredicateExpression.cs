@@ -1,0 +1,71 @@
+﻿using System;
+using System.Linq.Expressions;
+using Lucene.Net.Linq.Search;
+using Lucene.Net.Search;
+using Remotion.Linq.Clauses.Expressions;
+using Remotion.Linq.Parsing;
+
+namespace Lucene.Net.Linq.Expressions
+{
+    internal class LuceneQueryPredicateExpression : ExtensionExpression
+    {
+        private readonly LuceneQueryFieldExpression field;
+        private readonly Expression pattern;
+        private readonly BooleanClause.Occur occur;
+        private readonly QueryType queryType;
+
+        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, BooleanClause.Occur occur)
+            : this(field, pattern, occur, QueryType.Default)
+        {
+        }
+
+        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, BooleanClause.Occur occur, QueryType queryType)
+            : base(typeof(bool), (ExpressionType)LuceneExpressionType.LuceneQueryPredicateExpression)
+        {
+            this.field = field;
+            this.pattern = pattern;
+            this.occur = occur;
+            this.queryType = queryType;
+        }
+
+        public LuceneQueryFieldExpression QueryField
+        {
+            get { return field; }
+        }
+
+        public Expression QueryPattern
+        {
+            get { return pattern; }
+        }
+
+        public BooleanClause.Occur Occur
+        {
+            get { return occur; }
+        }
+
+        public float Boost
+        {
+            get { return field.Boost; }
+            set { field.Boost = value; }
+        }
+
+        public QueryType QueryType
+        {
+            get { return queryType; }
+        }
+
+        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        {
+            var newField = (LuceneQueryFieldExpression)visitor.VisitExpression(QueryField);
+            var newPattern = visitor.VisitExpression(QueryPattern);
+
+            return (newPattern == QueryPattern && newField == QueryField) ? this : new LuceneQueryPredicateExpression(newField, newPattern, Occur);
+        }
+
+        public override string ToString()
+        {
+            return string.Format("LuceneQuery[{0}]({1}{2}:{3}){4}", QueryType, Occur, QueryField.FieldName, pattern, Boost - 1.0f < 0.01f ? "" : "^" + Boost);
+        }
+
+    }
+}

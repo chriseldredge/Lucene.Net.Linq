@@ -98,8 +98,8 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
         private void AssertLuceneQueryExpression(Expression expression, string expectedQueryFieldName, ConstantExpression expectedPatternExpression, QueryType expectedQueryType, BooleanClause.Occur expectedOccur)
         {
-            Assert.That(expression, Is.InstanceOf<LuceneQueryExpression>());
-            var result = (LuceneQueryExpression)expression;
+            Assert.That(expression, Is.InstanceOf<LuceneQueryPredicateExpression>());
+            var result = (LuceneQueryPredicateExpression)expression;
 
             Assert.That(result.Occur, Is.EqualTo(expectedOccur));
             Assert.That(result.QueryType, Is.EqualTo(expectedQueryType));

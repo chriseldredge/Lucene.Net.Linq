@@ -42,7 +42,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 throw new NotSupportedException("Expected Left or Right to be LuceneQueryFieldExpression");
             }
 
-            return new LuceneQueryExpression(fieldExpression, pattern, occur, queryType);
+            return new LuceneQueryPredicateExpression(fieldExpression, pattern, occur, queryType);
         }
     }
 }

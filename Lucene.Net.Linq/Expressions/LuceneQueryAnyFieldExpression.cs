@@ -6,10 +6,9 @@ namespace Lucene.Net.Linq.Expressions
     internal class LuceneQueryAnyFieldExpression : LuceneQueryFieldExpression
     {
         private static readonly LuceneQueryAnyFieldExpression instance = new LuceneQueryAnyFieldExpression();
-        public new const ExpressionType ExpressionType = (ExpressionType)150005;
 
         private LuceneQueryAnyFieldExpression()
-            : base(typeof(string), ExpressionType, "*")
+            : base(typeof(string), (ExpressionType)LuceneExpressionType.LuceneQueryAnyFieldExpression, "*")
         {
         }
 

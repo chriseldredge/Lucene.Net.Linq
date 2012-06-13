@@ -41,7 +41,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             visitor = new BoostMethodCallTreeVisitor(1);
             var methodInfo = ReflectionUtility.GetMethod(() => false.Boost(0f));
             var fieldExpression = new LuceneQueryFieldExpression(typeof(string), "Name");
-            var query = new LuceneQueryExpression(fieldExpression, Expression.Constant("foo"), BooleanClause.Occur.SHOULD);
+            var query = new LuceneQueryPredicateExpression(fieldExpression, Expression.Constant("foo"), BooleanClause.Occur.SHOULD);
 
             const float boostAmount = 0.5f;
 
@@ -51,7 +51,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             var result = visitor.VisitExpression(call);
 
             Assert.That(result, Is.SameAs(query));
-            Assert.That(((LuceneQueryExpression)result).Boost, Is.EqualTo(boostAmount));
+            Assert.That(((LuceneQueryPredicateExpression)result).Boost, Is.EqualTo(boostAmount));
         }
 
         [Test]

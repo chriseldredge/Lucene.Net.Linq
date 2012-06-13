@@ -8,10 +8,9 @@ namespace Lucene.Net.Linq.Expressions
     internal class LuceneQueryFieldExpression : ExtensionExpression
     {
         private readonly string fieldName;
-        public const ExpressionType ExpressionType = (ExpressionType)150001;
 
         internal LuceneQueryFieldExpression(Type type, string fieldName)
-            : base(type, ExpressionType)
+            : base(type, (ExpressionType)LuceneExpressionType.LuceneQueryFieldExpression)
         {
             this.fieldName = fieldName;
             Boost = 1;

@@ -7,10 +7,9 @@ namespace Lucene.Net.Linq.Expressions
     internal class LuceneOrderByRelevanceExpression : ExtensionExpression
     {
         private static readonly LuceneOrderByRelevanceExpression instance = new LuceneOrderByRelevanceExpression();
-        public const ExpressionType ExpressionType = (ExpressionType)150004;
 
         private LuceneOrderByRelevanceExpression()
-            : base(typeof(object), ExpressionType)
+            : base(typeof(object), (ExpressionType)LuceneExpressionType.LuceneOrderByRelevanceExpression)
         {
         }
 

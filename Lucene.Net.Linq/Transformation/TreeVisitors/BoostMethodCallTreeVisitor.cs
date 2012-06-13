@@ -45,7 +45,6 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             if (queryField == null)
             {
                 return expression;
-                //throw new NotSupportedException("Boost() may only be applied on query fields appearing within a where clause.");
             }
 
             queryField.Boost = (float)((ConstantExpression)expression.Arguments[1]).Value;
@@ -55,7 +54,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         private Expression VisitAsBinaryExpression(MethodCallExpression expression)
         {
-            var query = expression.Arguments[0] as LuceneQueryExpression;
+            var query = expression.Arguments[0] as LuceneQueryPredicateExpression;
 
             if (query != null)
             {

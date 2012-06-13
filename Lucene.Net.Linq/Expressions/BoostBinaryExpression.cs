@@ -6,13 +6,11 @@ namespace Lucene.Net.Linq.Expressions
 {
     internal class BoostBinaryExpression : ExtensionExpression
     {
-        public const ExpressionType ExpressionType = (ExpressionType)150006;
-
         private readonly BinaryExpression expression;
         private readonly float boost;
         
         public BoostBinaryExpression(BinaryExpression expression, float boost)
-            : base(expression.Type, ExpressionType)
+            : base(expression.Type, (ExpressionType)LuceneExpressionType.BoostBinaryExpression)
         {
             this.expression = expression;
             this.boost = boost;

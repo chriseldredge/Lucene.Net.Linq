@@ -31,9 +31,9 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             // [doc].Name.StartsWith("foo")
             var call = Expression.Call(field, method, foo);
 
-            var result = visitor.VisitExpression(call) as LuceneQueryExpression;
+            var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            Assert.That(result, Is.Not.Null, "result as LuceneQueryExpression");
+            Assert.That(result, Is.Not.Null, "result as LuceneQueryPredicateExpression");
             Assert.That(result.QueryField, Is.SameAs(field));
             Assert.That(result.QueryPattern, Is.EqualTo(foo));
             Assert.That(result.QueryType, Is.EqualTo(QueryType.Prefix));
@@ -47,9 +47,9 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             // [doc].Name.EndsWith("foo")
             var call = Expression.Call(field, method, foo);
 
-            var result = visitor.VisitExpression(call) as LuceneQueryExpression;
+            var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            Assert.That(result, Is.Not.Null, "result as LuceneQueryExpression");
+            Assert.That(result, Is.Not.Null, "result as LuceneQueryPredicateExpression");
             Assert.That(result.QueryField, Is.SameAs(field));
             Assert.That(result.QueryPattern, Is.EqualTo(foo));
             Assert.That(result.QueryType, Is.EqualTo(QueryType.Suffix));
@@ -63,9 +63,9 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             // [doc].Name.Contains("foo")
             var call = Expression.Call(field, method, foo);
 
-            var result = visitor.VisitExpression(call) as LuceneQueryExpression;
+            var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            Assert.That(result, Is.Not.Null, "result as LuceneQueryExpression");
+            Assert.That(result, Is.Not.Null, "result as LuceneQueryPredicateExpression");
             Assert.That(result.QueryField, Is.SameAs(field));
             Assert.That(result.QueryPattern, Is.EqualTo(foo));
             Assert.That(result.QueryType, Is.EqualTo(QueryType.Wildcard));
