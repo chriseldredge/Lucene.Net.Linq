@@ -111,7 +111,6 @@
     <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitor.cs" />
-    <Compile Include="Transformation\TreeVisitors\QuerySourceReferenceGetMethodTransformingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="Util\IndexModeUtils.cs" />

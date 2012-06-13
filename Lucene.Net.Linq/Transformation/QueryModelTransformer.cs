@@ -22,7 +22,6 @@ namespace Lucene.Net.Linq.Transformation
                            new SubQueryContainsTreeVisitor(),
                            new LuceneExtensionMethodCallTreeVisitor(),
                            new ExternallyProvidedQueryExpressionTreeVisitor(),
-                           new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new BoostMethodCallTreeVisitor(0),
                            new FlagToBinaryConditionTreeVisitor(),
@@ -38,7 +37,6 @@ namespace Lucene.Net.Linq.Transformation
                        {
                            new LuceneExtensionMethodCallTreeVisitor(),
                            new BoostMethodCallTreeVisitor(1),
-                           new QuerySourceReferenceGetMethodTransformingTreeVisitor(),
                            new QuerySourceReferencePropertyTransformingTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor(),
