@@ -5,8 +5,11 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Store;
+using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
 using Remotion.Linq.Parsing.Structure;
+using Remotion.Linq.Parsing.Structure.ExpressionTreeProcessors;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
@@ -61,9 +64,35 @@ namespace Lucene.Net.Linq
             this.analyzer = analyzer;
             this.version = version;
 
-            queryParser = QueryParser.CreateDefault();
-
+            queryParser = CreateQueryParser();
             context = new Context(this.directory, this.analyzer, this.version, indexWriter, transactionLock);
+        }
+
+        internal static QueryParser CreateQueryParser()
+        {
+            var expressionTreeParser = new ExpressionTreeParser(
+                ExpressionTreeParser.CreateDefaultNodeTypeProvider(),
+                CreateExpressionTreeProcessor());
+
+            return new QueryParser(expressionTreeParser);
+        }
+
+        /// <summary>
+        /// Creates an <c cref="IExpressionTreeProcessor"/> that will execute
+        /// <c cref="AllowSpecialCharactersExpressionTransformer"/>
+        /// before executing <c cref="PartialEvaluatingExpressionTreeProcessor"/>
+        /// and other default processors. 
+        /// </summary>
+        /// <returns></returns>
+        internal static IExpressionTreeProcessor CreateExpressionTreeProcessor()
+        {
+            var firstRegistry = new ExpressionTransformerRegistry();
+            firstRegistry.Register(new AllowSpecialCharactersExpressionTransformer());
+
+            return new CompoundExpressionTreeProcessor(new IExpressionTreeProcessor[] {
+                new TransformingExpressionTreeProcessor (firstRegistry),
+                new PartialEvaluatingExpressionTreeProcessor(), 
+                new TransformingExpressionTreeProcessor (ExpressionTransformerRegistry.CreateDefault()) });
         }
 
         /// <summary>

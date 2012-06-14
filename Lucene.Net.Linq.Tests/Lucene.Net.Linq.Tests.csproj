@@ -59,6 +59,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="ContextTests.cs" />
+    <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\BoostTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Integration\SampleProgram.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
+    <Compile Include="Integration\CustomWhereTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />

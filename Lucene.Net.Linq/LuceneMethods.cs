@@ -3,7 +3,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Search;
 using Remotion.Linq;
-using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace Lucene.Net.Linq
 {
@@ -62,6 +61,40 @@ namespace Lucene.Net.Linq
         /// results in additional orderby clauses having no effect.
         /// </summary>
         public static Expression Score<T>(this T mappedDocument)
+        {
+            throw new InvalidOperationException(UnreachableCode);
+        }
+
+        /// <summary>
+        /// Instructs the query parser that a given query pattern
+        /// in a LINQ where clause should not have special characters
+        /// (such as <c>*</c>) escaped.
+        /// 
+        /// Disabling escaping allows prefix, wildcard, phrase and range queries
+        /// to be parsed from the <paramref name="queryPattern"/> instead of
+        /// treating it as a verbatim search term.
+        /// 
+        /// </summary>
+        /// <example>
+        /// The following two samples will produce the same <c cref="Query">Query</c>:
+        ///     <c>
+        ///         var query = "Foo*";
+        /// 
+        ///         var results = from doc in documents
+        ///         where doc.Title == query.AllowSpecialCharacters()
+        ///         select doc;
+        ///     </c>
+        ///     <c>
+        ///         var query = "Foo";
+        /// 
+        ///         var results = from doc in documents
+        ///         where doc.Title.StartsWith(query)
+        ///         select doc;
+        ///     </c>
+        /// </example>
+        /// <param name="queryPattern"></param>
+        /// <returns></returns>
+        public static string AllowSpecialCharacters(this string queryPattern)
         {
             throw new InvalidOperationException(UnreachableCode);
         }

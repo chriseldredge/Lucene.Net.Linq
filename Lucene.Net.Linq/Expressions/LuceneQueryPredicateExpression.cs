@@ -1,6 +1,6 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
@@ -54,18 +54,19 @@ namespace Lucene.Net.Linq.Expressions
             get { return queryType; }
         }
 
+        public bool AllowSpecialCharacters { get; set; }
+
         protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
         {
             var newField = (LuceneQueryFieldExpression)visitor.VisitExpression(QueryField);
             var newPattern = visitor.VisitExpression(QueryPattern);
 
-            return (newPattern == QueryPattern && newField == QueryField) ? this : new LuceneQueryPredicateExpression(newField, newPattern, Occur);
+            return (newPattern == QueryPattern && newField == QueryField) ? this : new LuceneQueryPredicateExpression(newField, newPattern, Occur) { AllowSpecialCharacters = AllowSpecialCharacters };
         }
 
         public override string ToString()
         {
-            return string.Format("LuceneQuery[{0}]({1}{2}:{3}){4}", QueryType, Occur, QueryField.FieldName, pattern, Boost - 1.0f < 0.01f ? "" : "^" + Boost);
+            return string.Format("LuceneQuery[{0}]({1}{2}:{3}){4}{5}", QueryType, Occur, QueryField.FieldName, pattern, Boost - 1.0f < 0.01f ? "" : "^" + Boost, AllowSpecialCharacters ? ".AllowSpecialCharacters()" : "");
         }
-
     }
 }

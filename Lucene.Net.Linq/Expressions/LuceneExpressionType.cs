@@ -8,6 +8,7 @@ namespace Lucene.Net.Linq.Expressions
         LuceneOrderByRelevanceExpression,
         LuceneQueryAnyFieldExpression,
         BoostBinaryExpression,
-        LuceneQueryExpression
+        LuceneQueryExpression,
+        AllowSpecialCharactersExpression,
     }
 }

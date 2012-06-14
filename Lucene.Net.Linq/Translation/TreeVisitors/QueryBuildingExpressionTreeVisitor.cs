@@ -220,8 +220,12 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
         private string EvaluateExpressionToString(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
         {
             var result = EvaluateExpression(expression);
+            
+            var str = mapping == null ? result.ToString() : mapping.ConvertToQueryExpression(result);
 
-            return mapping == null ? result.ToString() : mapping.ConvertToQueryExpression(result);
+            if (expression.AllowSpecialCharacters) return str;
+
+            return QueryParser.Escape(str ?? string.Empty);
         }
     }
 }

@@ -227,20 +227,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
-
-        [Test]
-        public void Where_ExactMatch_Phrase()
-        {
-            AddDocument(new SampleDocument { Name = "Documents Bill", Id = "X.Y.1.2" });
-            AddDocument(new SampleDocument { Name = "Bills Document", Id = "X.Z.1.3" });
-
-            var documents = provider.AsQueryable<SampleDocument>();
-
-            var result = from doc in documents where doc.Name == "\"Bills Document\"" select doc;
-
-            Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
-        }
-
+        
         [Test]
         public void Where_NotAnalyzed_StartsWith()
         {
@@ -296,15 +283,15 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_NotEqual()
         {
-            AddDocument(new SampleDocument { Name = "Other Document" });
-            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "Other" });
+            AddDocument(new SampleDocument { Name = "Mine", NullableScalar = 12 });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = (from doc in documents where doc.Name != "\"My Document\"" select doc).ToList();
+            var result = (from doc in documents where doc.Name != "Other" select doc).ToList();
 
             Assert.That(result.Count(), Is.EqualTo(1));
-            Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
+            Assert.That(result.Single().Name, Is.EqualTo("Mine"));
         }
 
         [Test]

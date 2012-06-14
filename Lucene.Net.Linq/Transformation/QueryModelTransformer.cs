@@ -31,6 +31,7 @@ namespace Lucene.Net.Linq.Transformation
                            new NullSafetyConditionRemovingTreeVisitor(),
                            new CompareCallToBinaryExpressionTreeVisitor(),
                            new BinaryToQueryExpressionTreeVisitor(),
+                           new AllowSpecialCharactersMethodExpressionTreeVisitor(),
                            new BoostMethodCallTreeVisitor(1)
                        },
                    new ExpressionTreeVisitor[]
