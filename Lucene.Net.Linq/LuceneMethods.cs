@@ -94,7 +94,7 @@ namespace Lucene.Net.Linq
         /// </example>
         /// <param name="queryPattern"></param>
         /// <returns></returns>
-        public static string AllowSpecialCharacters(this string queryPattern)
+        public static T AllowSpecialCharacters<T>(this T queryPattern)
         {
             throw new InvalidOperationException(UnreachableCode);
         }

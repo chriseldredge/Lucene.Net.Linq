@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Expressions;
 using Remotion.Linq.Clauses.Expressions;
@@ -9,48 +7,54 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class AllowSpecialCharactersMethodExpressionTreeVisitor : ExpressionTreeVisitor
     {
-        private readonly Stack<ExtensionExpression> ancestors = new Stack<ExtensionExpression>();
+        private bool allowed;
+        private LuceneQueryPredicateExpression parent;
 
         protected override Expression VisitExtensionExpression(ExtensionExpression expression)
         {
-            var custom = expression as AllowSpecialCharactersExpression;
-
-            if (custom == null)
+            if (expression is AllowSpecialCharactersExpression)
             {
-                try
-                {
-                    ancestors.Push(expression);
-                    return base.VisitExtensionExpression(expression);    
-                }
-                finally
-                {
-                    ancestors.Pop();
-                }
+                return VisitAllowSpecialCharactersExpression((AllowSpecialCharactersExpression) expression);
             }
 
-            return VisitAllowSpecialCharactersExpression(custom);
+            if (expression is LuceneQueryPredicateExpression)
+            {
+                return VisitQueryPredicateExpression((LuceneQueryPredicateExpression) expression);
+            }
 
+            return base.VisitExtensionExpression(expression);
         }
-
+        
         private Expression VisitAllowSpecialCharactersExpression(AllowSpecialCharactersExpression expression)
         {
-            const string message = "Expected AllowSpecialCharactersExpression to appear within a LuceneQueryPredicateExpression.";
+            allowed = true;
 
-            if (ancestors.Count == 0)
+            if (parent != null)
             {
-                throw new InvalidOperationException(message);
+                parent.AllowSpecialCharacters = true;
             }
 
-            var query = ancestors.Peek() as LuceneQueryPredicateExpression;
+            var result = VisitExpression(expression.Pattern);
 
-            if (query == null)
+            allowed = false;
+
+            return result;
+        }
+
+        private Expression VisitQueryPredicateExpression(LuceneQueryPredicateExpression expression)
+        {
+            parent = expression;
+
+            var result = base.VisitExtensionExpression(expression);
+
+            if (allowed && result is LuceneQueryPredicateExpression)
             {
-                throw new InvalidOperationException(message);
+                ((LuceneQueryPredicateExpression)result).AllowSpecialCharacters = true;
             }
 
-            query.AllowSpecialCharacters = true;
+            parent = null;
 
-            return expression.Pattern;
+            return result;
         }
     }
 }

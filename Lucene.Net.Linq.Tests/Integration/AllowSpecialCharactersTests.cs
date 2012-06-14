@@ -37,10 +37,26 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = (from doc in documents where doc.Path == "*".AllowSpecialCharacters() select doc).ToList();
             Assert.That(result.Count(), Is.EqualTo(2));
         }
+
+        [Test]
+        public void AllowSpecialCharacters_MultipleFields()
+        {
+            AddDocument(new PathDocument { Path = "A" });
+            AddDocument(new PathDocument { Name = "B" });
+
+            var documents = provider.AsQueryable<PathDocument>();
+
+            var result = (from doc in documents where (doc.Path == "*" || doc.Name == "*").AllowSpecialCharacters() select doc).ToList();
+            Assert.That(result.Count(), Is.EqualTo(2));
+        }
+
         public class PathDocument
         {
             [Field(IndexMode.NotAnalyzed)]
             public string Path { get; set; }
+
+            [Field(IndexMode.NotAnalyzed)]
+            public string Name { get; set; }
         }
     }
 }

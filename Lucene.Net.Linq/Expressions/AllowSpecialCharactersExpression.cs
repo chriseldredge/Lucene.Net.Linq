@@ -9,7 +9,7 @@ namespace Lucene.Net.Linq.Expressions
         private readonly Expression pattern;
 
         internal AllowSpecialCharactersExpression(Expression pattern)
-            : base(typeof(string), (ExpressionType)LuceneExpressionType.AllowSpecialCharactersExpression)
+            : base(pattern.Type, (ExpressionType)LuceneExpressionType.AllowSpecialCharactersExpression)
         {
             this.pattern = pattern;
         }
