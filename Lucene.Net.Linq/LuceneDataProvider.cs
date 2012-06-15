@@ -83,16 +83,14 @@ namespace Lucene.Net.Linq
         /// before executing <c cref="PartialEvaluatingExpressionTreeProcessor"/>
         /// and other default processors. 
         /// </summary>
-        /// <returns></returns>
         internal static IExpressionTreeProcessor CreateExpressionTreeProcessor()
         {
             var firstRegistry = new ExpressionTransformerRegistry();
             firstRegistry.Register(new AllowSpecialCharactersExpressionTransformer());
 
-            return new CompoundExpressionTreeProcessor(new IExpressionTreeProcessor[] {
-                new TransformingExpressionTreeProcessor (firstRegistry),
-                new PartialEvaluatingExpressionTreeProcessor(), 
-                new TransformingExpressionTreeProcessor (ExpressionTransformerRegistry.CreateDefault()) });
+            var processor = ExpressionTreeParser.CreateDefaultProcessor(ExpressionTransformerRegistry.CreateDefault());
+            processor.InnerProcessors.Insert(0, new TransformingExpressionTreeProcessor(firstRegistry));
+            return processor;
         }
 
         /// <summary>
