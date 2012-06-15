@@ -87,6 +87,41 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(context.FieldName, Is.EqualTo("ugly_lucene_field_name"));
         }
 
+        [Test]
+        public void CaseSensitive_WhenPropertySet()
+        {
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute {CaseSensitive = true});
+            Assert.That(flag, Is.True);
+        }
+
+        [Test]
+        public void CaseSensitive_IndexMode_NotAnalayzed()
+        {
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzed) { CaseSensitive = false });
+            Assert.That(flag, Is.True);
+        }
+
+        [Test]
+        public void CaseSensitive_IndexMode_NotAnalyzedNoNorms()
+        {
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzedNoNorms) { CaseSensitive = false });
+            Assert.That(flag, Is.True);
+        }
+
+        [Test]
+        public void CaseSensitive_False()
+        {
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute());
+            Assert.That(flag, Is.False);
+        }
+
+        [Test]
+        public void CaseSensitive_NullMetadata_False()
+        {
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(null);
+            Assert.That(flag, Is.False);
+        }
+
         public class ComplexType
         {
         }

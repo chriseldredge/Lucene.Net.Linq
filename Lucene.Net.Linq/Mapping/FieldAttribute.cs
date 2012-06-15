@@ -91,6 +91,13 @@ namespace Lucene.Net.Linq.Mapping
         /// will take precedence and <c>Format</c> will be ignored.
         /// </summary>
         public string Format { get; set; }
+
+        /// <summary>
+        /// When <c>true</c>, causes <c cref="QueryParser.SetLowercaseExpandedTerms"/> to
+        /// be set to false to prevent wildcard queries like <c>Foo*</c> from being
+        /// converted to lowercase.
+        /// </summary>
+        public bool CaseSensitive { get; set; }
     }
 
     /// <summary>

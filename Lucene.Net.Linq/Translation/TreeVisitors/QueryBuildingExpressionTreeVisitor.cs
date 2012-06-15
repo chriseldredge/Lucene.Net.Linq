@@ -43,12 +43,15 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             }
         }
 
-        public Query Parse(string fieldName, string pattern)
+        public Query Parse(IFieldMappingInfo mapping, string pattern)
         {
-            var queryParser = new QueryParser(context.Version, fieldName, context.Analyzer);
-            queryParser.SetLowercaseExpandedTerms(false);
+            var queryParser = new QueryParser(context.Version, mapping.FieldName, context.Analyzer);
+            
             queryParser.SetAllowLeadingWildcard(true);
-            return queryParser.Parse(pattern);
+            queryParser.SetLowercaseExpandedTerms(!mapping.CaseSensitive);
+            
+            var query = queryParser.Parse(pattern);
+            return query;
         }
 
         protected override Expression VisitBinaryExpression(BinaryExpression expression)
@@ -113,7 +116,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             }
 
             if (query == null)
-                query =  mapping.IsNumericField ? new TermQuery(new Term(fieldName, pattern)) : Parse(fieldName, pattern);
+                query =  mapping.IsNumericField ? new TermQuery(new Term(fieldName, pattern)) : Parse(mapping, pattern);
 
             var booleanQuery = new BooleanQuery();
 

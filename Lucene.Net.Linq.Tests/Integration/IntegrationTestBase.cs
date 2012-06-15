@@ -1,8 +1,10 @@
-﻿using Lucene.Net.Analysis;
+﻿using System.IO;
+using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
 using NUnit.Framework;
+using Directory = Lucene.Net.Store.Directory;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -31,7 +33,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         public class SampleDocument
         {
             public string Name { get; set; }
+
+            [Field(IndexMode.NotAnalyzed)]
             public string Id { get; set; }
+
+            public string Key { get; set; }
+
             public int Scalar { get; set; }
 
             [NumericField]
@@ -53,6 +60,14 @@ namespace Lucene.Net.Linq.Tests.Integration
             {
                 session.Add(document);
                 session.Commit();
+            }
+        }
+
+        public class LowercaseKeywordAnalyzer : KeywordAnalyzer
+        {
+            public override TokenStream TokenStream(string fieldName, TextReader reader)
+            {
+                return new LowerCaseFilter(base.TokenStream(fieldName, reader));
             }
         }
     }

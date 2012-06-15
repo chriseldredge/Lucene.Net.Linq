@@ -33,7 +33,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [Test]
         public void UsesPorterStemFilter()
         {
-            var query = builder.Parse("Text", "values");
+            var query = builder.Parse(new FakeFieldMappingInfo {FieldName = "Text"}, "values");
 
             Assert.That(query.ToString(), Is.EqualTo("Text:valu"));
         }
@@ -41,8 +41,22 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [Test]
         public void ParseMultipleTerms()
         {
-            var query = builder.Parse("Text", "x y z");
+            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text" }, "x y z");
             Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
+        }
+
+        [Test]
+        public void ParseLowercaseExpandedTerms()
+        {
+            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text", CaseSensitive = false }, "FOO*");
+            Assert.That(query.ToString(), Is.EqualTo("Text:foo*"));
+        }
+
+        [Test]
+        public void ParseDoNotLowercaseExpandedTerms()
+        {
+            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text", CaseSensitive = true }, "FOO*");
+            Assert.That(query.ToString(), Is.EqualTo("Text:FOO*"));
         }
     }
 
@@ -70,27 +84,6 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         public IEnumerable<string> AllFields
         {
             get { return new[] {"Id"}; }
-        }
-
-        class FakeFieldMappingInfo : IFieldMappingInfo
-        {
-            public string FieldName { get; set; }
-            public TypeConverter Converter { get; set; }
-            public PropertyInfo PropertyInfo { get; set; }
-            public string ConvertToQueryExpression(object value)
-            {
-                return value.ToString();
-            }
-
-            public bool IsNumericField
-            {
-                get { return true; }
-            }
-
-            public int SortFieldType
-            {
-                get { return -1; }
-            }
         }
 
         [Test]
@@ -177,4 +170,26 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         public int Id { get; set; }
     }
 
+    public class FakeFieldMappingInfo : IFieldMappingInfo
+    {
+        public string FieldName { get; set; }
+        public TypeConverter Converter { get; set; }
+        public PropertyInfo PropertyInfo { get; set; }
+        public string ConvertToQueryExpression(object value)
+        {
+            return value.ToString();
+        }
+
+        public bool IsNumericField
+        {
+            get { return true; }
+        }
+
+        public int SortFieldType
+        {
+            get { return -1; }
+        }
+
+        public bool CaseSensitive { get; set; }
+    }
 }

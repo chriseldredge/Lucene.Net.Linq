@@ -58,8 +58,18 @@ namespace Lucene.Net.Linq.Mapping
             var converter = GetConverter(p, type, metadata);
             var store = metadata != null ? metadata.Store : StoreMode.Yes;
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
+            var caseSensitive = GetCaseSensitivity(metadata);
 
-            return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName);
+            return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName, caseSensitive);
+        }
+
+        internal static bool GetCaseSensitivity(FieldAttribute metadata)
+        {
+            if (metadata == null) return false;
+
+            return metadata.CaseSensitive ||
+                   metadata.IndexMode == IndexMode.NotAnalyzed ||
+                   metadata.IndexMode == IndexMode.NotAnalyzedNoNorms;
         }
 
         internal static TypeConverter GetConverter(PropertyInfo p, Type type, FieldAttribute metadata)

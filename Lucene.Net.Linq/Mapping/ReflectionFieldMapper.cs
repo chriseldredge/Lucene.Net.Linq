@@ -20,6 +20,7 @@ namespace Lucene.Net.Linq.Mapping
         PropertyInfo PropertyInfo { get; }
         bool IsNumericField { get; }
         int SortFieldType { get; }
+        bool CaseSensitive { get; }
         string ConvertToQueryExpression(object value);
     }
 
@@ -30,14 +31,16 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly IndexMode index;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
+        private readonly bool caseSensitive;
 
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode indexMode, TypeConverter converter, string fieldName)
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode indexMode, TypeConverter converter, string fieldName, bool caseSensitive)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
             this.index = indexMode;
             this.converter = converter;
             this.fieldName = fieldName;
+            this.caseSensitive = caseSensitive;
         }
 
         public PropertyInfo PropertyInfo
@@ -63,6 +66,11 @@ namespace Lucene.Net.Linq.Mapping
         public string FieldName
         {
             get { return fieldName; }
+        }
+
+        public bool CaseSensitive
+        {
+            get { return caseSensitive; }
         }
 
         public virtual bool IsNumericField { get { return false; } }
@@ -180,6 +188,11 @@ namespace Lucene.Net.Linq.Mapping
         }
 
         public bool IsNumericField
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public bool CaseSensitive
         {
             get { throw new NotImplementedException(); }
         }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
 
@@ -7,6 +8,16 @@ namespace Lucene.Net.Linq.Tests.Integration
     [TestFixture]
     public class SelectTests : IntegrationTestBase
     {
+        private PerFieldAnalyzerWrapper analyzer;
+
+        protected override Analyzer GetAnalyzer(Net.Util.Version version)
+        {
+            analyzer = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
+            analyzer.AddAnalyzer("Id", new KeywordAnalyzer());
+            analyzer.AddAnalyzer("Key", new LowercaseKeywordAnalyzer());
+            return analyzer;
+        }
+
         [Test]
         public void Select()
         {
@@ -192,12 +203,13 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_ExactMatch_CaseInsensitive()
         {
-            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
-            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+            analyzer.AddAnalyzer("Id", new LowercaseKeywordAnalyzer());
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = from doc in documents where doc.Id == "x.z.1.3" select doc;
+            var result = from doc in documents where doc.Key == "x.z.1.3" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
@@ -205,12 +217,13 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_IgnoresToLower()
         {
-            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
-            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+            analyzer.AddAnalyzer("Id", new LowercaseKeywordAnalyzer());
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = from doc in documents where doc.Id.ToLower() == "x.z.1.3" select doc;
+            var result = from doc in documents where doc.Key.ToLower() == "x.z.1.3" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
@@ -218,38 +231,40 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_IgnoresToLowerWithinNullSafetyCondition()
         {
-            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
-            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+            analyzer.AddAnalyzer("Id", new LowercaseKeywordAnalyzer());
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = from doc in documents where (doc.Id != null ? doc.Id.ToLower() : null) == "x.z.1.3" select doc;
+            var result = from doc in documents where (doc.Key != null ? doc.Key.ToLower() : null) == "x.z.1.3" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
         
         [Test]
-        public void Where_NotAnalyzed_StartsWith()
+        public void Where_Keyword_StartsWith()
         {
             AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
+            var result = from doc in documents where doc.Id.StartsWith("X.Z") select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
         [Test]
-        public void Where_NotAnalyzed_CaseInsensitive()
+        public void Where_LowercaseKeyword_StartsWith()
         {
-            AddDocument(new SampleDocument { Name = "Other Document", Id = "X.Y.1.2" });
-            AddDocument(new SampleDocument { Name = "My Document", Id = "X.Z.1.3" });
+            analyzer.AddAnalyzer("Id", new LowercaseKeywordAnalyzer());
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-            var result = from doc in documents where doc.Id.StartsWith("x.z") select doc;
+            var result = from doc in documents where doc.Key.StartsWith("x.z") select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
