@@ -1,5 +1,6 @@
 ﻿using System;
 using Lucene.Net.Documents;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using Attribute = System.Attribute;
@@ -41,6 +42,14 @@ namespace Lucene.Net.Linq.Mapping
         /// to and from strings so they can be stored and indexed by Lucene.Net.
         /// </summary>
         public Type Converter { get; set; }
+
+        /// <summary>
+        /// Specifies that the property value, combined with any other properties that also
+        /// specify <code>Key = true</code>, represents a unique primary key to the document.
+        /// 
+        /// Key fields are used to replace or delete documents.
+        /// </summary>
+        public bool Key { get; set; }
     }
 
     /// <summary>

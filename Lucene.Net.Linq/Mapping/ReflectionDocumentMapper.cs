@@ -7,22 +7,24 @@ using Lucene.Net.Linq.Util;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public interface IFieldMappingInfoProvider
+    internal interface IFieldMappingInfoProvider
     {
         IFieldMappingInfo GetMappingInfo(string propertyName);
         IEnumerable<string> AllFields { get; }
     }
 
-    public interface IDocumentMapper<in T> : IFieldMappingInfoProvider
+    internal interface IDocumentMapper<in T> : IFieldMappingInfoProvider
     {
         void ToObject(Document source, float score, T target);
         void ToDocument(T source, Document target);
+        DocumentKey ToKey(T source);
         bool EnableScoreTracking { get; }
     }
 
     internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
     {
         private readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
+        private readonly List<IFieldMapper<T>> keyFields;
 
         public ReflectionDocumentMapper() : this(typeof(T))
         {
@@ -41,6 +43,13 @@ namespace Lucene.Net.Linq.Mapping
                 var mappingContext = FieldMappingInfoBuilder.Build<T>(p);
                 fieldMap.Add(mappingContext.PropertyInfo.Name, mappingContext);
             }
+
+            var keyProps = from p in props
+                           let a = p.GetCustomAttribute<BaseFieldAttribute>(true)
+                           where a != null && a.Key
+                           select p;
+
+            keyFields = keyProps.Select(kp => fieldMap[kp.Name]).ToList();
         }
 
         public IFieldMappingInfo GetMappingInfo(string propertyName)
@@ -64,6 +73,13 @@ namespace Lucene.Net.Linq.Mapping
             }
         }
 
+        public DocumentKey ToKey(T source)
+        {
+            var values = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.PropertyInfo.GetValue(source, null));
+
+            return new DocumentKey(values);
+        }
+
         public IEnumerable<string> AllFields
         {
             get { return fieldMap.Values.Select(m => m.FieldName); }
@@ -72,6 +88,11 @@ namespace Lucene.Net.Linq.Mapping
         public bool EnableScoreTracking
         {
             get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
+        }
+
+        public List<IFieldMapper<T>> KeyFields
+        {
+            get { return new List<IFieldMapper<T>>(keyFields); }
         }
     }
 }

@@ -5,11 +5,10 @@ using System.Linq;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Util;
-using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public class NumericReflectionFieldMapper<T> : ReflectionFieldMapper<T>
+    internal class NumericReflectionFieldMapper<T> : ReflectionFieldMapper<T>
     {
         private static readonly IEnumerable<Type> supportedValueTypes = new List<Type>{typeof(long), typeof(int), typeof(double), typeof(float)};
 

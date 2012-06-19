@@ -1,5 +1,4 @@
-﻿using System.IO;
-using Lucene.Net.Analysis;
+﻿using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
@@ -60,14 +59,6 @@ namespace Lucene.Net.Linq.Tests.Integration
             {
                 session.Add(document);
                 session.Commit();
-            }
-        }
-
-        public class LowercaseKeywordAnalyzer : KeywordAnalyzer
-        {
-            public override TokenStream TokenStream(string fieldName, TextReader reader)
-            {
-                return new LowerCaseFilter(base.TokenStream(fieldName, reader));
             }
         }
     }

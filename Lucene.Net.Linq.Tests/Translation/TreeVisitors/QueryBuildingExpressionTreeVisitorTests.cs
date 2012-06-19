@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq.Expressions;
-using System.Reflection;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Expressions;
 using Lucene.Net.Linq.Mapping;
@@ -60,8 +58,21 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         }
     }
 
+    internal class FieldMappingInfoProviderStub : IFieldMappingInfoProvider
+    {
+        public IFieldMappingInfo GetMappingInfo(string propertyName)
+        {
+            return new FakeFieldMappingInfo { FieldName = propertyName };
+        }
+
+        public IEnumerable<string> AllFields
+        {
+            get { return new[] { "Id" }; }
+        }
+    }
+
     [TestFixture]
-    public class QueryBuildingExpressionTreeVisitorTests : IFieldMappingInfoProvider
+    public class QueryBuildingExpressionTreeVisitorTests
     {
         private QueryBuildingExpressionTreeVisitor builder;
 
@@ -73,17 +84,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [SetUp]
         public void SetUp()
         {
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), version, null, new object()), this);
-        }
-
-        public IFieldMappingInfo GetMappingInfo(string propertyName)
-        {
-            return new FakeFieldMappingInfo {FieldName = propertyName};
-        }
-
-        public IEnumerable<string> AllFields
-        {
-            get { return new[] {"Id"}; }
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), version, null, new object()), new FieldMappingInfoProviderStub());
         }
 
         [Test]
@@ -162,34 +163,5 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
 
             Assert.That(builder.Query.ToString(), Is.EqualTo("+Average:[" + double.MinValue + " TO 11.5]"));
         }
-    }
-
-    public class Record
-    {
-        public string Name { get; set; }
-        public int Id { get; set; }
-    }
-
-    public class FakeFieldMappingInfo : IFieldMappingInfo
-    {
-        public string FieldName { get; set; }
-        public TypeConverter Converter { get; set; }
-        public PropertyInfo PropertyInfo { get; set; }
-        public string ConvertToQueryExpression(object value)
-        {
-            return value.ToString();
-        }
-
-        public bool IsNumericField
-        {
-            get { return true; }
-        }
-
-        public int SortFieldType
-        {
-            get { return -1; }
-        }
-
-        public bool CaseSensitive { get; set; }
     }
 }

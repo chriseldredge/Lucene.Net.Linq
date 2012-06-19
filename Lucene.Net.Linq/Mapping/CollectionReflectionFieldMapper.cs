@@ -4,7 +4,7 @@ using Lucene.Net.Documents;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public class CollectionReflectionFieldMapper<T> : ReflectionFieldMapper<T>
+    internal class CollectionReflectionFieldMapper<T> : ReflectionFieldMapper<T>
     {
         private readonly Type elementType;
 

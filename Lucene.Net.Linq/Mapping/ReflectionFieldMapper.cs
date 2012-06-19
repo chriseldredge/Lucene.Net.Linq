@@ -7,13 +7,13 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public interface IFieldMapper<in T> : IFieldMappingInfo
+    internal interface IFieldMapper<in T> : IFieldMappingInfo
     {
         void CopyFromDocument(Document source, float score, T target);
         void CopyToDocument(T source, Document target);
     }
 
-    public interface IFieldMappingInfo
+    internal interface IFieldMappingInfo
     {
         string FieldName { get; }
         TypeConverter Converter { get; }
@@ -24,20 +24,20 @@ namespace Lucene.Net.Linq.Mapping
         string ConvertToQueryExpression(object value);
     }
 
-    public class ReflectionFieldMapper<T> : IFieldMapper<T>
+    internal class ReflectionFieldMapper<T> : IFieldMapper<T>
     {
         protected readonly PropertyInfo propertyInfo;
         protected readonly StoreMode store;
         protected readonly IndexMode index;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
-        private readonly bool caseSensitive;
+        protected readonly bool caseSensitive;
 
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode indexMode, TypeConverter converter, string fieldName, bool caseSensitive)
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TypeConverter converter, string fieldName, bool caseSensitive)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
-            this.index = indexMode;
+            this.index = index;
             this.converter = converter;
             this.fieldName = fieldName;
             this.caseSensitive = caseSensitive;
@@ -130,7 +130,7 @@ namespace Lucene.Net.Linq.Mapping
             {
                 fieldValue = (string)converter.ConvertTo(value, typeof(string));
             }
-            else if (value.GetType() == typeof(string))
+            else if (value is string)
             {
                 fieldValue = (string)value;
             }

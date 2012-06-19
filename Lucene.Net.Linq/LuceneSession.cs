@@ -15,8 +15,9 @@ namespace Lucene.Net.Linq
         private readonly IDocumentMapper<T> mapper;
         private readonly Context context;
         
-        private readonly List<Document> additions = new List<Document>();
-        private readonly List<Query> deletions = new List<Query>();
+        private readonly IDictionary<DocumentKey, Document> additions = new Dictionary<DocumentKey, Document>();
+        private readonly List<Query> deleteQueries = new List<Query>();
+        private readonly ISet<DocumentKey> deleteKeys = new HashSet<DocumentKey>();
 
         public LuceneSession(IDocumentMapper<T> mapper, Context context)
         {
@@ -26,31 +27,54 @@ namespace Lucene.Net.Linq
 
         public void Add(params T[] items)
         {
-            var docs = items.Select(i =>
-                                        {
-                                            var doc = new Document();
-                                            mapper.ToDocument(i, doc);
-                                            return doc;
-                                        });
+            lock (sessionLock)
+            {
+                foreach (var item in items)
+                {
+                    var key = mapper.ToKey(item);
+                    var doc = new Document();
 
-            Add(docs.ToArray());
+                    mapper.ToDocument(item, doc);
+                    
+                    additions[key] = doc;
+                }
+            }
         }
 
-        internal void Add(params Document[] docs)
+        internal void Add(DocumentKey key, Document doc)
+        {
+            additions[key] = doc;
+        }
+
+        public void Delete(params T[] items)
         {
             lock (sessionLock)
-                additions.AddRange(docs);
+            {
+                foreach (var item in items)
+                {
+                    var key = mapper.ToKey(item);
+                    if (key.Empty)
+                    {
+                        throw new InvalidOperationException("The type " + typeof(T) + " does not specify any key fields.");
+                    }
+                    deleteKeys.Add(key);
+                }
+            }
         }
 
         public void Delete(params Query[] items)
         {
             lock (sessionLock)
-                deletions.AddRange(items);
+                deleteQueries.AddRange(items);
         }
 
         public void DeleteAll()
         {
-            DeleteAllFlag = true;
+            lock (sessionLock)
+            {
+                DeleteAllFlag = true;
+                additions.Clear();
+            }
         }
 
         public void Commit()
@@ -82,23 +106,34 @@ namespace Lucene.Net.Linq
             }
         }
 
+        public void Dispose()
+        {
+        }
+
         private void CommitInternal()
         {
             var writer = context.IndexWriter;
+            IEnumerable<Query> deletes = new Query[0];
 
             if (DeleteAllFlag)
             {
                 writer.DeleteAll();
             }
-
-            else if (deletions.Count > 0)
+            else if (deleteQueries.Count > 0 || deleteKeys.Count > 0)
             {
-                writer.DeleteDocuments(deletions.ToArray());
+                deletes = Deletions;
+            }
+
+            deletes = deletes.Union(additions.Keys.Where(k => !k.Empty).Select(k => k.ToQuery(context.Analyzer, context.Version)));
+
+            if (deletes.Any())
+            {
+                writer.DeleteDocuments(deletes.Distinct().ToArray());
             }
 
             if (additions.Count > 0)
             {
-                additions.Apply(writer.AddDocument);
+                additions.Values.Apply(writer.AddDocument);
             }
 
             writer.Commit();
@@ -111,22 +146,19 @@ namespace Lucene.Net.Linq
         private void ClearPendingChanges()
         {
             DeleteAllFlag = false;
-            deletions.Clear();
+            deleteKeys.Clear();
+            deleteQueries.Clear();
             additions.Clear();
         }
 
-        private bool PendingChanges
+        internal bool PendingChanges
         {
-            get { return DeleteAllFlag || additions.Count > 0 || deletions.Count > 0; }
-        }
-
-        public void Dispose()
-        {
+            get { return DeleteAllFlag || additions.Count > 0 || deleteQueries.Count > 0 || deleteKeys.Count > 0; }
         }
 
         internal bool DeleteAllFlag { get; private set; }
 
-        internal IEnumerable<Document> Additions { get { return new List<Document>(additions); } }
-        internal IEnumerable<Query> Deletions { get { return new List<Query>(deletions); } }
+        internal IEnumerable<Document> Additions { get { return new List<Document>(additions.Values); } }
+        internal IEnumerable<Query> Deletions { get { return deleteQueries.Union(deleteKeys.Select(k => k.ToQuery(context.Analyzer, context.Version))); } }
     }
 }

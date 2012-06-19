@@ -1,10 +1,13 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Lucene.Net.Analysis;
+using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -15,6 +18,7 @@ namespace Lucene.Net.Linq.Tests
     {
         private LuceneSession<Record> session;
         private IDocumentMapper<Record> mapper;
+        private Analyzer analyzer;
         private IIndexWriter writer;
         private Context context;
 
@@ -23,22 +27,33 @@ namespace Lucene.Net.Linq.Tests
         {
             mapper = MockRepository.GenerateStrictMock<IDocumentMapper<Record>>();
             writer = MockRepository.GenerateStrictMock<IIndexWriter>();
+            analyzer = new StandardAnalyzer(Version.LUCENE_29);
 
-            context = MockRepository.GenerateStub<Context>(null, null, null, writer, new object());
+            context = MockRepository.GenerateStub<Context>(null, analyzer, Version.LUCENE_29, writer, new object());
 
             session = new LuceneSession<Record>(mapper, context);
+
+            mapper.Expect(m => m.ToKey(Arg<Record>.Is.NotNull))
+                .WhenCalled(mi => mi.ReturnValue = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id"}, ((Record)mi.Arguments[0]).Id } }))
+                .Repeat.Any();
         }
 
         [Test]
-        public void DeleteAll()
+        public void AddWithSameKeyReplaces()
         {
-            session.DeleteAll();
+            var r1 = new Record { Id = "11", Name = "A" };
+            var r2 = new Record { Id = "11", Name = "B" };
 
-            Assert.That(session.DeleteAllFlag, Is.True, "DeleteAllFlag");
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(r1), Arg<Document>.Is.NotNull));
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(r2), Arg<Document>.Is.NotNull));
+
+            session.Add(r1, r2);
 
             Verify();
-        }
 
+            Assert.That(session.Additions.Count(), Is.EqualTo(1));
+        }
+        
         [Test]
         public void Commit_DeleteAll()
         {
@@ -60,9 +75,15 @@ namespace Lucene.Net.Linq.Tests
             var q1 = new TermQuery(new Term("field1", "value1"));
             var q2 = new TermQuery(new Term("field1", "value2"));
 
+            var r1 = new Record { Id = "12" };
+
+            var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> {{ new FakeFieldMappingInfo { FieldName = "Id"}, 12}});
+
+            session.Delete(r1);
+
             session.Delete(q1, q2);
 
-            writer.Expect(w => w.DeleteDocuments(new[] {q1, q2}));
+            writer.Expect(w => w.DeleteDocuments(new[] {q1, q2, key.ToQuery(context.Analyzer, context.Version)}));
             writer.Expect(w => w.Commit());
 
             session.Commit();
@@ -78,7 +99,8 @@ namespace Lucene.Net.Linq.Tests
             var doc1 = new Document();
             var doc2 = new Document();
 
-            session.Add(doc1, doc2);
+            session.Add(new DocumentKey(), doc1);
+            session.Add(new DocumentKey(), doc2);
 
             writer.Expect(w => w.AddDocument(doc1));
             writer.Expect(w => w.AddDocument(doc2));
@@ -92,11 +114,29 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void Commit_Add_DeletesKey()
+        {
+            var doc1 = new Document();
+            var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, 1 } });
+
+            session.Add(key, doc1);
+
+            writer.Expect(w => w.DeleteDocuments(new[] {key.ToQuery(context.Analyzer, context.Version)}));
+            writer.Expect(w => w.AddDocument(doc1));
+            writer.Expect(w => w.Commit());
+
+            session.Commit();
+
+            Verify();
+
+            Assert.That(session.Additions, Is.Empty, "Commit should clear pending deletions.");
+        }
+        [Test]
         public void Commit_ReloadsSearcher()
         {
             var doc1 = new Document();
 
-            session.Add(doc1);
+            session.Add(new DocumentKey(), doc1);
 
             writer.Expect(w => w.AddDocument(doc1));
             writer.Expect(w => w.Commit());
@@ -115,20 +155,61 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
-        public void Add()
+        public void DeleteAll()
         {
-            var r1 = new Record();
-            var r2 = new Record();
+            session.DeleteAll();
 
-            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(r1), Arg<Document>.Is.NotNull));
-            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(r2), Arg<Document>.Is.NotNull));
-
-            session.Add(r1, r2);
+            Assert.That(session.DeleteAllFlag, Is.True, "DeleteAllFlag");
 
             Verify();
+        }
 
-            Assert.That(session.Additions.Count(), Is.EqualTo(2));
-            Assert.That(session.Additions.First(), Is.Not.SameAs(session.Additions.Skip(1).First()));
+        [Test]
+        public void DeleteAllClearsPendingAdditions()
+        {
+            var r1 = new Record();
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(r1), Arg<Document>.Is.NotNull));
+            
+            session.Add(r1);
+            session.DeleteAll();
+
+            Assert.That(session.Additions, Is.Empty, "Additions");
+
+            Verify();
+        }
+
+        [Test]
+        public void Delete()
+        {
+            var r1 = new Record { Id = "12" };
+
+            session.Delete(r1);
+
+            Assert.That(session.Deletions.Single().ToString(), Is.EqualTo("+Id:12"));
+        }
+
+        [Test]
+        public void Delete_SetsPendingChangesFlag()
+        {
+            var r1 = new Record { Id = "12" };
+
+            session.Delete(r1);
+
+            Assert.That(session.PendingChanges, Is.True, "PendingChanges");
+        }
+
+
+        [Test]
+        public void Delete_ThrowsOnEmptyKey()
+        {
+            mapper.BackToRecord(BackToRecordOptions.Expectations);
+            mapper.Expect(m => m.ToKey(Arg<Record>.Is.NotNull)).Return(new DocumentKey());
+
+            var r1 = new Record { Id = "12" };
+
+            TestDelegate call = () => session.Delete(r1);
+
+            Assert.That(call, Throws.InvalidOperationException);
         }
 
         private void Verify()

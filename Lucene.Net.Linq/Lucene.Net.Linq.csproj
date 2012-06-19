@@ -57,6 +57,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Abstractions\IIndexWriter.cs" />
+    <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Transformation\AllowSpecialCharactersExpressionTransformer.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />

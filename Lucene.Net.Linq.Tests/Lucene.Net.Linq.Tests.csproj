@@ -59,6 +59,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="ContextTests.cs" />
+    <Compile Include="FakeFieldMappingInfo.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\BoostTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
@@ -71,8 +72,10 @@
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
+    <Compile Include="LowercaseKeywordAnalyzer.cs" />
     <Compile Include="LuceneDataProviderTests.cs" />
     <Compile Include="LuceneSessionTests.cs" />
+    <Compile Include="Mapping\DocumentKeyTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeOffsetTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />
@@ -80,6 +83,8 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderScoreTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderTimeSpanTests.cs" />
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
+    <Compile Include="Mapping\ReflectionDocumentMapperTests.cs" />
+    <Compile Include="Record.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitorTests.cs" />
