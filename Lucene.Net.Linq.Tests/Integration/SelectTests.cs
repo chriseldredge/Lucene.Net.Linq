@@ -405,6 +405,19 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Where_ThisAndNotThat()
+        {
+            AddDocument(new SampleDocument { Name = "Other", NullableScalar = 12 });
+            AddDocument(new SampleDocument { Name = "My", NullableScalar = 12 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.NullableScalar == 12 && doc.Name != "Other" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My"));
+        }
+
+        [Test]
         public void Where_AnyField()
         {
             AddDocument(new SampleDocument { Name = "Other Document" });

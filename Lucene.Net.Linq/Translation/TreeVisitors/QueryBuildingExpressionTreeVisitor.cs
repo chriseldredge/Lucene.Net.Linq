@@ -201,17 +201,34 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
         {
             var result = base.VisitBinaryExpression(expression);
 
-            var second = queries.Pop();
-            var first = queries.Pop();
+            var second = (BooleanQuery)queries.Pop();
+            var first = (BooleanQuery)queries.Pop();
+            var occur = expression.NodeType == ExpressionType.AndAlso ? BooleanClause.Occur.MUST : BooleanClause.Occur.SHOULD;
 
             var query = new BooleanQuery();
-            var occur = expression.NodeType == ExpressionType.AndAlso ? BooleanClause.Occur.MUST : BooleanClause.Occur.SHOULD;
-            query.Add(first, occur);
-            query.Add(second, occur);
-            
+            Combine(query, first, occur);
+            Combine(query, second, occur);
+
             queries.Push(query);
 
             return result;
+        }
+
+        private void Combine(BooleanQuery target, BooleanQuery source, BooleanClause.Occur occur)
+        {
+            if (source.GetClauses().Length == 1)
+            {
+                var clause = source.GetClauses()[0];
+                if (clause.GetOccur() == BooleanClause.Occur.MUST)
+                {
+                    clause.SetOccur(occur);
+                }
+                target.Add(clause);
+            }
+            else
+            {
+                target.Add(source, occur);
+            }
         }
 
         private object EvaluateExpression(LuceneQueryPredicateExpression expression)
