@@ -57,25 +57,29 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Abstractions\IIndexWriter.cs" />
+    <Compile Include="Clauses\ExpressionNodes\BoostExpressionNode.cs" />
+    <Compile Include="Clauses\BoostClause.cs" />
+    <Compile Include="Clauses\Expressions\AllowSpecialCharactersExpression.cs" />
+    <Compile Include="Clauses\Expressions\BoostBinaryExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneCompositeOrderingExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneExpressionType.cs" />
+    <Compile Include="Clauses\Expressions\LuceneOrderByRelevanceExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneQueryAnyFieldExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneQueryExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneQueryFieldExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneQueryPredicateExpression.cs" />
+    <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
+    <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="Transformation\AllowSpecialCharactersExpressionTransformer.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
     <Compile Include="Converters\FormatConverter.cs" />
-    <Compile Include="Expressions\AllowSpecialCharactersExpression.cs" />
-    <Compile Include="Expressions\BoostBinaryExpression.cs" />
-    <Compile Include="Expressions\LuceneExpressionType.cs" />
-    <Compile Include="Expressions\LuceneQueryAnyFieldExpression.cs" />
-    <Compile Include="Expressions\LuceneCompositeOrderingExpression.cs" />
-    <Compile Include="Expressions\LuceneQueryExpression.cs" />
-    <Compile Include="Expressions\LuceneQueryPredicateExpression.cs" />
-    <Compile Include="Expressions\LuceneOrderByRelevanceExpression.cs" />
     <Compile Include="ISession.cs" />
     <Compile Include="LuceneDataProvider.cs" />
     <Compile Include="LuceneMethods.cs" />
     <Compile Include="LuceneQueryable.cs" />
     <Compile Include="LuceneQueryExecutor.cs" />
-    <Compile Include="Expressions\LuceneQueryFieldExpression.cs" />
     <Compile Include="LuceneSession.cs" />
     <Compile Include="Mapping\CollectionReflectionFieldMapper.cs" />
     <Compile Include="Converters\DateTimeOffsetToTicksConverter.cs" />
@@ -97,7 +101,8 @@
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
-    <Compile Include="Translation\LuceneQueryModel.cs" />
+    <Compile Include="ILuceneQueryModelVisitor.cs" />
+    <Compile Include="LuceneQueryModel.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandler.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorRegistry.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandlers.cs" />
@@ -116,7 +121,6 @@
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
-    <Compile Include="Translation\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="Util\IndexModeUtils.cs" />
     <Compile Include="Util\LinqExtensions.cs" />
     <Compile Include="Util\Log.cs" />

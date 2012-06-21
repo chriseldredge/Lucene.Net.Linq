@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Search;
 using Remotion.Linq;
 

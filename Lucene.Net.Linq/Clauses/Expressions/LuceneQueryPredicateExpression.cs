@@ -1,10 +1,10 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Expressions
+namespace Lucene.Net.Linq.Clauses.Expressions
 {
     internal class LuceneQueryPredicateExpression : ExtensionExpression
     {

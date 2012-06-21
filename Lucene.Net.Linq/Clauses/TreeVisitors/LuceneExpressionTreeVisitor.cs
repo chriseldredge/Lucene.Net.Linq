@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using Lucene.Net.Linq.Expressions;
+using System.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Translation.TreeVisitors
+namespace Lucene.Net.Linq.Clauses.TreeVisitors
 {
     internal abstract class LuceneExpressionTreeVisitor : ExpressionTreeVisitor
     {

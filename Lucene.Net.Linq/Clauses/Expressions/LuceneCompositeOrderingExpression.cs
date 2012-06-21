@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
-namespace Lucene.Net.Linq.Expressions
+namespace Lucene.Net.Linq.Clauses.Expressions
 {
     internal class LuceneCompositeOrderingExpression : ExtensionExpression
     {

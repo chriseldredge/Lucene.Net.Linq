@@ -1,16 +1,13 @@
-﻿using System;
-using Lucene.Net.Linq.Expressions;
+﻿using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Translation.ResultOperatorHandlers;
 using Lucene.Net.Linq.Translation.TreeVisitors;
-using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
 namespace Lucene.Net.Linq.Translation
 {
-    internal class QueryModelTranslator : QueryModelVisitorBase
+    internal class QueryModelTranslator : QueryModelVisitorBase, ILuceneQueryModelVisitor
     {
         private static readonly ResultOperatorRegistry resultOperators = ResultOperatorRegistry.CreateDefault();
 
@@ -72,6 +69,11 @@ namespace Lucene.Net.Linq.Translation
             {
                 model.AddSort(ordering.Expression, ordering.OrderingDirection);
             }
+        }
+
+        public void VisitBoostClause(BoostClause boostClause, QueryModel queryModel, int index)
+        {
+            model.AddBoostFunction(boostClause.BoostFunction);
         }
     }
 }

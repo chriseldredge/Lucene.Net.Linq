@@ -1,6 +1,4 @@
 using System;
-using System.Linq.Expressions;
-using Lucene.Net.Search;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ResultOperators;
 

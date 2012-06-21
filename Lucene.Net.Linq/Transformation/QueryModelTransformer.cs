@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using Lucene.Net.Linq.Util;
 using Remotion.Linq;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
-using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Translation.TreeVisitors;

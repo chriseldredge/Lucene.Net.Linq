@@ -14,8 +14,8 @@ namespace Lucene.Net.Linq.Tests.Integration
         [SetUp]
         public void AddDocuments()
         {
-            AddDocument(new SampleDocument { Name = "sample", Id = "0", Scalar = 0});
-            AddDocument(new SampleDocument { Name = "other", Id = "1", Scalar = 1});
+            AddDocument(new SampleDocument { Name = "sample", Id = "0", Scalar = 2});
+            AddDocument(new SampleDocument { Name = "other", Id = "1", Scalar = 3});
 
             documents = provider.AsQueryable<SampleDocument>();
         }
@@ -63,11 +63,11 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Dynamic_Multiple()
         {
-            AddDocument(new SampleDocument { Name = "sample", Id = "33", Scalar = 1 });
+            AddDocument(new SampleDocument { Name = "sample", Id = "333", Scalar = 1 });
 
             var first = documents.Where(d => d.Name == "sample").Boost(d => d.Id.Length).Boost(d => d.Scalar);
 
-            Assert.That(first.ToList()[0].Id, Is.EqualTo("33"));
+            Assert.That(first.ToList()[0].Id, Is.EqualTo("333"));
         }
 
         [Test]

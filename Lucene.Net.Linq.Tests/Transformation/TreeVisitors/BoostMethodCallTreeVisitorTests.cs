@@ -1,6 +1,6 @@
 using System;
 using System.Linq.Expressions;
-using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using Lucene.Net.Search;
 using NUnit.Framework;

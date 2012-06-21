@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Lucene.Net.Search;
-using Remotion.Linq;
 
 namespace Lucene.Net.Linq
 {
@@ -35,14 +35,11 @@ namespace Lucene.Net.Linq
         /// are added by calling this method more than once, the return values from each function are
         /// multiplied to yield a final result.
         /// </summary>
-        public static IQueryable<T> Boost<T>(this IQueryable<T> source, Func<T, float> boostFunction)
+        public static IQueryable<T> Boost<T>(this IQueryable<T> source, Expression<Func<T, float>> boostFunction)
         {
-            var provider = (QueryProviderBase) source.Provider;
-            var executor = (LuceneQueryExecutor<T>)provider.Executor;
-
-            executor.AddCustomScoreFunction(boostFunction);
-
-            return source;
+            return source.Provider.CreateQuery<T>(
+                Expression.Call(((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)),
+                                source.Expression, boostFunction));
         }
 
         /// <summary>

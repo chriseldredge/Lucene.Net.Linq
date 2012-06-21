@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
-using Lucene.Net.Linq.Expressions;
+using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.ResultOperators;
 using Remotion.Linq.Clauses.StreamedData;
 
-namespace Lucene.Net.Linq.Translation
+namespace Lucene.Net.Linq
 {
     internal class LuceneQueryModel
     {
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
         private readonly IList<SortField> sorts = new List<SortField>();
         private Query query;
+        private Delegate customScoreFunction;
 
         public LuceneQueryModel(IFieldMappingInfoProvider fieldMappingInfoProvider)
         {
@@ -43,7 +43,7 @@ namespace Lucene.Net.Linq.Translation
         public Expression SelectClause { get; set; }
         public StreamedSequenceInfo OutputDataInfo { get; set; }
         public ResultOperatorBase ResultSetOperator { get; private set; }
-
+        
         public void AddQuery(Query additionalQuery)
         {
             if (query == null)
@@ -145,5 +145,38 @@ namespace Lucene.Net.Linq.Translation
             throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " + propertyType);
         }
 
+        public void AddBoostFunction(LambdaExpression expression)
+        {
+            var scoreFunction = expression.Compile();
+
+            if (customScoreFunction != null)
+            {
+                scoreFunction = Delegate.Combine(customScoreFunction, scoreFunction);
+            }
+
+            customScoreFunction = scoreFunction;
+        }
+
+        public Func<TDocument, float> GetCustomScoreFunction<TDocument>()
+        {
+            if (customScoreFunction == null) return null;
+
+            var invocationList = customScoreFunction.GetInvocationList();
+
+            if (invocationList.Length == 1)
+            {
+                return (Func<TDocument, float>)customScoreFunction;
+            }
+
+            return delegate(TDocument document)
+            {
+                var score = 1.0f;
+                foreach (Func<TDocument, float> func in invocationList)
+                {
+                    score = score * func(document);
+                }
+                return score;
+            };
+        }
     }
 }

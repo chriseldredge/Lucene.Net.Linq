@@ -1,4 +1,4 @@
-namespace Lucene.Net.Linq.Expressions
+namespace Lucene.Net.Linq.Clauses.Expressions
 {
     internal enum LuceneExpressionType
     {

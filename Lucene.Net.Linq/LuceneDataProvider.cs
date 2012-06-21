@@ -5,11 +5,8 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Store;
-using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
 using Remotion.Linq.Parsing.Structure;
-using Remotion.Linq.Parsing.Structure.ExpressionTreeProcessors;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
@@ -64,34 +61,10 @@ namespace Lucene.Net.Linq
             this.analyzer = analyzer;
             this.version = version;
 
-            queryParser = CreateQueryParser();
+            queryParser = RelinqQueryParserFactory.CreateQueryParser();
             context = new Context(this.directory, this.analyzer, this.version, indexWriter, transactionLock);
         }
 
-        internal static QueryParser CreateQueryParser()
-        {
-            var expressionTreeParser = new ExpressionTreeParser(
-                ExpressionTreeParser.CreateDefaultNodeTypeProvider(),
-                CreateExpressionTreeProcessor());
-
-            return new QueryParser(expressionTreeParser);
-        }
-
-        /// <summary>
-        /// Creates an <c cref="IExpressionTreeProcessor"/> that will execute
-        /// <c cref="AllowSpecialCharactersExpressionTransformer"/>
-        /// before executing <c cref="PartialEvaluatingExpressionTreeProcessor"/>
-        /// and other default processors. 
-        /// </summary>
-        internal static IExpressionTreeProcessor CreateExpressionTreeProcessor()
-        {
-            var firstRegistry = new ExpressionTransformerRegistry();
-            firstRegistry.Register(new AllowSpecialCharactersExpressionTransformer());
-
-            var processor = ExpressionTreeParser.CreateDefaultProcessor(ExpressionTransformerRegistry.CreateDefault());
-            processor.InnerProcessors.Insert(0, new TransformingExpressionTreeProcessor(firstRegistry));
-            return processor;
-        }
 
         /// <summary>
         /// Returns an IQueryable implementation where the type being mapped
@@ -111,7 +84,7 @@ namespace Lucene.Net.Linq
         /// <param name="factory">Factory method to instantiate new instances of T.</param>
         public IQueryable<T> AsQueryable<T>(Func<T> factory)
         {
-            var executor = new QueryExecutor<T>(context, factory, new ReflectionDocumentMapper<T>());
+            var executor = new LuceneQueryExecutor<T>(context, factory, new ReflectionDocumentMapper<T>());
             return new LuceneQueryable<T>(queryParser, executor);
         }
 

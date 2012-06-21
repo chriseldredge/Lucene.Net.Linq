@@ -16,23 +16,16 @@ using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq
 {
-    internal class QueryExecutor<TDocument> : LuceneQueryExecutor<TDocument>
+    internal class LuceneQueryExecutor<TDocument> : LuceneQueryExecutorBase<TDocument>
     {
         private readonly Func<TDocument> newItem;
         private readonly IDocumentMapper<TDocument> mapper;
 
-        public QueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
+        public LuceneQueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
             : base(context)
         {
             this.newItem = newItem;
             this.mapper = mapper;
-        }
-
-        protected override void SetCurrentDocument(Document doc, float score)
-        {
-            var item = ConvertDocument(doc, score);
-
-            CurrentDocument = item;
         }
 
         protected override TDocument ConvertDocument(Document doc, float score)
@@ -60,14 +53,11 @@ namespace Lucene.Net.Linq
         }
     }
 
-    internal abstract class LuceneQueryExecutor<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
+    internal abstract class LuceneQueryExecutorBase<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
         private readonly Context context;
-        private Func<TDocument, float> customScoreFunction;
-
-        public TDocument CurrentDocument { get; protected set; }
-
-        protected LuceneQueryExecutor(Context context)
+        
+        protected LuceneQueryExecutorBase(Context context)
         {
             this.context = context;
         }
@@ -83,8 +73,6 @@ namespace Lucene.Net.Linq
                 var searcher = searcherHandle.Searcher;
                 var skipResults = luceneQueryModel.SkipResults;
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc() - skipResults);
-
-                // TODO: apply custom score function if specified. (does score matter for any scalars?)
 
                 var hits = searcher.Search(luceneQueryModel.Query, null, maxResults, luceneQueryModel.Sort);
 
@@ -102,9 +90,23 @@ namespace Lucene.Net.Linq
             return returnDefaultWhenEmpty ? sequence.SingleOrDefault() : sequence.Single();
         }
 
+        public class ItemHolder
+        {
+            public TDocument Current { get; set; }
+        }
+
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
+            var itemHolder = new ItemHolder();
+
+            var currentItemExpression = Expression.Property(Expression.Constant(itemHolder), "Current");
+
             var luceneQueryModel = PrepareQuery(queryModel);
+
+            // TODO: move this into QueryModelTransformer?
+            var mapping = new QuerySourceMapping();
+            mapping.AddMapping(queryModel.MainFromClause, currentItemExpression);
+            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
@@ -118,9 +120,10 @@ namespace Lucene.Net.Linq
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc() - skipResults);
                 var query = luceneQueryModel.Query;
 
-                if (customScoreFunction != null)
+                var scoreFunction = luceneQueryModel.GetCustomScoreFunction<TDocument>();
+                if (scoreFunction != null)
                 {
-                    query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocument, customScoreFunction);
+                    query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocument, scoreFunction);
                 }
 
                 if (EnableScoreTracking)
@@ -138,8 +141,8 @@ namespace Lucene.Net.Linq
 
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
-                    SetCurrentDocument(searcher.Doc(hits.ScoreDocs[i].doc), hits.ScoreDocs[i].score);
-                    yield return projector(CurrentDocument);
+                    itemHolder.Current = ConvertDocument(searcher.Doc(hits.ScoreDocs[i].doc), hits.ScoreDocs[i].score);
+                    yield return projector(itemHolder.Current);
                 }
             }
         }
@@ -153,11 +156,6 @@ namespace Lucene.Net.Linq
 
             Log.Trace(() => "Lucene query: " + builder.Model);
 
-            // TODO: move this into QueryModelTransformer
-            var mapping = new QuerySourceMapping();
-            mapping.AddMapping(queryModel.MainFromClause, GetCurrentRowExpression());
-            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
-            
             return builder.Model;
         }
 
@@ -165,13 +163,7 @@ namespace Lucene.Net.Linq
         public abstract IEnumerable<string> AllFields { get; }
 
         protected abstract TDocument ConvertDocument(Document doc, float score);
-        protected abstract void SetCurrentDocument(Document doc, float score);
         protected abstract bool EnableScoreTracking { get; }
-
-        protected virtual Expression GetCurrentRowExpression()
-        {
-            return Expression.Property(Expression.Constant(this), "CurrentDocument");
-        }
 
         protected virtual Expression<Func<TDocument, T>> GetProjector<T>(QueryModel queryModel)
         {
@@ -206,21 +198,6 @@ namespace Lucene.Net.Linq
         public int DoCount(TopFieldDocs d)
         {
             return d.ScoreDocs.Length;
-        }
-
-        public void AddCustomScoreFunction(Func<TDocument, float> customScoreFunction)
-        {
-            if (this.customScoreFunction == null)
-            {
-                this.customScoreFunction = customScoreFunction;
-                return;
-            }
-
-            var first = this.customScoreFunction;
-
-            Func<TDocument, float> combined = doc => first(doc) * customScoreFunction(doc);
-
-            this.customScoreFunction = combined;
         }
     }
 }
