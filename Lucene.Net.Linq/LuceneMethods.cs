@@ -35,7 +35,18 @@ namespace Lucene.Net.Linq
         /// are added by calling this method more than once, the return values from each function are
         /// multiplied to yield a final result.
         /// </summary>
-        public static IQueryable<T> Boost<T>(this IQueryable<T> source, Expression<Func<T, float>> boostFunction)
+        public static IQueryable<T> Boost<T>(this IQueryable<T> source, Func<T, float> boostFunction)
+        {
+            Expression<Func<T, float>> func = t => boostFunction(t);
+            return source.BoostInternal(func);
+        }
+
+        /// <summary>
+        /// Applies a custom boost function to customize query scoring. When multiple boost functions
+        /// are added by calling this method more than once, the return values from each function are
+        /// multiplied to yield a final result.
+        /// </summary>
+        internal static IQueryable<T> BoostInternal<T>(this IQueryable<T> source, Expression<Func<T, float>> boostFunction)
         {
             return source.Provider.CreateQuery<T>(
                 Expression.Call(((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (T)),

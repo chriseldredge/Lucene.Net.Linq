@@ -71,6 +71,14 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Dynamic_Boost_Stream()
+        {
+            var first = documents.Boost(d => d.Scalar).OrderBy(d => d.Score());
+
+            Assert.That(first.ToList()[0].Id, Is.EqualTo("1"));
+        }
+
+        [Test]
         public void ExtensionMethodThrowsWhenInvoked()
         {
             TestDelegate call = () => "hello".Boost(0f);
