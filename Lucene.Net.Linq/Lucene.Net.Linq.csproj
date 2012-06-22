@@ -71,6 +71,8 @@
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
+    <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
+    <Compile Include="ScalarResultHandlers\ScalarResultHandlerRegistry.cs" />
     <Compile Include="Transformation\AllowSpecialCharactersExpressionTransformer.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
@@ -107,6 +109,7 @@
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorRegistry.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandlers.cs" />
     <Compile Include="Util\AnalyzerExtensions.cs" />
+    <Compile Include="Translation\ResultOperatorHandlers\AggregateResultOperatorHandlers.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitor.cs" />

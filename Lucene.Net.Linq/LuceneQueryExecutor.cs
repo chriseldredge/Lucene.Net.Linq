@@ -4,15 +4,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.ScalarResultHandlers;
 using Lucene.Net.Linq.Search.Function;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Linq.Util;
-using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
-using Remotion.Linq.Clauses.ResultOperators;
 
 namespace Lucene.Net.Linq
 {
@@ -55,6 +54,8 @@ namespace Lucene.Net.Linq
 
     internal abstract class LuceneQueryExecutorBase<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
+        
+
         private readonly Context context;
         
         protected LuceneQueryExecutorBase(Context context)
@@ -76,10 +77,9 @@ namespace Lucene.Net.Linq
 
                 var hits = searcher.Search(luceneQueryModel.Query, null, maxResults, luceneQueryModel.Sort);
 
-                var projection = GetScalarProjector<T>(luceneQueryModel.ResultSetOperator, hits);
-                var projector = projection.Compile();
+                var handler = ScalarResultHandlerRegistry.Instance.GetItem(luceneQueryModel.ResultSetOperator.GetType());
 
-                return projector(hits);
+                return handler.Execute<T>(hits);
             }
         }
 
@@ -103,7 +103,6 @@ namespace Lucene.Net.Linq
 
             var luceneQueryModel = PrepareQuery(queryModel);
 
-            // TODO: move this into QueryModelTransformer?
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, currentItemExpression);
             queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
@@ -159,45 +158,15 @@ namespace Lucene.Net.Linq
             return builder.Model;
         }
 
-        public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
-        public abstract IEnumerable<string> AllFields { get; }
-
-        protected abstract TDocument ConvertDocument(Document doc, float score);
-        protected abstract bool EnableScoreTracking { get; }
-
         protected virtual Expression<Func<TDocument, T>> GetProjector<T>(QueryModel queryModel)
         {
             return Expression.Lambda<Func<TDocument, T>>(queryModel.SelectClause.Selector, Expression.Parameter(typeof(TDocument)));
         }
 
-        protected virtual Expression<Func<TopFieldDocs, T>> GetScalarProjector<T>(ResultOperatorBase op, TopFieldDocs docs)
-        {
-            Expression call = Expression.Call(Expression.Constant(this), GetType().GetMethod("DoCount"), Expression.Constant(docs));
-            if (op is LongCountResultOperator)
-            {
-                call = Expression.Convert(call, typeof(long));
-            }
-            else if (op is AnyResultOperator)
-            {
-                call = Expression.Call(Expression.Constant(this), GetType().GetMethod("DoAny"), Expression.Constant(docs));
-            }
-            else if (!(op is CountResultOperator))
-            {
-                //TODO: resultOperator.ExecuteInMemory() on unsupported ones.
-                throw new NotSupportedException("The result operator type " + op.GetType() + " is not supported.");
-            }
-            
-            return Expression.Lambda<Func<TopFieldDocs, T>>(call, Expression.Parameter(typeof(TopFieldDocs)));
-        }
+        public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
+        public abstract IEnumerable<string> AllFields { get; }
 
-        public bool DoAny(TopFieldDocs d)
-        {
-            return d.TotalHits != 0;
-        }
-
-        public int DoCount(TopFieldDocs d)
-        {
-            return d.ScoreDocs.Length;
-        }
+        protected abstract TDocument ConvertDocument(Document doc, float score);
+        protected abstract bool EnableScoreTracking { get; }
     }
 }
