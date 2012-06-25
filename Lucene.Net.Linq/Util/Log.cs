@@ -2,31 +2,10 @@
 
 namespace Lucene.Net.Linq.Util
 {
-    /// <summary>
-    /// Controls which logging messages are emitted during execution.
-    /// </summary>
+    [Obsolete("This library now uses Common.Logging to log messages.")]
     public static class Log
     {
-#if DEBUG
-        static Log()
-        {
-            TraceEnabled = true;
-        }
-#endif
-
-        /// <summary>
-        /// When set, messages will be written to <c cref="System.Diagnostics.Trace"/>
-        /// to provide insight into how LINQ expressions are converted and
-        /// what queries are being executed.
-        /// </summary>
+        [Obsolete("This library now uses Common.Logging to log messages.")]
         public static bool TraceEnabled { get; set; }
-
-        internal static void Trace(Func<string> format)
-        {
-            if (TraceEnabled)
-            {
-                System.Diagnostics.Trace.WriteLine(format(), "Lucene.Net.Linq");
-            }
-        }
     }
 }

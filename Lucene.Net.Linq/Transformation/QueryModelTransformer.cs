@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Common.Logging;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using Lucene.Net.Linq.Util;
@@ -13,6 +14,8 @@ namespace Lucene.Net.Linq.Transformation
     /// </summary>
     internal class QueryModelTransformer : QueryModelVisitorBase
     {
+        private static readonly ILog Log = LogManager.GetLogger<QueryModelTransformer>();
+
         private readonly IEnumerable<ExpressionTreeVisitor> whereSelectClauseVisitors;
         private readonly IEnumerable<ExpressionTreeVisitor> orderingVisitors;
 
@@ -62,12 +65,12 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            Log.Trace(() => "Original QueryModel:     " + queryModel);
+            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
 
             foreach (var visitor in whereSelectClauseVisitors)
             {
                 whereClause.TransformExpressions(visitor.VisitExpression);
-                Log.Trace(() => "Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel);
+                Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
 
             base.VisitWhereClause(whereClause, queryModel, index);
@@ -75,12 +78,12 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
-            Log.Trace(() => "Original QueryModel:     " + queryModel);
+            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
 
             foreach (var visitor in orderingVisitors)
             {
                 orderByClause.TransformExpressions(visitor.VisitExpression);
-                Log.Trace(() => "Transformed QueryModel after " + visitor.GetType().Name + ": " + queryModel);
+                Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
             
             ExpandCompositeOrderings(orderByClause);
