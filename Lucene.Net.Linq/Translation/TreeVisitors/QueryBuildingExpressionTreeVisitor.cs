@@ -185,8 +185,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 var minInclusive = lowerRange == RangeType.Inclusive;
                 var maxInclusive = upperRange == RangeType.Inclusive;
 
-                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpressionToString(lowerBoundExpression, mapping);
-                var upperBound = upperBoundExpression == null ? null : EvaluateExpressionToString(upperBoundExpression, mapping);
+                var lowerBound = lowerBoundExpression == null ? null : EvaluateExpressionToStringAndAnalyze(lowerBoundExpression, mapping);
+                var upperBound = upperBoundExpression == null ? null : EvaluateExpressionToStringAndAnalyze(upperBoundExpression, mapping);
                 return new TermRangeQuery(mapping.FieldName, lowerBound, upperBound, minInclusive, maxInclusive);
             }
         }
@@ -247,6 +247,11 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             if (expression.AllowSpecialCharacters) return str;
 
             return QueryParser.Escape(str ?? string.Empty);
+        }
+
+        private string EvaluateExpressionToStringAndAnalyze(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
+        {
+            return context.Analyzer.Analyze(mapping.FieldName, EvaluateExpressionToString(expression, mapping));
         }
     }
 }

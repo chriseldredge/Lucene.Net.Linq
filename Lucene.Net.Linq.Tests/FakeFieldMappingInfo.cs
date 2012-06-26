@@ -6,17 +6,19 @@ namespace Lucene.Net.Linq.Tests
 {
     public class FakeFieldMappingInfo : IFieldMappingInfo
     {
+        public FakeFieldMappingInfo()
+        {
+            IsNumericField = true;
+        }
+
         public string FieldName { get; set; }
         public TypeConverter Converter { get; set; }
         public PropertyInfo PropertyInfo { get; set; }
+        public bool IsNumericField { get; set; }
+
         public string ConvertToQueryExpression(object value)
         {
             return value.ToString();
-        }
-
-        public bool IsNumericField
-        {
-            get { return true; }
         }
 
         public int SortFieldType

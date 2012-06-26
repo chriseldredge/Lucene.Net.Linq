@@ -106,6 +106,7 @@
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandler.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorRegistry.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandlers.cs" />
+    <Compile Include="Util\AnalyzerExtensions.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitor.cs" />

@@ -62,13 +62,15 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
     {
         public IFieldMappingInfo GetMappingInfo(string propertyName)
         {
-            return new FakeFieldMappingInfo { FieldName = propertyName };
+            return new FakeFieldMappingInfo { FieldName = propertyName, IsNumericField = IsNumeric };
         }
 
         public IEnumerable<string> AllFields
         {
             get { return new[] { "Id" }; }
         }
+
+        public bool IsNumeric { get; set; }
     }
 
     [TestFixture]
@@ -80,11 +82,13 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             new LuceneQueryFieldExpression(typeof (int), "Id");
 
         private static readonly Version version = Version.LUCENE_29;
+        private FieldMappingInfoProviderStub fieldMappingInfoProvider;
 
         [SetUp]
         public void SetUp()
         {
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new WhitespaceAnalyzer(), version, null, new object()), new FieldMappingInfoProviderStub());
+            fieldMappingInfoProvider = new FieldMappingInfoProviderStub { IsNumeric = true };
+            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new LowercaseKeywordAnalyzer(), version, null, new object()), fieldMappingInfoProvider);
         }
 
         [Test]
@@ -118,6 +122,22 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             builder.VisitExpression(expression);
 
             Assert.That(builder.Query.ToString(), Is.EqualTo("+Count:{5 TO " + int.MaxValue + "]"));
+        }
+
+        [Test]
+        public void GreaterThan_AnalyzesTerm()
+        {
+            fieldMappingInfoProvider.IsNumeric = false;
+
+            var expression = new LuceneQueryPredicateExpression(
+                new LuceneQueryFieldExpression(typeof(string), "Name"),
+                Expression.Constant("SampleName"),
+                BooleanClause.Occur.MUST,
+                QueryType.GreaterThan);
+
+            builder.VisitExpression(expression);
+
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:{samplename TO *]"));
         }
 
         [Test]
