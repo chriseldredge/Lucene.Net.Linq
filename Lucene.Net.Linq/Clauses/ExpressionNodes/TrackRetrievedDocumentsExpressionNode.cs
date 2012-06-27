@@ -5,18 +5,19 @@ using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
 namespace Lucene.Net.Linq.Clauses.ExpressionNodes
 {
-    internal class BoostExpressionNode : MethodCallExpressionNodeBase
+    internal class TrackRetrievedDocumentsExpressionNode : MethodCallExpressionNodeBase
     {
         public static readonly MethodInfo[] SupportedMethods = new[]
-            {
-                GetSupportedMethod (() => LuceneMethods.BoostInternal<object> (null, null))
-            };
+                                                                   {
+                                                                       GetSupportedMethod (() => LuceneMethods.TrackRetrievedDocuments<object>(null, null))
+                                                                   };
 
-        private readonly LambdaExpression boostFunction;
+        private readonly ConstantExpression tracker;
 
-        public BoostExpressionNode(MethodCallExpressionParseInfo parseInfo, LambdaExpression boostFunction) : base(parseInfo)
+        public TrackRetrievedDocumentsExpressionNode(MethodCallExpressionParseInfo parseInfo, ConstantExpression tracker)
+            : base(parseInfo)
         {
-            this.boostFunction = boostFunction;
+            this.tracker = tracker;
         }
 
         public override Expression Resolve(ParameterExpression inputParameter, Expression expressionToBeResolved, ClauseGenerationContext clauseGenerationContext)
@@ -26,7 +27,7 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
 
         protected override QueryModel ApplyNodeSpecificSemantics(QueryModel queryModel, ClauseGenerationContext clauseGenerationContext)
         {
-            queryModel.BodyClauses.Add(new BoostClause(boostFunction));
+            queryModel.BodyClauses.Add(new TrackRetrievedDocumentsClause(tracker));
             return queryModel;
         }
     }

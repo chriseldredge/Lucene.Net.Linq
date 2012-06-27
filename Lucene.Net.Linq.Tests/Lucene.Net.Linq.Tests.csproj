@@ -73,6 +73,7 @@
     <Compile Include="Integration\SelectCollectionTests.cs" />
     <Compile Include="Integration\CustomWhereTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
+    <Compile Include="Integration\SessionTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
     <Compile Include="LowercaseKeywordAnalyzer.cs" />

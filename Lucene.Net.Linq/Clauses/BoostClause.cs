@@ -1,46 +1,33 @@
-﻿using System;
-using System.Linq.Expressions;
-using Lucene.Net.Linq.Translation;
+﻿using System.Linq.Expressions;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
 namespace Lucene.Net.Linq.Clauses
 {
-    internal class BoostClause : IBodyClause
+    internal class BoostClause : ExtensionClause<LambdaExpression>
     {
-        private LambdaExpression boostFunction;
-
-        internal BoostClause(LambdaExpression boostFunction)
+        public BoostClause(LambdaExpression expression) : base(expression)
         {
-            this.boostFunction = boostFunction;
         }
 
         public LambdaExpression BoostFunction
         {
-            get { return boostFunction; }
+            get { return expression; }
         }
 
-        public void TransformExpressions(Func<Expression, Expression> transformation)
+        protected override void Accept(ILuceneQueryModelVisitor visitor, QueryModel queryModel, int index)
         {
-            boostFunction = transformation(boostFunction) as LambdaExpression;
+            visitor.VisitBoostClause(this, queryModel, index);
         }
 
-        public void Accept(IQueryModelVisitor visitor, QueryModel queryModel, int index)
+        public override IBodyClause Clone(CloneContext cloneContext)
         {
-            var customVisitor = visitor as ILuceneQueryModelVisitor;
-            if (customVisitor == null) return;
-
-            customVisitor.VisitBoostClause(this, queryModel, index);
-        }
-
-        public IBodyClause Clone(CloneContext cloneContext)
-        {
-            return new BoostClause(boostFunction);
+            return new BoostClause(expression);
         }
 
         public override string ToString()
         {
-            return "boost " + boostFunction;
+            return "boost " + expression;
         }
     }
 }

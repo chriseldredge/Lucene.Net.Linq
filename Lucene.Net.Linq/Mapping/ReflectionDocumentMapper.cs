@@ -18,6 +18,7 @@ namespace Lucene.Net.Linq.Mapping
         void ToObject(Document source, float score, T target);
         void ToDocument(T source, Document target);
         DocumentKey ToKey(T source);
+        bool Equals(T item1, T item2);
         bool EnableScoreTracking { get; }
     }
 
@@ -93,6 +94,19 @@ namespace Lucene.Net.Linq.Mapping
         public List<IFieldMapper<T>> KeyFields
         {
             get { return new List<IFieldMapper<T>>(keyFields); }
+        }
+
+        public bool Equals(T item1, T item2)
+        {
+            foreach (var field in fieldMap.Values)
+            {
+                var val1 = field.PropertyInfo.GetValue(item1, null);
+                var val2 = field.PropertyInfo.GetValue(item2, null);
+
+                if (!Equals(val1, val2)) return false;
+            }
+
+            return true;
         }
     }
 }

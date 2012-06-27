@@ -5,6 +5,8 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 
 * Automatically converts PONOs to Documents and back
 * Add, delete and update documents in atomic transaction
+* Unit of Work pattern automatically tracks and flushes updated documents
+* Update/replace documents with [Field(Key=true)] to prevent duplicates
 * Term queries
 * Prefix queries
 * Range queries and numeric range queries
@@ -80,17 +82,14 @@ Next, create LuceneDataProvider and run some queries:
             using (var session = provider.OpenSession<Article>())
             {
                 session.Add(new Article { Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow });
-                session.Commit();
             }
-
-            writer.Commit();
 
             var articles = provider.AsQueryable<Article>();
 
             var threshold = DateTimeOffset.UtcNow.Subtract(TimeSpan.FromDays(30));
 
             var articlesByJohn = from a in articles
-                          where a.Author == "John Smith" && a.PublishDate > threshold
+                          where a.Author == "John Doe" && a.PublishDate > threshold
                           orderby a.Title
                           select a;
 
@@ -107,7 +106,6 @@ generally be analyzed using a stemming analyzer, but fields like Id, IssueNumber
 Upcoming features
 -----------------
 
-* Support "primary key" to replace existing documents to prevent duplicates
 * Ability to specify optional cache warming queries to run when searcher is reloaded
 * Support for more LINQ expressions
 * Optimize sorting complex types stored as string fields when the strings are sortable

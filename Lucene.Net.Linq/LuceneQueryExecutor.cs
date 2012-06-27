@@ -138,9 +138,22 @@ namespace Lucene.Net.Linq
                     if (skipResults < 0) yield break;
                 }
 
+                var tracker = luceneQueryModel.DocumentTracker as IRetrievedDocumentTracker<TDocument>;
+
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
-                    itemHolder.Current = ConvertDocument(searcher.Doc(hits.ScoreDocs[i].doc), hits.ScoreDocs[i].score);
+                    var doc = hits.ScoreDocs[i].doc;
+                    var score = hits.ScoreDocs[i].score;
+                    
+                    var item = ConvertDocument(searcher.Doc(doc), score);
+
+                    if (tracker != null)
+                    {
+                        var copy = ConvertDocument(searcher.Doc(doc), score);
+                        tracker.TrackDocument(item, copy);
+                    }
+
+                    itemHolder.Current = item;
                     yield return projector(itemHolder.Current);
                 }
             }

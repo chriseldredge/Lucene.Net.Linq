@@ -75,5 +75,10 @@ namespace Lucene.Net.Linq.Translation
         {
             model.AddBoostFunction(boostClause.BoostFunction);
         }
+
+        public void VisitTrackRetrievedDocumentsClause(TrackRetrievedDocumentsClause trackRetrievedDocumentsClause, QueryModel queryModel, int index)
+        {
+            model.DocumentTracker = trackRetrievedDocumentsClause.Tracker.Value;
+        }
     }
 }

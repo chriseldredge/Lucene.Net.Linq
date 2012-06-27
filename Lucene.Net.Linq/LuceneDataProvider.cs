@@ -84,15 +84,24 @@ namespace Lucene.Net.Linq
         /// <param name="factory">Factory method to instantiate new instances of T.</param>
         public IQueryable<T> AsQueryable<T>(Func<T> factory)
         {
-            var executor = new LuceneQueryExecutor<T>(context, factory, new ReflectionDocumentMapper<T>());
-            return new LuceneQueryable<T>(queryParser, executor);
+            return CreateQueryable(factory, new ReflectionDocumentMapper<T>());
         }
 
         /// <summary>
         /// Opens a session for staging changes and then committing them atomically.
         /// </summary>
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
-        public ISession<T> OpenSession<T>()
+        public ISession<T> OpenSession<T>() where T : new()
+        {
+            return OpenSession(() => new T());
+        }
+
+        /// <summary>
+        /// Opens a session for staging changes and then committing them atomically.
+        /// </summary>
+        /// <param name="factory">Factory delegate that creates new instances of <typeparamref name="T"/></param>
+        /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
+        public ISession<T> OpenSession<T>(Func<T> factory)
         {
             if (context.IsReadOnly)
             {
@@ -100,7 +109,13 @@ namespace Lucene.Net.Linq
             }
 
             var mapper = new ReflectionDocumentMapper<T>();
-            return new LuceneSession<T>(mapper, context);
+            return new LuceneSession<T>(mapper, context, CreateQueryable(factory, mapper));
+        }
+
+        private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, IDocumentMapper<T> mapper)
+        {
+            var executor = new LuceneQueryExecutor<T>(context, factory, mapper);
+            return new LuceneQueryable<T>(queryParser, executor);
         }
     }
 }

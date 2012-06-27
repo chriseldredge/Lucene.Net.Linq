@@ -43,7 +43,9 @@ namespace Lucene.Net.Linq
         public Expression SelectClause { get; set; }
         public StreamedSequenceInfo OutputDataInfo { get; set; }
         public ResultOperatorBase ResultSetOperator { get; private set; }
-        
+
+        public object DocumentTracker { get; set; }
+
         public void AddQuery(Query additionalQuery)
         {
             if (query == null)
@@ -161,17 +163,17 @@ namespace Lucene.Net.Linq
         {
             if (customScoreFunction == null) return null;
 
-            var invocationList = customScoreFunction.GetInvocationList();
+            var invocationList = customScoreFunction.GetInvocationList().Cast<Func<TDocument, float>>().ToArray();
 
             if (invocationList.Length == 1)
             {
-                return (Func<TDocument, float>)customScoreFunction;
+                return invocationList[0];
             }
 
             return delegate(TDocument document)
             {
                 var score = 1.0f;
-                foreach (Func<TDocument, float> func in invocationList)
+                foreach (var func in invocationList)
                 {
                     score = score * func(document);
                 }

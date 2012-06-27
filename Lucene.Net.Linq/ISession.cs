@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq
 {
-    public interface ISession<in T> : IDisposable
+    public interface ISession<T> : IDisposable
     {
+        IQueryable<T> Query();
         void Add(params T[] items);
         void Delete(params T[] items);
         void Delete(params Query[] items);

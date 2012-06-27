@@ -31,11 +31,18 @@ namespace Lucene.Net.Linq.Tests.Integration
 
         public class SampleDocument
         {
+            private static int count;
+            public SampleDocument()
+            {
+                Key = (count++).ToString();
+            }
+
             public string Name { get; set; }
 
             [Field(IndexMode.NotAnalyzed)]
             public string Id { get; set; }
 
+            [Field(Key = true)]
             public string Key { get; set; }
 
             public int Scalar { get; set; }
@@ -53,7 +60,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             public string Alias { get; set; }
         }
 
-        protected void AddDocument<T>(T document)
+        protected void AddDocument<T>(T document) where T : new()
         {
             using (var session = provider.OpenSession<T>())
             {

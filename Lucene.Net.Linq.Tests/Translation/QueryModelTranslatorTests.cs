@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
+using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
@@ -150,7 +151,6 @@ namespace Lucene.Net.Linq.Tests.Translation
             mappingInfo.Expect(m => m.GetMappingInfo("Id")).Return(numericMappingInfo);
             nonNumericMappingInfo.Stub(i => i.FieldName).Return("Name");
             numericMappingInfo.Stub(i => i.FieldName).Return("Id");
-            
 
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Asc));
@@ -165,6 +165,15 @@ namespace Lucene.Net.Linq.Tests.Translation
             Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(2));
             AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "Name", OrderingDirection.Asc, SortField.STRING);
             AssertSortFieldEquals(transformer.Model.Sort.GetSort()[1], "Id", OrderingDirection.Desc, SortField.LONG);
+        }
+
+        [Test]
+        public void SetsDocumentTracker()
+        {
+            var expr = Expression.Constant(this);
+            transformer.VisitTrackRetrievedDocumentsClause(new TrackRetrievedDocumentsClause(expr), queryModel, 0);
+
+            Assert.That(transformer.Model.DocumentTracker, Is.SameAs(expr.Value));
         }
 
         private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)

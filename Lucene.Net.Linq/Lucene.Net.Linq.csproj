@@ -63,6 +63,7 @@
     <Compile Include="Abstractions\IIndexWriter.cs" />
     <Compile Include="Clauses\ExpressionNodes\BoostExpressionNode.cs" />
     <Compile Include="Clauses\BoostClause.cs" />
+    <Compile Include="Clauses\ExpressionNodes\TrackRetrievedDocumentsExpressionNode.cs" />
     <Compile Include="Clauses\Expressions\AllowSpecialCharactersExpression.cs" />
     <Compile Include="Clauses\Expressions\BoostBinaryExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneCompositeOrderingExpression.cs" />
@@ -72,7 +73,10 @@
     <Compile Include="Clauses\Expressions\LuceneQueryExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneQueryFieldExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneQueryPredicateExpression.cs" />
+    <Compile Include="Clauses\ExtensionClause.cs" />
+    <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
+    <Compile Include="IRetrievedDocumentTracker.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
@@ -111,7 +115,6 @@
     <Compile Include="LuceneQueryModel.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandler.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorRegistry.cs" />
-    <Compile Include="Translation\ResultOperatorHandlers\ResultOperatorHandlers.cs" />
     <Compile Include="Util\AnalyzerExtensions.cs" />
     <Compile Include="Translation\ResultOperatorHandlers\AggregateResultOperatorHandlers.cs" />
     <Compile Include="Util\ExpressionExtensions.cs" />

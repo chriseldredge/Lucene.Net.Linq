@@ -53,6 +53,13 @@ namespace Lucene.Net.Linq
                                 source.Expression, boostFunction));
         }
 
+        internal static IQueryable<T> TrackRetrievedDocuments<T>(this IQueryable<T> source, IRetrievedDocumentTracker<T> tracker)
+        {
+            return source.Provider.CreateQuery<T>(
+                Expression.Call(((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)),
+                                source.Expression, Expression.Constant(tracker)));
+        }
+
         /// <summary>
         /// Applies the provided Query. Enables queries to be constructed from outside of
         /// LINQ to be executed as part of a LINQ query.

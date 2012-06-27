@@ -8,6 +8,9 @@ namespace Lucene.Net.Linq.Tests.Mapping
     [TestFixture]
     public class ReflectionDocumentMapperTests
     {
+        private ReflectedDocument item1 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+        private ReflectedDocument item2 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+
         [Test]
         public void CtrFindsKeyFields()
         {
@@ -50,6 +53,34 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(key1, Is.Not.EqualTo(key2));
         }
 
+        [Test]
+        public void Documents_Equal()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
+
+            Assert.That(mapper.Equals(item1, item2), Is.True);
+        }
+
+        [Test]
+        public void Documents_Equal_IgnoredField()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
+
+            item1.IgnoreMe = "different";
+
+            Assert.That(mapper.Equals(item1, item2), Is.True);
+        }
+
+        [Test]
+        public void Documents_Equal_Not()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
+
+            item1.Version = new Version("5.6.7.8");
+
+            Assert.That(mapper.Equals(item1, item2), Is.False);
+        }
+
         public class ReflectedDocument
         {
             [Field(Key = true)]
@@ -65,6 +96,9 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             [NumericField(Key = true)]
             public int Number { get; set; }
+
+            [IgnoreField]
+            public string IgnoreMe { get; set; }
         }
     }
 
