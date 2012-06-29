@@ -111,6 +111,7 @@
     <Compile Include="Transformation\TreeVisitors\ExternallyProvidedQueryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\NoOpConvertExpressionRemovingVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="ILuceneQueryModelVisitor.cs" />
     <Compile Include="LuceneQueryModel.cs" />

@@ -96,6 +96,7 @@
     <Compile Include="Transformation\TreeVisitors\MethodCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\NoOpConvertExpressionRemovingVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />
     <Compile Include="VersionConverter.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionComplexTypeTests.cs" />

@@ -1,11 +1,10 @@
 ﻿using System.Linq.Expressions;
 using Lucene.Net.Linq.Clauses.Expressions;
-using Remotion.Linq.Clauses.Expressions;
-using Remotion.Linq.Parsing;
+using Lucene.Net.Linq.Clauses.TreeVisitors;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
-    internal class FlagToBinaryConditionTreeVisitor : ExpressionTreeVisitor
+    internal class FlagToBinaryConditionTreeVisitor : LuceneExpressionTreeVisitor
     {
         private Expression parent;
         private bool negate;
@@ -41,22 +40,20 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             if (Equals(operand, expression.Operand))
             {
-                return Expression.MakeBinary(ExpressionType.Equal, operand, Expression.Constant(negate));    
+                return Expression.MakeBinary(ExpressionType.Equal, operand, Expression.Constant(negate));
             }
 
             return operand;
         }
 
-        protected override Expression VisitExtensionExpression(ExtensionExpression expression)
+        protected override Expression VisitLuceneQueryFieldExpression(LuceneQueryFieldExpression expression)
         {
-            var field = expression as LuceneQueryFieldExpression;
-
-            if (field == null || field.Type != typeof(bool) || IsAlreadyInEqualityExpression())
+            if (expression.Type != typeof(bool) || IsAlreadyInEqualityExpression())
             {
-                return base.VisitExtensionExpression(expression);
+                return base.VisitLuceneQueryFieldExpression(expression);
             }
 
-            return Expression.MakeBinary(ExpressionType.Equal, field, Expression.Constant(!negate));
+            return Expression.MakeBinary(ExpressionType.Equal, expression, Expression.Constant(!negate));
         }
 
         private bool IsAlreadyInEqualityExpression()

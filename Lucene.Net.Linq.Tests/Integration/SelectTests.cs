@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
@@ -291,6 +292,19 @@ namespace Lucene.Net.Linq.Tests.Integration
             var documents = provider.AsQueryable<SampleDocument>();
 
             var result = from doc in documents where !doc.Name.StartsWith("other") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void Where_StartsWith_Negate_NullSafe()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+            
+            var result = from doc in documents where (bool)(!((bool?)doc.Name.StartsWith("other"))) select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
