@@ -283,6 +283,19 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Where_StartsWith_Negate()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document" });
+            AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where !doc.Name.StartsWith("other") select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
         public void Where_Compare()
         {
             AddDocument(new SampleDocument { Name = "Other Document", Id = "b" });

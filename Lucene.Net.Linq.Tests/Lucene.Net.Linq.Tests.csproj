@@ -90,9 +90,10 @@
     <Compile Include="Mapping\ReflectionDocumentMapperTests.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
-    <Compile Include="Transformation\TreeVisitors\CompareCallToBinaryExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitorTests.cs" />
-    <Compile Include="Transformation\TreeVisitors\MethodCallToBinaryExpressionTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\MethodCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />

@@ -9,9 +9,9 @@ using Remotion.Linq.Parsing;
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     /// <summary>
-    /// Replaces supported method calls like Compare([LuceneQueryFieldExpression], "abc") to LuceneQueryPredicateExpression
+    /// Replaces supported method calls like <c>string.Compare([LuceneQueryFieldExpression], "abc") > 0</c> to LuceneQueryPredicateExpression
     /// </summary>
-    internal class CompareCallToBinaryExpressionTreeVisitor : ExpressionTreeVisitor
+    internal class CompareCallToLuceneQueryPredicateExpressionTreeVisitor : ExpressionTreeVisitor
     {
         private static readonly ISet<ExpressionType> compareTypes =
             new HashSet<ExpressionType>

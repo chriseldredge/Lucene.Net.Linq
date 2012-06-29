@@ -7,9 +7,9 @@ using Remotion.Linq.Parsing;
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     /// <summary>
-    /// Replaces supported method calls like [LuceneQueryFieldExpression].StartsWith("foo") with a BinaryExpression like [LuceneQueryFieldExpression] == foo*
+    /// Replaces supported method calls like [LuceneQueryFieldExpression].StartsWith("foo") with a LuceneQueryPredicateExpression like [LuceneQueryPredicateExpression](+Field:foo*)
     /// </summary>
-    internal class MethodCallToBinaryExpressionTreeVisitor : ExpressionTreeVisitor
+    internal class MethodCallToLuceneQueryPredicateExpressionTreeVisitor : ExpressionTreeVisitor
     {
         protected override Expression VisitMethodCallExpression(MethodCallExpression expression)
         {

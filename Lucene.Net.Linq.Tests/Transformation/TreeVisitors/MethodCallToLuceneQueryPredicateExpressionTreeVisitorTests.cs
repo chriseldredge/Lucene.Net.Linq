@@ -7,16 +7,16 @@ using NUnit.Framework;
 namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 {
     [TestFixture]
-    public class MethodCallToBinaryExpressionTreeVisitorTests
+    public class MethodCallToLuceneQueryPredicateExpressionTreeVisitorTests
     {
-        private MethodCallToBinaryExpressionTreeVisitor visitor;
+        private MethodCallToLuceneQueryPredicateExpressionTreeVisitor visitor;
         private Expression field;
         private ConstantExpression foo;
 
         [SetUp]
         public void SetUp()
         {
-            visitor = new MethodCallToBinaryExpressionTreeVisitor();
+            visitor = new MethodCallToLuceneQueryPredicateExpressionTreeVisitor();
             field = new LuceneQueryFieldExpression(typeof (string), "firstName");
             foo = Expression.Constant("foo");
         }

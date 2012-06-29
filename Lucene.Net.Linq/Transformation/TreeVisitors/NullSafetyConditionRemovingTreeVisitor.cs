@@ -33,8 +33,8 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
         private static Expression GetNonNullSide(Expression a, Expression b)
         {
-            if (a.IsNullConstant()) return b;
-            if (b.IsNullConstant()) return a;
+            if (a.IsNullConstant() || a.IsFalseConstant()) return b;
+            if (b.IsNullConstant() || b.IsFalseConstant()) return a;
 
             return null;
         }

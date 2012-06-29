@@ -35,11 +35,16 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             negate = !negate;
 
-            var result = VisitExpression(expression.Operand);
+            var operand = VisitExpression(expression.Operand);
 
             negate = !negate;
 
-            return result;
+            if (Equals(operand, expression.Operand))
+            {
+                return Expression.MakeBinary(ExpressionType.Equal, operand, Expression.Constant(negate));    
+            }
+
+            return operand;
         }
 
         protected override Expression VisitExtensionExpression(ExtensionExpression expression)

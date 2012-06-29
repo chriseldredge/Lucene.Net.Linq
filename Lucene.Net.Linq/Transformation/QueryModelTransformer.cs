@@ -30,9 +30,10 @@ namespace Lucene.Net.Linq.Transformation
                            new FlagToBinaryConditionTreeVisitor(),
                            new NoOpMethodCallRemovingTreeVisitor(),
                            new NoOpConditionRemovingTreeVisitor(),
-                           new MethodCallToBinaryExpressionTreeVisitor(),
+                           new MethodCallToLuceneQueryPredicateExpressionTreeVisitor(),
                            new NullSafetyConditionRemovingTreeVisitor(),
-                           new CompareCallToBinaryExpressionTreeVisitor(),
+                           new CompareCallToLuceneQueryPredicateExpressionTreeVisitor(),
+                           new BooleanBinaryToQueryPredicateExpressionTreeVisitor(),
                            new BinaryToQueryExpressionTreeVisitor(),
                            new AllowSpecialCharactersMethodExpressionTreeVisitor(),
                            new BoostMethodCallTreeVisitor(1)

@@ -81,12 +81,28 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         {
             // "where !doc.SomeFlag"
             var flag = new LuceneQueryFieldExpression(typeof(bool), "SomeFlag");
-            var expression = Expression.MakeUnary(ExpressionType.Not, flag, typeof (bool));
+            var expression = Expression.MakeUnary(ExpressionType.Not, flag, typeof(bool));
             var result = visitor.VisitExpression(expression) as BinaryExpression;
 
             Assert.That(result, Is.Not.Null, "Expected BinaryExpression to be returned.");
             Assert.That(result.Left, Is.SameAs(flag));
             Assert.That(result.Right, Is.InstanceOf<ConstantExpression>());
+            Assert.That(((ConstantExpression)result.Right).Value, Is.EqualTo(false));
+        }
+
+        [Test]
+        public void ConvertNestedMethodCall()
+        {
+            // where !doc.Name.StartsWith("foo")
+            var field = new LuceneQueryFieldExpression(typeof(string), "Name");
+            var startsWith = Expression.Call(field, "StartsWith", null, Expression.Constant("foo"));
+            var expression = Expression.MakeUnary(ExpressionType.Not, startsWith, typeof(bool));
+            var result = visitor.VisitExpression(expression) as BinaryExpression;
+
+            Assert.That(result, Is.Not.Null, "Expected BinaryExpression to be returned.");
+            Assert.That(result.Left, Is.SameAs(startsWith));
+            Assert.That(result.Right, Is.InstanceOf<ConstantExpression>());
+            Assert.That(result.NodeType, Is.EqualTo(ExpressionType.Equal));
             Assert.That(((ConstantExpression)result.Right).Value, Is.EqualTo(false));
         }
 

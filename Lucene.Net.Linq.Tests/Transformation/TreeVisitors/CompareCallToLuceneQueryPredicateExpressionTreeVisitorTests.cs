@@ -8,10 +8,10 @@ using NUnit.Framework;
 namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 {
     [TestFixture]
-    public class CompareCallToBinaryExpressionTreeVisitorTests
+    public class CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests
     {
-        private CompareCallToBinaryExpressionTreeVisitor visitor;
-        private readonly MethodInfo methodInfo = typeof(CompareCallToBinaryExpressionTreeVisitorTests).GetMethod("Compare", BindingFlags.Static | BindingFlags.Public);
+        private CompareCallToLuceneQueryPredicateExpressionTreeVisitor visitor;
+        private readonly MethodInfo methodInfo = typeof(CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests).GetMethod("Compare", BindingFlags.Static | BindingFlags.Public);
 
         private readonly Expression field = new LuceneQueryFieldExpression(typeof(string), "Name");
         private readonly Expression constant = Expression.Constant("John");
@@ -19,7 +19,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         [SetUp]
         public void SetUp()
         {
-            visitor = new CompareCallToBinaryExpressionTreeVisitor();
+            visitor = new CompareCallToLuceneQueryPredicateExpressionTreeVisitor();
         }
 
         [Test]

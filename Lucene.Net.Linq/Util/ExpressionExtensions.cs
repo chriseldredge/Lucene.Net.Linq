@@ -16,26 +16,17 @@ namespace Lucene.Net.Linq.Util
 
             if (constant == null) return false;
 
-            if (constant.Value == null) return true;
-
-            var type = constant.Type;
-
-            if (type == typeof(bool))
-            {
-                return (bool)constant.Value == false;
-            }
-
-            return false;
+            return (constant.Value == null);
         }
 
         internal static bool IsTrueConstant(this Expression expression)
         {
-            return (expression is ConstantExpression) && Convert.ToBoolean(((ConstantExpression)expression).Value);
+            return expression.Type == typeof(bool) && expression is ConstantExpression && Convert.ToBoolean(((ConstantExpression)expression).Value);
         }
 
         internal static bool IsFalseConstant(this Expression expression)
         {
-            return (expression is ConstantExpression) && !Convert.ToBoolean(((ConstantExpression)expression).Value);
+            return expression.Type == typeof(bool) && expression is ConstantExpression && !Convert.ToBoolean(((ConstantExpression)expression).Value);
         }
     }
 }
