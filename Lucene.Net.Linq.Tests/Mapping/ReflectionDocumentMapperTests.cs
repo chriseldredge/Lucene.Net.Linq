@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
@@ -79,6 +80,16 @@ namespace Lucene.Net.Linq.Tests.Mapping
             item1.Version = new Version("5.6.7.8");
 
             Assert.That(mapper.Equals(item1, item2), Is.False);
+        }
+
+        [Test]
+        public void ValuesEqual_Enumerable()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
+
+            var result = mapper.ValuesEqual(new[] {"a", "b"}, new List<string> {"a", "b"});
+
+            Assert.That(result, Is.True, "Should be equal when sequences are equal");
         }
 
         public class ReflectedDocument

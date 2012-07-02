@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -103,10 +104,23 @@ namespace Lucene.Net.Linq.Mapping
                 var val1 = field.PropertyInfo.GetValue(item1, null);
                 var val2 = field.PropertyInfo.GetValue(item2, null);
 
-                if (!Equals(val1, val2)) return false;
+                if (!ValuesEqual(val1, val2))
+                {
+                    return false;
+                }
             }
 
             return true;
+        }
+
+        public bool ValuesEqual(object val1, object val2)
+        {
+            if (val1 is IEnumerable && val2 is IEnumerable)
+            {
+                return ((IEnumerable) val1).Cast<object>().SequenceEqual(((IEnumerable) val2).Cast<object>());
+            }
+
+            return Equals(val1, val2);
         }
     }
 }
