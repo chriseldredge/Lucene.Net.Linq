@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Search;
@@ -48,14 +49,11 @@ namespace Lucene.Net.Linq
             get { return transactionLock; }
         }
 
-        public ISearcherHandle CheckoutSearcher(object client)
+        public ISearcherHandle CheckoutSearcher()
         {
             lock(searcherLock)
             {
-                var current = CurrentTracker;
-                current.AddClient(client);
-
-                return new SearcherHandle(current, client);
+                return new SearcherHandle(CurrentTracker);
             }
         }
 
@@ -100,12 +98,12 @@ namespace Lucene.Net.Linq
         internal class SearcherHandle : ISearcherHandle
         {
             private readonly SearcherClientTracker tracker;
-            private readonly object client;
+            private bool disposed;
 
-            public SearcherHandle(SearcherClientTracker tracker, object client)
+            public SearcherHandle(SearcherClientTracker tracker)
             {
                 this.tracker = tracker;
-                this.client = client;
+                tracker.AddClient(this);
             }
 
             public IndexSearcher Searcher
@@ -115,7 +113,9 @@ namespace Lucene.Net.Linq
 
             public void Dispose()
             {
-                tracker.RemoveClient(client);
+                if (disposed) throw new ObjectDisposedException(typeof(ISearcherHandle).Name);
+                disposed = true;
+                tracker.RemoveClient(this);
             }
         }
 
@@ -154,7 +154,7 @@ namespace Lucene.Net.Linq
             {
                 lock (sync)
                 {
-                    searcherReferences.RemoveAll(wr => ReferenceEquals(wr.Target, client));
+                    searcherReferences.Remove(searcherReferences.First(wr => ReferenceEquals(wr.Target, client)));
                     RemoveDeadReferences();
 
                     if (disposePending)
@@ -190,6 +190,14 @@ namespace Lucene.Net.Linq
                     {
                         disposePending = true;
                     }
+                }
+            }
+
+            internal int ReferenceCount
+            {
+                get
+                {
+                    lock (sync) return searcherReferences.Count;
                 }
             }
 

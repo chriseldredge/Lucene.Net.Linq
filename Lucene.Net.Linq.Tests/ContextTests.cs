@@ -32,7 +32,7 @@ namespace Lucene.Net.Linq.Tests
         [Test]
         public void SearchHandleCreatesNew()
         {
-            var handle = context.CheckoutSearcher(this);
+            var handle = context.CheckoutSearcher();
 
             Assert.That(handle.Searcher, Is.Not.Null);
         }
@@ -40,7 +40,7 @@ namespace Lucene.Net.Linq.Tests
         [Test]
         public void SearchHandleRetainsInstance()
         {
-            var handle = context.CheckoutSearcher(this);
+            var handle = context.CheckoutSearcher();
 
             var s1 = handle.Searcher;
 
@@ -53,19 +53,19 @@ namespace Lucene.Net.Linq.Tests
         [Test]
         public void SearcherInstanceChangesOnReload()
         {
-            var s1 = context.CheckoutSearcher(this).Searcher;
+            var s1 = context.CheckoutSearcher().Searcher;
 
             context.Reload();
 
-            var s2 = context.CheckoutSearcher(this).Searcher;
+            var s2 = context.CheckoutSearcher().Searcher;
 
             Assert.That(s2, Is.Not.SameAs(s1), "Searcher instance after Reload()");
         }
 
         [Test]
-        public void DisposeHandleDoesNotDisposesSearcher()
+        public void DisposeHandleDoesNotDisposeSearcher()
         {
-            var handle = context.CheckoutSearcher(this);
+            var handle = context.CheckoutSearcher();
 
             var searcher = handle.Searcher;
 
@@ -89,7 +89,7 @@ namespace Lucene.Net.Linq.Tests
         {
             var searcher = context.CurrentTracker.Searcher;
 
-            context.CheckoutSearcher(this);
+            context.CheckoutSearcher();
 
             context.Reload();
 
@@ -101,13 +101,40 @@ namespace Lucene.Net.Linq.Tests
         {
             var searcher = context.CurrentTracker.Searcher;
 
-            var handle = context.CheckoutSearcher(this);
+            var handle = context.CheckoutSearcher();
 
             context.Reload();
 
             handle.Dispose();
 
             searcher.AssertWasCalled(s => s.Dispose());
+        }
+
+        [Test]
+        public void DisposeHandleThrowsWhenAlreadyDisposed()
+        {
+            var handle = context.CheckoutSearcher();
+
+            handle.Dispose();
+
+            Assert.Throws<ObjectDisposedException>(handle.Dispose);
+        }
+
+        [Test]
+        public void TwoHandles()
+        {
+            var h1 = context.CheckoutSearcher();
+            var h2 = context.CheckoutSearcher();
+
+            Assert.That(context.CurrentTracker.ReferenceCount, Is.EqualTo(2));
+
+            h1.Dispose();
+
+            Assert.That(context.CurrentTracker.ReferenceCount, Is.EqualTo(1));
+
+            h2.Dispose();
+
+            Assert.That(context.CurrentTracker.ReferenceCount, Is.EqualTo(0));
         }
 
         class TestableContext : Context

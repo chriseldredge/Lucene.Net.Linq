@@ -14,7 +14,9 @@
 		<tags>lucene.net lucene linq odata search nosql</tags>
 		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
-		<releaseNotes>ISession implements unit-of-work pattern, automatically flushing modified documents.</releaseNotes>
+		<releaseNotes>
+			Fix concurrency issue where IndexSearcher may be disposed while still in use.
+		</releaseNotes>
 		<dependencies>
 			<dependency id="Remotion.Linq" version="[1.13.111, 2.0)" />
 			<dependency id="Common.Logging" version="[2.1.1, 3.0)" />

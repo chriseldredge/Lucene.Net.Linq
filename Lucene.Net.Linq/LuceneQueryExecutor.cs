@@ -67,7 +67,7 @@ namespace Lucene.Net.Linq
         {
             var luceneQueryModel = PrepareQuery(queryModel);
 
-            var searcherHandle = context.CheckoutSearcher(this);
+            var searcherHandle = context.CheckoutSearcher();
 
             using (searcherHandle)
             {
@@ -110,7 +110,7 @@ namespace Lucene.Net.Linq
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
 
-            var searcherHandle = context.CheckoutSearcher(this);
+            var searcherHandle = context.CheckoutSearcher();
 
             using (searcherHandle)
             {
