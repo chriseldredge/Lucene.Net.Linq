@@ -11,6 +11,8 @@ namespace Lucene.Net.Linq
 {
     internal class Context
     {
+        public event EventHandler<SearcherLoadEventArgs> SearcherLoading;
+
         private readonly Directory directory;
         private readonly Analyzer analyzer;
         private readonly Version version;
@@ -18,6 +20,7 @@ namespace Lucene.Net.Linq
         private readonly object transactionLock;
 
         private readonly object searcherLock = new object();
+        private readonly object reloadLock = new object();
         private SearcherClientTracker tracker;
         
         public Context(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
@@ -39,6 +42,11 @@ namespace Lucene.Net.Linq
             get { return version; }
         }
 
+        public Directory Directory
+        {
+            get { return directory; }
+        }
+
         public IIndexWriter IndexWriter
         {
             get { return indexWriter; }
@@ -51,22 +59,31 @@ namespace Lucene.Net.Linq
 
         public ISearcherHandle CheckoutSearcher()
         {
-            lock(searcherLock)
-            {
-                return new SearcherHandle(CurrentTracker);
-            }
+            return new SearcherHandle(CurrentTracker);
         }
 
         public virtual void Reload()
         {
-            lock(searcherLock)
+            lock (reloadLock)
             {
-                if (tracker != null)
+                var newTracker = new SearcherClientTracker(CreateSearcher());
+
+                var tmpHandler = SearcherLoading;
+
+                if (tmpHandler != null)
                 {
-                    tracker.Dispose();
+                    tmpHandler(this, new SearcherLoadEventArgs(newTracker.Searcher));
                 }
 
-                tracker = null;
+                lock (searcherLock)
+                {
+                    if (tracker != null)
+                    {
+                        tracker.Dispose();
+                    }
+
+                    tracker = newTracker;
+                }
             }
         }
 
@@ -206,7 +223,6 @@ namespace Lucene.Net.Linq
                 searcherReferences.RemoveAll(wr => !wr.IsAlive);
             }
         }
-       
     }
 
     internal interface ISearcherHandle : IDisposable

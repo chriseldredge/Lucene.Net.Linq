@@ -82,6 +82,7 @@
     <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandlerRegistry.cs" />
+    <Compile Include="SearcherLoadEventArgs.cs" />
     <Compile Include="Transformation\AllowSpecialCharactersExpressionTransformer.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />

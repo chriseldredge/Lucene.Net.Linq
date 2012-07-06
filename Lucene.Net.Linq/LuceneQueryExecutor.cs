@@ -67,7 +67,7 @@ namespace Lucene.Net.Linq
         {
             var luceneQueryModel = PrepareQuery(queryModel);
 
-            var searcherHandle = context.CheckoutSearcher();
+            var searcherHandle = CheckoutSearcher();
 
             using (searcherHandle)
             {
@@ -110,7 +110,7 @@ namespace Lucene.Net.Linq
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
 
-            var searcherHandle = context.CheckoutSearcher();
+            var searcherHandle = CheckoutSearcher();
 
             using (searcherHandle)
             {
@@ -157,6 +157,11 @@ namespace Lucene.Net.Linq
                     yield return projector(itemHolder.Current);
                 }
             }
+        }
+
+        private ISearcherHandle CheckoutSearcher()
+        {
+            return context.CheckoutSearcher();
         }
 
         private LuceneQueryModel PrepareQuery(QueryModel queryModel)

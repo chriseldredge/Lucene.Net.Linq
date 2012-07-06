@@ -5,6 +5,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq.Parsing.Structure;
 using Version = Lucene.Net.Util.Version;
@@ -65,7 +66,6 @@ namespace Lucene.Net.Linq
             context = new Context(this.directory, this.analyzer, this.version, indexWriter, transactionLock);
         }
 
-
         /// <summary>
         /// Returns an IQueryable implementation where the type being mapped
         /// from <c cref="Document"/> has a public default constructor.
@@ -84,7 +84,7 @@ namespace Lucene.Net.Linq
         /// <param name="factory">Factory method to instantiate new instances of T.</param>
         public IQueryable<T> AsQueryable<T>(Func<T> factory)
         {
-            return CreateQueryable(factory, new ReflectionDocumentMapper<T>());
+            return CreateQueryable(factory, context);
         }
 
         /// <summary>
@@ -109,13 +109,71 @@ namespace Lucene.Net.Linq
             }
 
             var mapper = new ReflectionDocumentMapper<T>();
-            return new LuceneSession<T>(mapper, context, CreateQueryable(factory, mapper));
+            return new LuceneSession<T>(mapper, context, CreateQueryable(factory, context, mapper));
         }
 
-        private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, IDocumentMapper<T> mapper)
+        /// <summary>
+        /// Registers a callback to be invoked when a new IndexSearcher is being initialized.
+        /// This method allows an IndexSearcher to be "warmed up" by executing one or more
+        /// queries before the instance becomes visible on other threads.
+        /// 
+        /// While callbacks are being executed, other threads will continue to use the previous
+        /// instance of IndexSearcher if this is not the first instance being initialized.
+        /// 
+        /// If this is the first instance, other threads will block until all callbacks complete.
+        /// </summary>
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback) where T : new()
+        {
+            RegisterCacheWarmingCallback(callback, () => new T());
+        }
+
+        /// <summary>
+        /// Same as <see cref="RegisterCacheWarmingCallback{T}(System.Action{System.Linq.IQueryable{T}})"/>
+        /// but allows client to provide factory method for creating new instances of <typeparamref name="T"/>.
+        /// </summary>
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, Func<T> factory)
+        {
+            context.SearcherLoading += (s, e) =>
+            {
+                var warmupContext = new WarmUpContext(context, e.IndexSearcher);
+                var queryable = CreateQueryable(factory, warmupContext);
+                callback(queryable);
+            };
+        }
+
+        private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, Context context)
+        {
+            return CreateQueryable(factory, context, new ReflectionDocumentMapper<T>());
+        }
+
+        private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, Context context, IDocumentMapper<T> mapper)
         {
             var executor = new LuceneQueryExecutor<T>(context, factory, mapper);
             return new LuceneQueryable<T>(queryParser, executor);
+        }
+
+        private class WarmUpContext : Context
+        {
+            private readonly IndexSearcher newSearcher;
+
+            internal WarmUpContext(Context target, IndexSearcher newSearcher)
+                : base(target.Directory, target.Analyzer, target.Version, target.IndexWriter, target.TransactionLock)
+            {
+                this.newSearcher = newSearcher;
+            }
+
+            protected override IndexSearcher CreateSearcher()
+            {
+                return newSearcher;
+            }
+        }
+
+        internal Context Context
+        {
+            get
+            {
+                return context;
+            }
         }
     }
 }

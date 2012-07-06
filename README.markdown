@@ -18,6 +18,7 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 * Sort by standard string, NumericField or any type that implements IComparable
 * Sort by item.Score() extension method to sort by relevance
 * Specify custom format for DateTime stored as strings
+* Register cache-warming queries to be executed when IndexSearcher is being reloaded
 
 Example
 ----------
@@ -103,12 +104,11 @@ Next, create LuceneDataProvider and run some queries:
 Use a PerFieldAnalyzerWrapper to control how queries and fields are analyzed. For the above example, fields like SearchText (text) should
 generally be analyzed using a stemming analyzer, but fields like Id, IssueNumber and Version should be indexed using a keyword analyzer.
 
-Upcoming features
------------------
+Upcoming features / ideas
+-------------------------
 
-* Ability to specify optional cache warming queries to run when searcher is reloaded
-* Support for more LINQ expressions
-* Optimize sorting complex types stored as string fields when the strings are sortable
+* Ability to capture query statistics like execution time, total hits, top score, etc.
+* Ability to use faceting to group results by field or natively return distinct field values
 
 Known issues 
 ------------
@@ -120,4 +120,8 @@ Not supported:
 * Subqueries, grouping, etc.
 * Overly complex predicates
 * etc.
+
+The following dynamic boost query is not supported:
+
+    session.Query().Select(i => new { i.Id, i.Author, i.Citations }).Boost(i => i.Citations)
 

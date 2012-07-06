@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -82,6 +83,21 @@ namespace Lucene.Net.Linq.Tests
             context.Reload();
 
             searcher.AssertWasCalled(s => s.Dispose());
+        }
+
+        [Test]
+        public void ReloadFiresLoadingEvent()
+        {
+            var searcher = context.CurrentTracker.Searcher;
+            IndexSearcher current = null;
+            IndexSearcher next = null;
+
+            context.SearcherLoading += (e, x) => { current = context.CurrentTracker.Searcher; next = x.IndexSearcher; };
+            context.Reload();
+
+            Assert.That(current, Is.SameAs(searcher), "Should not have replaced current instance");
+            Assert.That(next, Is.Not.Null, "Should create non-null new instance");
+            Assert.That(next, Is.Not.SameAs(searcher), "Should create new instance");
         }
 
         [Test]

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading;
 using Lucene.Net.Linq.Util;
 using NUnit.Framework;
 
@@ -83,9 +84,11 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Min_NoDocuments()
         {
-            writer.DeleteAll();
-            writer.Commit();
-
+            using (var session = provider.OpenSession<SampleDocument>())
+            {
+                session.DeleteAll();
+            }
+            
             Assert.That(() => documents.Min(d => d.Scalar), Throws.InvalidOperationException);
         }
 

@@ -16,6 +16,7 @@
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
 		<releaseNotes>
 			Fix concurrency issue where IndexSearcher may be disposed while still in use.
+			Add LuceneDataProvider.RegisterCacheWarmingCallback method to warm up IndexReader before replacing previous instance.
 		</releaseNotes>
 		<dependencies>
 			<dependency id="Remotion.Linq" version="[1.13.111, 2.0)" />
