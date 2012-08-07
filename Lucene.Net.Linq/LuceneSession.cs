@@ -88,6 +88,14 @@ namespace Lucene.Net.Linq
             Commit();
         }
 
+        public void Rollback()
+        {
+            lock (sessionLock)
+            {
+                ClearPendingChanges();
+            }
+        }
+
         public void Commit()
         {
             lock (sessionLock)
@@ -190,6 +198,7 @@ namespace Lucene.Net.Linq
             deleteKeys.Clear();
             deleteQueries.Clear();
             additions.Clear();
+            documentTracker.Clear();
         }
 
         internal bool PendingChanges
@@ -251,6 +260,11 @@ namespace Lucene.Net.Linq
             public IEnumerable<T> FindModifiedDocuments()
             {
                 return items.Where(t => !mapper.Equals(t.Item1, t.Item2)).Select(t => t.Item1);
+            }
+
+            public void Clear()
+            {
+                items.Clear();
             }
         }
     }

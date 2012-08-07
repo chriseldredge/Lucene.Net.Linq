@@ -12,5 +12,6 @@ namespace Lucene.Net.Linq
         void Delete(params Query[] items);
         void DeleteAll();
         void Commit();
+        void Rollback();
     }
 }

@@ -34,5 +34,23 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = (from d in session.Query() where d.Name == "a" select d).Single();
             Assert.That(result.Scalar, Is.EqualTo(4));
         }
+        [Test]
+        public void RollbackDiscardsTrackedDocumentModifications()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+            int originalScalar;
+
+            using (session)
+            {
+                var item = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                originalScalar = item.Scalar;
+                item.Scalar = originalScalar + 1;
+
+                session.Rollback();
+            }
+
+            Assert.That(provider.AsQueryable<SampleDocument>().Single(doc => doc.Name == "a").Scalar, Is.EqualTo(originalScalar));
+        }
     }
 }
