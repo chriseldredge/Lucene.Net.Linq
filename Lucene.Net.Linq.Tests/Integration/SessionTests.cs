@@ -34,8 +34,42 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = (from d in session.Query() where d.Name == "a" select d).Single();
             Assert.That(result.Scalar, Is.EqualTo(4));
         }
+
         [Test]
-        public void RollbackDiscardsTrackedDocumentModifications()
+        public void QueryReturnsDirtyDocument()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session)
+            {
+                var item = (from d in session.Query() where d.Name == "a" select d).Single();
+                var dupe = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                Assert.That(dupe, Is.SameAs(item), "Should return same instance of tracked document within session.");
+            }
+        }
+
+        [Test]
+        public void ModifiedKeyDeletesByPreviousKey()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session)
+            {
+                var item = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                item.Key = item.Key + "2";
+
+                session.Commit();
+
+                var results = from d in session.Query() where d.Name == "a" select d;
+                Assert.That(results.Count(), Is.EqualTo(1));
+                Assert.That(results.Single().Key, Is.EqualTo(item.Key));
+            }
+        }
+
+        [Test]
+        public void RollbackThenCommitDiscardsTrackedDocumentModifications()
         {
             var session = provider.OpenSession<SampleDocument>();
             int originalScalar;
@@ -51,6 +85,25 @@ namespace Lucene.Net.Linq.Tests.Integration
             }
 
             Assert.That(provider.AsQueryable<SampleDocument>().Single(doc => doc.Name == "a").Scalar, Is.EqualTo(originalScalar));
+        }
+
+        [Test]
+        public void RollbackThenQueryDiscardsTrackedDocumentModifications()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session)
+            {
+                var item = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                item.Scalar++;
+
+                session.Rollback();
+
+                var after = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                Assert.That(after, Is.Not.SameAs(item), "Should discard tracked instance after rollback");
+            }
         }
     }
 }

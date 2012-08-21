@@ -15,8 +15,9 @@
 		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
 		<releaseNotes>
-			Fix concurrency issue where IndexSearcher may be disposed while still in use.
-			Add LuceneDataProvider.RegisterCacheWarmingCallback method to warm up IndexReader before replacing previous instance.
+			* On multiple calls to ISession.Query(), return same instance of a result so clients can modify the same item across queries.
+			* When a key is modified on a result within ISession, delete the document using the original key during commit.
+			* Update to Remotion.Linq 1.13.161.
 		</releaseNotes>
 		<dependencies>
 			<dependency id="Remotion.Linq" version="[1.13.161, 2.0)" />

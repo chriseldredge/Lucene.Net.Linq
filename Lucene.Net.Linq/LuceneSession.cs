@@ -188,7 +188,13 @@ namespace Lucene.Net.Linq
             foreach (var doc in docs)
             {
                 Log.Debug(m => m("Flushing modified document " + doc));
-                Add(doc);
+
+                if (!doc.Key.Empty)
+                {
+                    deleteKeys.Add(doc.Key);
+                }
+
+                Add(doc.Document);
             }
         }
 
@@ -242,28 +248,72 @@ namespace Lucene.Net.Linq
             return doc;
         }
 
+        internal class TrackedDocument
+        {
+            private readonly T document;
+            private readonly T hiddenCopy;
+            private readonly DocumentKey key;
+
+            internal TrackedDocument(T document, T hiddenCopy, DocumentKey key)
+            {
+                this.document = document;
+                this.hiddenCopy = hiddenCopy;
+                this.key = key;
+            }
+
+            internal T Document
+            {
+                get { return document; }
+            }
+
+            internal T HiddenCopy
+            {
+                get { return hiddenCopy; }
+            }
+
+            internal DocumentKey Key
+            {
+                get { return key; }
+            }
+        }
+
         internal class SessionDocumentTracker : IRetrievedDocumentTracker<T>
         {
             private readonly IDocumentMapper<T> mapper;
-            private readonly IList<Tuple<T, T>> items = new List<Tuple<T, T>>();
+            private readonly IDictionary<DocumentKey, T> byKey = new Dictionary<DocumentKey, T>();
+            private readonly IList<TrackedDocument> items = new List<TrackedDocument>();
 
             public SessionDocumentTracker(IDocumentMapper<T> mapper)
             {
                 this.mapper = mapper;
             }
 
-            public void TrackDocument(T item, T hiddenCopy)
+            public bool TryGetTrackedDocument(T item, out T tracked)
             {
-                items.Add(new Tuple<T, T>(item, hiddenCopy));
+                tracked = default(T);
+
+                var key = mapper.ToKey(item);
+                if (key.Empty) return false;
+                
+                return byKey.TryGetValue(key, out tracked);
             }
 
-            public IEnumerable<T> FindModifiedDocuments()
+            public void TrackDocument(T item, T hiddenCopy)
             {
-                return items.Where(t => !mapper.Equals(t.Item1, t.Item2)).Select(t => t.Item1);
+                var key = mapper.ToKey(item);
+                byKey.Add(key, item);
+
+                items.Add(new TrackedDocument(item, hiddenCopy, mapper.ToKey(hiddenCopy)));
+            }
+
+            public IEnumerable<TrackedDocument> FindModifiedDocuments()
+            {
+                return items.Where(t => !mapper.Equals(t.Document, t.HiddenCopy));
             }
 
             public void Clear()
             {
+                byKey.Clear();
                 items.Clear();
             }
         }

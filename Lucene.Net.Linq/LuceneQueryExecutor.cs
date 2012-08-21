@@ -149,8 +149,17 @@ namespace Lucene.Net.Linq
 
                     if (tracker != null)
                     {
-                        var copy = ConvertDocument(searcher.Doc(doc), score);
-                        tracker.TrackDocument(item, copy);
+                        TDocument tracked;
+                        
+                        if (tracker.TryGetTrackedDocument(item, out tracked))
+                        {
+                            item = tracked;
+                        }
+                        else
+                        {
+                            var copy = ConvertDocument(searcher.Doc(doc), score);
+                            tracker.TrackDocument(item, copy);
+                        }
                     }
 
                     itemHolder.Current = item;
