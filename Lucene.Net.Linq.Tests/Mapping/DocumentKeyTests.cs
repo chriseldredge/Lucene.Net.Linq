@@ -63,5 +63,33 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             Assert.That(call, Throws.InvalidOperationException);
         }
+
+        [Test]
+        public void HashCode_NotEqualForDifferentKeys()
+        {
+            var key1 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id1" }, "**mykey**" } });
+            var key2 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id2" }, "**mykey**" } });
+
+            Assert.That(key1.GetHashCode(), Is.Not.EqualTo(key2.GetHashCode()));
+        }
+
+        [Test]
+        public void HashCode_NullSafe()
+        {
+            var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id1" }, null } });
+
+            TestDelegate call = () => key.GetHashCode();
+
+            Assert.That(call, Throws.Nothing);
+        }
+
+        [Test]
+        public void HashCode_NotEqualForDifferentValues()
+        {
+            var key1 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id1" }, "**mykey**" } });
+            var key2 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id1" }, "**my other key**" } });
+
+            Assert.That(key1.GetHashCode(), Is.Not.EqualTo(key2.GetHashCode()));
+        }
     }
 }

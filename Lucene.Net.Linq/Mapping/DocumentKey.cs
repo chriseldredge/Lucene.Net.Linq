@@ -76,7 +76,7 @@ namespace Lucene.Net.Linq.Mapping
             unchecked
             {
                 var hash = values.Count;
-                values.Apply(kv => hash += kv.GetHashCode());
+                values.Apply(kv => hash += kv.Key.GetHashCode() + (kv.Value != null ? kv.Value.GetHashCode() : 0));
                 return hash;
             }
         }
