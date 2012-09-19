@@ -63,6 +63,7 @@
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="Abstractions\IIndexWriter.cs" />
+    <Compile Include="AnalyzerExtensions.cs" />
     <Compile Include="Clauses\ExpressionNodes\BoostExpressionNode.cs" />
     <Compile Include="Clauses\BoostClause.cs" />
     <Compile Include="Clauses\ExpressionNodes\TrackRetrievedDocumentsExpressionNode.cs" />
