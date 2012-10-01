@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Common.Logging;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Search;
@@ -11,6 +12,8 @@ namespace Lucene.Net.Linq
 {
     internal class Context
     {
+        private static readonly ILog Log = LogManager.GetLogger<Context>();
+
         public event EventHandler<SearcherLoadEventArgs> SearcherLoading;
 
         private readonly Directory directory;
@@ -64,6 +67,8 @@ namespace Lucene.Net.Linq
 
         public virtual void Reload()
         {
+            Log.Info(m => m("Reloading index."));
+
             lock (reloadLock)
             {
                 var newTracker = new SearcherClientTracker(CreateSearcher());
@@ -72,6 +77,7 @@ namespace Lucene.Net.Linq
 
                 if (tmpHandler != null)
                 {
+                    Log.Debug(m => m("Invoking SearcherLoading event."));
                     tmpHandler(this, new SearcherLoadEventArgs(newTracker.Searcher));
                 }
 
@@ -85,6 +91,8 @@ namespace Lucene.Net.Linq
                     tracker = newTracker;
                 }
             }
+
+            Log.Debug(m => m("Index reloading completed."));
         }
 
         internal SearcherClientTracker CurrentTracker

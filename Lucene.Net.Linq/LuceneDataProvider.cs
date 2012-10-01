@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Common.Logging;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -18,6 +19,8 @@ namespace Lucene.Net.Linq
     /// </summary>
     public class LuceneDataProvider
     {
+        private static readonly ILog Log = LogManager.GetLogger<LuceneDataProvider>();
+
         private readonly Directory directory;
         private readonly Analyzer analyzer;
         private readonly Version version;
@@ -135,9 +138,13 @@ namespace Lucene.Net.Linq
         {
             context.SearcherLoading += (s, e) =>
             {
+                Log.Trace(m => m("Invoking cache warming callback " + factory));
+
                 var warmupContext = new WarmUpContext(context, e.IndexSearcher);
                 var queryable = CreateQueryable(factory, warmupContext);
                 callback(queryable);
+
+                Log.Trace(m => m("Callback {0} completed.", factory));
             };
         }
 

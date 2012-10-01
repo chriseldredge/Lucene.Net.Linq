@@ -175,11 +175,16 @@ namespace Lucene.Net.Linq
                 additionMap.Values.Apply(writer.AddDocument);
             }
 
+            Log.Trace(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additionMap.Count));
+            Log.Info(m => m("Committing."));
+
             writer.Commit();
 
             ClearPendingChanges();
-
+            
             context.Reload();
+
+            Log.Info(m => m("Commit completed."));
         }
 
         internal void StageModifiedDocuments()
@@ -187,7 +192,7 @@ namespace Lucene.Net.Linq
             var docs = documentTracker.FindModifiedDocuments();
             foreach (var doc in docs)
             {
-                Log.Debug(m => m("Flushing modified document " + doc));
+                Log.Trace(m => m("Flushing modified document " + doc));
 
                 if (!doc.Key.Empty)
                 {

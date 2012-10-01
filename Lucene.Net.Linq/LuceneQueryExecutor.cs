@@ -54,7 +54,7 @@ namespace Lucene.Net.Linq
 
     internal abstract class LuceneQueryExecutorBase<TDocument> : IQueryExecutor, IFieldMappingInfoProvider
     {
-        private readonly ILog Log = LogManager.GetCurrentClassLogger();
+        private readonly ILog Log = LogManager.GetLogger(typeof(LuceneQueryExecutorBase<>));
 
         private readonly Context context;
         
