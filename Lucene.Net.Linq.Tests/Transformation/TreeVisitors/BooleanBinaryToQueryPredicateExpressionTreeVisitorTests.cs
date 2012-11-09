@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         private static readonly LuceneQueryPredicateExpression predicate = new LuceneQueryPredicateExpression(
             new LuceneQueryFieldExpression(typeof (string), "Name"),
             Expression.Constant("foo"),
-            BooleanClause.Occur.MUST,
+            Occur.MUST,
             QueryType.Prefix);
 
         [SetUp]
@@ -32,7 +32,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
             
-            AssertResult(result, BooleanClause.Occur.MUST_NOT);
+            AssertResult(result, Occur.MUST_NOT);
         }
 
         [Test]
@@ -42,7 +42,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            AssertResult(result, BooleanClause.Occur.MUST_NOT);
+            AssertResult(result, Occur.MUST_NOT);
         }
 
         [Test]
@@ -75,10 +75,10 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
 
             var result = visitor.VisitExpression(call) as LuceneQueryPredicateExpression;
 
-            AssertResult(result, BooleanClause.Occur.MUST_NOT);
+            AssertResult(result, Occur.MUST_NOT);
         }
 
-        private static void AssertResult(LuceneQueryPredicateExpression result, BooleanClause.Occur expectedOccur)
+        private static void AssertResult(LuceneQueryPredicateExpression result, Occur expectedOccur)
         {
             Assert.That(result, Is.Not.Null, "Expected LuceneQueryPredicateExpression to be returned.");
             Assert.That(result, Is.Not.SameAs(predicate));

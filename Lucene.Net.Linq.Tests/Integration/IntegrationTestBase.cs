@@ -21,7 +21,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             directory = new RAMDirectory();
             writer = new IndexWriter(directory, GetAnalyzer(version), IndexWriter.MaxFieldLength.UNLIMITED);
             
-            provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), version, writer);
+            provider = new LuceneDataProvider(directory, writer.Analyzer, version, writer);
         }
 
         protected virtual Analyzer GetAnalyzer(Version version)

@@ -10,15 +10,15 @@ namespace Lucene.Net.Linq.Clauses.Expressions
     {
         private readonly LuceneQueryFieldExpression field;
         private readonly Expression pattern;
-        private readonly BooleanClause.Occur occur;
+        private readonly Occur occur;
         private readonly QueryType queryType;
-
-        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, BooleanClause.Occur occur)
+		
+        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, Occur occur)
             : this(field, pattern, occur, QueryType.Default)
         {
         }
 
-        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, BooleanClause.Occur occur, QueryType queryType)
+        public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, Occur occur, QueryType queryType)
             : base(typeof(bool), (ExpressionType)LuceneExpressionType.LuceneQueryPredicateExpression)
         {
             this.field = field;
@@ -37,7 +37,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             get { return pattern; }
         }
 
-        public BooleanClause.Occur Occur
+        public Occur Occur
         {
             get { return occur; }
         }

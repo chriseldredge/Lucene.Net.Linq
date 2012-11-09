@@ -24,15 +24,15 @@ namespace Lucene.Net.Linq.Util
 
             try
             {
-                if (s.IncrementToken() && s.HasAttribute(typeof(TermAttribute)))
+                if (s.IncrementToken() && s.HasAttribute<ITermAttribute>())
                 {
-                    var attr = (TermAttribute)s.GetAttribute(typeof(TermAttribute));
-                    result.Append(attr.Term());
+					var attr = s.GetAttribute<ITermAttribute>();
+                    result.Append(attr.Term);
                 }
             }
             finally
             {
-                s.Close();
+                s.Dispose();
             }
 
             return result.ToString();

@@ -31,8 +31,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper.CopyToDocument(this, doc);
 
-            Assert.That(doc.GetFieldable("CustomValueType").TokenStreamValue().ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
-            Assert.That(doc.GetFieldable("CustomValueType").StringValue(), Is.EqualTo("1.34"));
+            Assert.That(doc.GetFieldable("CustomValueType").TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
+            Assert.That(doc.GetFieldable("CustomValueType").StringValue, Is.EqualTo("1.34"));
         }
 
         [Test]

@@ -111,7 +111,7 @@ namespace Lucene.Net.Linq.Mapping
 
         protected internal virtual object ConvertFieldValue(Field field)
         {
-            var fieldValue = (object)field.StringValue();
+            var fieldValue = (object)field.StringValue;
 
             if (converter != null)
             {
@@ -151,8 +151,6 @@ namespace Lucene.Net.Linq.Mapping
                         return Field.Store.YES;
                     case StoreMode.No:
                         return Field.Store.NO;
-                    case StoreMode.Compress:
-                        return Field.Store.COMPRESS;
                 }
                 throw new InvalidOperationException("Unrecognized FieldStore value " + store);
             }

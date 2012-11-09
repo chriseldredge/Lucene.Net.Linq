@@ -42,10 +42,10 @@ namespace Lucene.Net.Linq.Search
             currentReaderValues = GetCurrentReaderValues(reader, docBase);
         }
 
-        public override IComparable Value(int slot)
-        {
-            return values[slot];
-        }
+		public override IComparable this[int slot]
+		{
+			get { return values[slot]; }
+		}
 
         protected abstract T[] GetCurrentReaderValues(IndexReader reader, int docBase);
     }

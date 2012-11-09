@@ -31,8 +31,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper.CopyToDocument(this, doc);
 
-            Assert.That(doc.GetFieldable("TimeStampOffset").TokenStreamValue().ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
-            Assert.That(doc.GetFieldable("TimeStampOffset").StringValue(), Is.EqualTo(TimeStampOffset.Value.UtcTicks.ToString()));
+            Assert.That(doc.GetFieldable("TimeStampOffset").TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
+            Assert.That(doc.GetFieldable("TimeStampOffset").StringValue, Is.EqualTo(TimeStampOffset.Value.UtcTicks.ToString()));
         }
 
         [Test]

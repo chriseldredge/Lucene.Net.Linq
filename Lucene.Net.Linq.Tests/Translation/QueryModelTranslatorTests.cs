@@ -123,7 +123,7 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
             AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.CUSTOM);
-            Assert.That(transformer.Model.Sort.GetSort()[0].GetComparatorSource(), Is.InstanceOf<ConvertableFieldComparatorSource>());
+            Assert.That(transformer.Model.Sort.GetSort()[0].ComparatorSource, Is.InstanceOf<ConvertableFieldComparatorSource>());
         }
 
         [Test]
@@ -178,9 +178,9 @@ namespace Lucene.Net.Linq.Tests.Translation
 
         private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)
         {
-            Assert.That(sortField.GetField(), Is.EqualTo(expectedFieldName));
-            Assert.That(sortField.GetType(), Is.EqualTo(expectedType), "SortField type for field " + expectedFieldName);
-            Assert.That(sortField.GetReverse(), Is.EqualTo(expectedDirection == OrderingDirection.Desc), "Reverse");
+            Assert.That(sortField.Field, Is.EqualTo(expectedFieldName));
+            Assert.That(sortField.Type, Is.EqualTo(expectedType), "SortField type for field " + expectedFieldName);
+            Assert.That(sortField.Reverse, Is.EqualTo(expectedDirection == OrderingDirection.Desc), "Reverse");
         }
 
     }

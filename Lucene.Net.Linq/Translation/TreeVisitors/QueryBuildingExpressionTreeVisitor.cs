@@ -34,9 +34,9 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 if (query is BooleanQuery)
                 {
                     var booleanQuery = (BooleanQuery)query.Clone();
-                    if (booleanQuery.GetClauses().All(c => c.GetOccur() == BooleanClause.Occur.MUST_NOT))
+                    if (booleanQuery.GetClauses().All(c => c.Occur == Occur.MUST_NOT))
                     {
-                        booleanQuery.Add(new MatchAllDocsQuery(), BooleanClause.Occur.SHOULD);
+                        booleanQuery.Add(new MatchAllDocsQuery(), Occur.SHOULD);
                         return booleanQuery;
                     }
                 }
@@ -48,8 +48,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
         {
             var queryParser = new QueryParser(context.Version, mapping.FieldName, context.Analyzer);
             
-            queryParser.SetAllowLeadingWildcard(true);
-            queryParser.SetLowercaseExpandedTerms(!mapping.CaseSensitive);
+            queryParser.AllowLeadingWildcard = true;
+            queryParser.LowercaseExpandedTerms = !mapping.CaseSensitive;
             
             var query = queryParser.Parse(pattern);
             return query;
@@ -73,7 +73,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var query = queries.Peek();
 
-            query.SetBoost(expression.Boost);
+            query.Boost = expression.Boost;
 
             return result;
         }
@@ -121,7 +121,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var booleanQuery = new BooleanQuery();
 
-            query.SetBoost(expression.Boost);
+            query.Boost = expression.Boost;
             booleanQuery.Add(query, occur);
 
             queries.Push(booleanQuery);
@@ -191,11 +191,11 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             }
         }
 
-        private static BooleanClause.Occur Negate(BooleanClause.Occur occur)
+        private static Occur Negate(Occur occur)
         {
-            return (occur == BooleanClause.Occur.MUST_NOT)
-                       ? BooleanClause.Occur.MUST
-                       : BooleanClause.Occur.MUST_NOT;
+            return (occur == Occur.MUST_NOT)
+                       ? Occur.MUST
+                       : Occur.MUST_NOT;
         }
 
         private Expression MakeBooleanQuery(BinaryExpression expression)
@@ -204,7 +204,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var second = (BooleanQuery)queries.Pop();
             var first = (BooleanQuery)queries.Pop();
-            var occur = expression.NodeType == ExpressionType.AndAlso ? BooleanClause.Occur.MUST : BooleanClause.Occur.SHOULD;
+            var occur = expression.NodeType == ExpressionType.AndAlso ? Occur.MUST : Occur.SHOULD;
 
             var query = new BooleanQuery();
             Combine(query, first, occur);
@@ -215,14 +215,14 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             return result;
         }
 
-        private void Combine(BooleanQuery target, BooleanQuery source, BooleanClause.Occur occur)
+        private void Combine(BooleanQuery target, BooleanQuery source, Occur occur)
         {
             if (source.GetClauses().Length == 1)
             {
                 var clause = source.GetClauses()[0];
-                if (clause.GetOccur() == BooleanClause.Occur.MUST)
+                if (clause.Occur == Occur.MUST)
                 {
-                    clause.SetOccur(occur);
+                    clause.Occur = occur;
                 }
                 target.Add(clause);
             }

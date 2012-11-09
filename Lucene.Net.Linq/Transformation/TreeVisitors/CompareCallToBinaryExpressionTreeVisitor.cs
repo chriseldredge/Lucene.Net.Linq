@@ -36,12 +36,12 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
         {
             if (expression.Arguments[0] is LuceneQueryFieldExpression)
             {
-                return new LuceneQueryPredicateExpression((LuceneQueryFieldExpression) expression.Arguments[0], expression.Arguments[1], BooleanClause.Occur.MUST, compareType.ToQueryType());
+                return new LuceneQueryPredicateExpression((LuceneQueryFieldExpression) expression.Arguments[0], expression.Arguments[1], Occur.MUST, compareType.ToQueryType());
             }
 
             if (expression.Arguments[1] is LuceneQueryFieldExpression)
             {
-                return new LuceneQueryPredicateExpression((LuceneQueryFieldExpression)expression.Arguments[1], expression.Arguments[0], BooleanClause.Occur.MUST, compareType.ToQueryType());
+                return new LuceneQueryPredicateExpression((LuceneQueryFieldExpression)expression.Arguments[1], expression.Arguments[0], Occur.MUST, compareType.ToQueryType());
             }
             
             return null;

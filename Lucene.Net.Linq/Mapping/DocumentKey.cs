@@ -32,7 +32,7 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             var query = new BooleanQuery();
-            values.Apply(kvp => query.Add(Parse(new QueryParser(version, kvp.Key, analyzer), ConvertToQueryExpression(kvp)), BooleanClause.Occur.MUST));
+            values.Apply(kvp => query.Add(Parse(new QueryParser(version, kvp.Key, analyzer), ConvertToQueryExpression(kvp)), Occur.MUST));
             return query;
         }
 
@@ -46,7 +46,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             if (string.IsNullOrEmpty(value))
             {
-                throw new InvalidOperationException("The key value for field " + parser.GetField() + " must not be blank.");
+                throw new InvalidOperationException("The key value for field " + parser.Field + " must not be blank.");
             }
             return parser.Parse(QueryParser.Escape(value));
         }

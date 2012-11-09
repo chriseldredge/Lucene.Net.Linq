@@ -20,15 +20,15 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
             if (expression.Method.Name == "StartsWith")
             {
-                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], BooleanClause.Occur.MUST, QueryType.Prefix);
+                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], Occur.MUST, QueryType.Prefix);
             }
             if (expression.Method.Name == "EndsWith")
             {
-                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], BooleanClause.Occur.MUST, QueryType.Suffix);
+                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], Occur.MUST, QueryType.Suffix);
             }
             if (expression.Method.Name == "Contains")
             {
-                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], BooleanClause.Occur.MUST, QueryType.Wildcard);
+                return new LuceneQueryPredicateExpression(queryField, expression.Arguments[0], Occur.MUST, QueryType.Wildcard);
             }
             
             return base.VisitMethodCallExpression(expression);

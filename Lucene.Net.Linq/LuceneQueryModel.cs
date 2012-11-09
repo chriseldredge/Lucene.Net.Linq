@@ -55,8 +55,8 @@ namespace Lucene.Net.Linq
             }
 
             var bQuery = new BooleanQuery();
-            bQuery.Add(query, BooleanClause.Occur.MUST);
-            bQuery.Add(additionalQuery, BooleanClause.Occur.MUST);
+            bQuery.Add(query, Occur.MUST);
+            bQuery.Add(additionalQuery, Occur.MUST);
 
             query = bQuery;
         }

@@ -35,7 +35,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             mapper.CopyToDocument(sample, document);
 
             var field = (NumericField)document.GetFieldable("Long");
-            Assert.That(field.TokenStreamValue().ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
+            Assert.That(field.TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
         }
 
         [Test]
@@ -48,7 +48,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             mapper.CopyToDocument(sample, document);
 
             var field = (NumericField)document.GetFieldable("Int");
-            Assert.That(field.TokenStreamValue().ToString(), Is.EqualTo("(numeric,valSize=32,precisionStep=128)"));
+            Assert.That(field.TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=32,precisionStep=128)"));
         }
 
         [Test]

@@ -28,7 +28,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 return predicate;
             }
 
-            return new LuceneQueryPredicateExpression(predicate.QueryField, predicate.QueryPattern, BooleanClause.Occur.MUST_NOT, predicate.QueryType)
+            return new LuceneQueryPredicateExpression(predicate.QueryField, predicate.QueryPattern, Occur.MUST_NOT, predicate.QueryType)
                     { Boost = predicate.Boost, AllowSpecialCharacters = predicate.AllowSpecialCharacters };
         }
     }

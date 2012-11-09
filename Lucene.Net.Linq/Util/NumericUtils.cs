@@ -8,7 +8,7 @@ namespace Lucene.Net.Linq.Util
 {
     internal static class NumericRangeUtils
     {
-        internal static NumericRangeQuery CreateNumericRangeQuery(string fieldName, ValueType lowerBound, ValueType upperBound, RangeType lowerRange, RangeType upperRange)
+        internal static Query CreateNumericRangeQuery(string fieldName, ValueType lowerBound, ValueType upperBound, RangeType lowerRange, RangeType upperRange)
         {
             if (lowerBound == null && upperBound == null)
             {

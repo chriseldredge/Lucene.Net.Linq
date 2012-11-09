@@ -18,10 +18,10 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 return base.VisitBinaryExpression(expression);
             }
 
-            var occur = BooleanClause.Occur.MUST;
+            var occur = Occur.MUST;
             if (expression.NodeType == ExpressionType.NotEqual)
             {
-                occur = BooleanClause.Occur.MUST_NOT;
+                occur = Occur.MUST_NOT;
             }
 
             LuceneQueryFieldExpression fieldExpression;

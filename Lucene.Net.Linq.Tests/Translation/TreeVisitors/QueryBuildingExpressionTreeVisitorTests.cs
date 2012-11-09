@@ -116,7 +116,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof (int), "Count"),
                 Expression.Constant(5),
-                BooleanClause.Occur.MUST,
+                Occur.MUST,
                 QueryType.GreaterThan);
 
             builder.VisitExpression(expression);
@@ -132,7 +132,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(string), "Name"),
                 Expression.Constant("SampleName"),
-                BooleanClause.Occur.MUST,
+                Occur.MUST,
                 QueryType.GreaterThan);
 
             builder.VisitExpression(expression);
@@ -146,7 +146,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(float), "Count"),
                 Expression.Constant(6f),
-                BooleanClause.Occur.MUST,
+                Occur.MUST,
                 QueryType.GreaterThanOrEqual);
 
             builder.VisitExpression(expression);
@@ -162,7 +162,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(DateTime), "Published"),
                 Expression.Constant(dateTime),
-                BooleanClause.Occur.MUST,
+                Occur.MUST,
                 QueryType.LessThan);
 
             builder.VisitExpression(expression);
@@ -176,7 +176,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(DateTime), "Average"),
                 Expression.Constant(11.5d),
-                BooleanClause.Occur.MUST,
+                Occur.MUST,
                 QueryType.LessThanOrEqual);
 
             builder.VisitExpression(expression);
