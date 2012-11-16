@@ -1,5 +1,6 @@
 *.suo
 *ReSharper*
+*ncrunch*
 *.user
 *.dotCover
 bin
