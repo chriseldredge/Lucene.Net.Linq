@@ -149,8 +149,13 @@ namespace Lucene.Net.Linq
 
                     if (tracker != null)
                     {
+                        if (tracker.IsMarkedForDeletion(item))
+                        {
+                            continue;
+                        }
+
                         TDocument tracked;
-                        
+
                         if (tracker.TryGetTrackedDocument(item, out tracked))
                         {
                             item = tracked;

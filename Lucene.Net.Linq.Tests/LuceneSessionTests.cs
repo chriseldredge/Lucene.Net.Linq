@@ -204,6 +204,28 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void Delete_MarkedForDeletion()
+        {
+            var r1 = new Record { Id = "12" };
+            
+            session.Delete(r1);
+
+            Assert.That(session.DocumentTracker.IsMarkedForDeletion(r1), Is.True, "IsMarkedForDeletion");
+        }
+
+        [Test]
+        public void Delete_MarkedForDeletion_ClearedOnRollback()
+        {
+            var r1 = new Record { Id = "12" };
+
+            session.Delete(r1);
+
+            session.Rollback();
+
+            Assert.That(session.DocumentTracker.IsMarkedForDeletion(r1), Is.False, "IsMarkedForDeletion");
+        }
+
+        [Test]
         public void Delete_SetsPendingChangesFlag()
         {
             var r1 = new Record { Id = "12" };

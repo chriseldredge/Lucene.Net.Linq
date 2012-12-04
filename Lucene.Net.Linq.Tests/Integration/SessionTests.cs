@@ -50,6 +50,38 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void QueryOmitsDeletedDocument()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session)
+            {
+                var before = session.Query().Select(d => d.Name).ToList();
+
+                session.Delete(session.Query().Single(d => d.Name == "a"));
+
+                var after = session.Query().Select(d => d.Name).ToList();
+
+                Assert.That(after.Count, Is.EqualTo(before.Count - 1), "Should not return documents pending delete.");
+            }
+        }
+
+        [Test]
+        public void DeleteModifiedDocument()
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session)
+            {
+                var doc = session.Query().Single(d => d.Name == "b");
+                doc.Alias = "new alias";
+
+                session.Delete(doc);
+            }
+
+            Assert.That(session.Query().Count(d => d.Name == "b"), Is.EqualTo(0), "Should delete document and not re-add it.");
+        }
+        [Test]
         public void ModifiedKeyDeletesByPreviousKey()
         {
             var session = provider.OpenSession<SampleDocument>();

@@ -64,6 +64,7 @@ namespace Lucene.Net.Linq
                         throw new InvalidOperationException("The type " + typeof(T) + " does not specify any key fields.");
                     }
                     deleteKeys.Add(key);
+                    DocumentTracker.MarkForDeletion(key);
                 }
             }
         }
@@ -217,7 +218,7 @@ namespace Lucene.Net.Linq
             get { return DeleteAllFlag || additions.Count > 0 || deleteQueries.Count > 0 || deleteKeys.Count > 0; }
         }
 
-        internal IRetrievedDocumentTracker<T> DocumentTracker { get { return documentTracker; } }
+        internal SessionDocumentTracker DocumentTracker { get { return documentTracker; } }
 
         internal bool DeleteAllFlag { get; private set; }
         
@@ -286,6 +287,7 @@ namespace Lucene.Net.Linq
         {
             private readonly IDocumentMapper<T> mapper;
             private readonly IDictionary<DocumentKey, T> byKey = new Dictionary<DocumentKey, T>();
+            private readonly ISet<DocumentKey> deletedKeys = new HashSet<DocumentKey>();
             private readonly IList<TrackedDocument> items = new List<TrackedDocument>();
 
             public SessionDocumentTracker(IDocumentMapper<T> mapper)
@@ -311,15 +313,28 @@ namespace Lucene.Net.Linq
                 items.Add(new TrackedDocument(item, hiddenCopy, mapper.ToKey(hiddenCopy)));
             }
 
+            public bool IsMarkedForDeletion(T item)
+            {
+                return deletedKeys.Contains(mapper.ToKey(item));
+            }
+
+            public void MarkForDeletion(DocumentKey key)
+            {
+                deletedKeys.Add(key);
+            }
+
             public IEnumerable<TrackedDocument> FindModifiedDocuments()
             {
-                return items.Where(t => !mapper.Equals(t.Document, t.HiddenCopy));
+                return items
+                    .Where(t => !mapper.Equals(t.Document, t.HiddenCopy))
+                    .Where(t => !IsMarkedForDeletion(t.Document));
             }
 
             public void Clear()
             {
                 byKey.Clear();
                 items.Clear();
+                deletedKeys.Clear();
             }
         }
     }

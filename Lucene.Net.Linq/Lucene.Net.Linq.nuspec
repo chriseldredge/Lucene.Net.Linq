@@ -15,8 +15,8 @@
 		<summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
 		<description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
 		<releaseNotes>
-			* Update to Lucene.Net 3.0.3. This is a breaking change.
-			* Minor tweaks to logging messages.
+			* ISession.Query() will not return items marked for deletion
+			* Bug Fix: ISession.Commit() will not add documents that are modified and marked for deletion
 		</releaseNotes>
 		<dependencies>
 			<dependency id="Remotion.Linq" version="[1.13.161, 2.0)" />
