@@ -36,6 +36,22 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             {
                 fieldExpression = (LuceneQueryFieldExpression) expression.Right;
                 pattern = expression.Left;
+
+                switch(queryType)
+                {
+                    case QueryType.GreaterThan:
+                        queryType = QueryType.LessThan;
+                        break;
+                    case QueryType.LessThan:
+                        queryType = QueryType.GreaterThan;
+                        break;
+                    case QueryType.GreaterThanOrEqual:
+                        queryType = QueryType.LessThanOrEqual;
+                        break;
+                    case QueryType.LessThanOrEqual:
+                        queryType = QueryType.GreaterThanOrEqual;
+                        break;
+                }
             }
             else
             {

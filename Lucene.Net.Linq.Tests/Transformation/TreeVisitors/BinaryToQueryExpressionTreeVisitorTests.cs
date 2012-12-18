@@ -28,6 +28,46 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         }
 
         [Test]
+        public void GreaterThan_SwitchesOperatorWhenConstantIsOnLeft()
+        {
+            var five = Expression.Constant(5);
+            var expression = Expression.MakeBinary(ExpressionType.GreaterThan, five, new LuceneQueryFieldExpression(typeof(int), "Count"));
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Count", five, QueryType.LessThan, Occur.MUST);
+        }
+
+        [Test]
+        public void LessThan_SwitchesOperatorWhenConstantIsOnLeft()
+        {
+            var five = Expression.Constant(5);
+            var expression = Expression.MakeBinary(ExpressionType.LessThan, five, new LuceneQueryFieldExpression(typeof(int), "Count"));
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Count", five, QueryType.GreaterThan, Occur.MUST);
+        }
+
+        [Test]
+        public void GreaterThanOrEqual_SwitchesOperatorWhenConstantIsOnLeft()
+        {
+            var five = Expression.Constant(5);
+            var expression = Expression.MakeBinary(ExpressionType.GreaterThanOrEqual, five, new LuceneQueryFieldExpression(typeof(int), "Count"));
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Count", five, QueryType.LessThanOrEqual, Occur.MUST);
+        }
+
+        [Test]
+        public void LessThanOrEqual_SwitchesOperatorWhenConstantIsOnLeft()
+        {
+            var five = Expression.Constant(5);
+            var expression = Expression.MakeBinary(ExpressionType.LessThanOrEqual, five, new LuceneQueryFieldExpression(typeof(int), "Count"));
+
+            var result = visitor.VisitExpression(expression);
+            AssertLuceneQueryExpression(result, "Count", five, QueryType.GreaterThanOrEqual, Occur.MUST);
+        }
+
+        [Test]
         public void Equal()
         {
             var foo = Expression.Constant("foo");
@@ -56,7 +96,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
             var result = visitor.VisitExpression(expression);
             AssertLuceneQueryExpression(result, "Count", five, QueryType.GreaterThan, Occur.MUST);
         }
-
+        
         [Test]
         public void GreaterThanOrEqual()
         {
