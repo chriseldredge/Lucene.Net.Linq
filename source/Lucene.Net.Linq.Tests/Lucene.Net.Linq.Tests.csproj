@@ -63,7 +63,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\build\VersionInfo.cs">
+    <Compile Include="..\..\build\VersionInfo.cs" Condition="Exists('..\build\VersionInfo.cs')">
       <Link>Properties\VersionInfo.cs</Link>
     </Compile>
     <Compile Include="ContextTests.cs" />

@@ -1,11 +1,12 @@
 properties { 
   $base_dir  = resolve-path .
+  $source_dir  = "$base_dir\source"
   $build_dir = "$base_dir\build"
-  $packageinfo_dir = "$base_dir"
+  $packageinfo_dir = "$source_dir"
   $debug_build_dir = "$build_dir\bin\debug"
   $release_build_dir = "$build_dir\bin\release"
   $release_dir = "$base_dir\Release"
-  $sln_file = "$base_dir\Lucene.Net.Linq.sln"
+  $sln_file = "$source_dir\Lucene.Net.Linq.sln"
   $version = "1.0.0"
   $revision = ""
   $tools_dir = "$base_dir\Tools"
@@ -45,7 +46,7 @@ task Test -depends Compile -precondition { return $run_tests }{
 
 task Package -depends Compile, Test {
 
-  $spec_files = @(Get-ChildItem $packageinfo_dir "*.nuspec" -Recurse)
+  $spec_files = @(Get-ChildItem $packageinfo_dir "Lucene.Net.Linq*.nuspec" -Recurse)
 
   foreach ($spec in @($spec_files))
   {
