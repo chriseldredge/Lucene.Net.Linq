@@ -91,6 +91,22 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void OrderBy_ComparableGeneric()
+        {
+            writer.DeleteAll();
+
+            AddDocument(new SampleDocument { GenericComparable = new SampleGenericOnlyComparable(23155163) });
+            AddDocument(new SampleDocument { GenericComparable = new SampleGenericOnlyComparable(4667) });
+            AddDocument(new SampleDocument { GenericComparable = new SampleGenericOnlyComparable(22468359) });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from d in documents where d.GenericComparable != null orderby d.GenericComparable select d.GenericComparable.Value;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { 4667, 22468359, 23155163 }));
+        }
+
+        [Test]
         public void OrderBy_Score()
         {
             AddDocument(new SampleDocument { Name = "apple apple apple apple apple apple ", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });

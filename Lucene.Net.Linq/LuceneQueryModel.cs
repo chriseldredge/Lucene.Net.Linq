@@ -139,9 +139,15 @@ namespace Lucene.Net.Linq
         private FieldComparatorSource GetCustomSort(IFieldMappingInfo fieldMappingInfo)
         {
             var propertyType = fieldMappingInfo.PropertyInfo.PropertyType;
+
             if (typeof(IComparable).IsAssignableFrom(propertyType))
             {
-                return new ConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
+                return new NonGenericConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
+            }
+
+            if (typeof (IComparable<>).MakeGenericType(propertyType).IsAssignableFrom(propertyType))
+            {
+                return new GenericConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
             }
 
             throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " + propertyType);

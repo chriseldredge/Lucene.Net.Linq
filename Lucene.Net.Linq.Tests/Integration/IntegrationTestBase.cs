@@ -1,4 +1,7 @@
-﻿using Lucene.Net.Analysis;
+﻿using System;
+using System.ComponentModel;
+using System.Globalization;
+using Lucene.Net.Analysis;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
@@ -58,6 +61,53 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             [Field("backing_field")]
             public string Alias { get; set; }
+
+            public SampleGenericOnlyComparable GenericComparable { get; set; }
+        }
+
+        [TypeConverter(typeof(SampleGenericOnlyComparableConverter))]
+        public class SampleGenericOnlyComparable : IComparable<SampleGenericOnlyComparable>
+        {
+            private readonly int value;
+
+            public SampleGenericOnlyComparable(int value)
+            {
+                this.value = value;
+            }
+
+            public int Value
+            {
+                get { return value; }
+            }
+
+            public int CompareTo(SampleGenericOnlyComparable other)
+            {
+                return value.CompareTo(other.value);
+            }
+        }
+
+        public class SampleGenericOnlyComparableConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                return sourceType == typeof (string);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                return destinationType == typeof(string);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                return new SampleGenericOnlyComparable(int.Parse(value.ToString()));
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                var comp = (SampleGenericOnlyComparable) value;
+                return comp != null ? comp.Value.ToString() : null;
+            }
         }
 
         protected void AddDocument<T>(T document) where T : new()

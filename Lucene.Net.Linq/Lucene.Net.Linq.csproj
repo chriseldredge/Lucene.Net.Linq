@@ -85,6 +85,9 @@
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandlerRegistry.cs" />
     <Compile Include="SearcherLoadEventArgs.cs" />
+    <Compile Include="Search\GenericConvertableFieldComparatorSource.cs" />
+    <Compile Include="Search\GenericFieldComparator.cs" />
+    <Compile Include="Search\NonGenericFieldComparator.cs" />
     <Compile Include="Transformation\AllowSpecialCharactersExpressionTransformer.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Converters\DateTimeConverter.cs" />
@@ -126,7 +129,7 @@
     <Compile Include="Util\ExpressionExtensions.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitor.cs" />
     <Compile Include="Translation\TreeVisitors\QueryBuildingExpressionTreeVisitor.cs" />
-    <Compile Include="Search\ConvertableFieldComparatorSource.cs" />
+    <Compile Include="Search\NonGenericConvertableFieldComparatorSource.cs" />
     <Compile Include="Search\QueryType.cs" />
     <Compile Include="Transformation\QueryModelTransformer.cs" />
     <Compile Include="Translation\QueryModelTranslator.cs" />

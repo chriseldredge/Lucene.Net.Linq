@@ -123,7 +123,7 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             Assert.That(transformer.Model.Sort.GetSort().Length, Is.EqualTo(1));
             AssertSortFieldEquals(transformer.Model.Sort.GetSort()[0], "the_name_field", OrderingDirection.Desc, SortField.CUSTOM);
-            Assert.That(transformer.Model.Sort.GetSort()[0].ComparatorSource, Is.InstanceOf<ConvertableFieldComparatorSource>());
+            Assert.That(transformer.Model.Sort.GetSort()[0].ComparatorSource, Is.InstanceOf<NonGenericConvertableFieldComparatorSource>());
         }
 
         [Test]

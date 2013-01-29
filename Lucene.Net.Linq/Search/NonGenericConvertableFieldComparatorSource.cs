@@ -2,17 +2,16 @@
 using System.ComponentModel;
 using System.Linq;
 using Lucene.Net.Index;
-using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Search
 {
-    internal class ConvertableFieldComparatorSource : FieldComparatorSource
+    internal class NonGenericConvertableFieldComparatorSource : FieldComparatorSource
     {
-        private Type type;
-        private TypeConverter converter;
+        private readonly Type type;
+        private readonly TypeConverter converter;
 
-        public ConvertableFieldComparatorSource(Type type, TypeConverter converter)
+        public NonGenericConvertableFieldComparatorSource(Type type, TypeConverter converter)
         {
             this.type = type;
             this.converter = converter;
@@ -20,16 +19,16 @@ namespace Lucene.Net.Linq.Search
 
         public override FieldComparator NewComparator(string fieldname, int numHits, int sortPos, bool reversed)
         {
-            var genericType = typeof(ConvertableFieldComparator<>).MakeGenericType(type);
+            var genericType = typeof(NonGenericConvertableFieldComparator<>).MakeGenericType(type);
             var ctr = genericType.GetConstructor(new[] { typeof(int), typeof(string), typeof(TypeConverter) });
             return (FieldComparator)ctr.Invoke(new object[] { numHits, fieldname, converter });
         }
 
-        public class ConvertableFieldComparator<TComparable> : FieldComparator<TComparable> where TComparable : IComparable
+        public class NonGenericConvertableFieldComparator<TComparable> : NonGenericFieldComparator<TComparable> where TComparable : IComparable
         {
             private readonly TypeConverter converter;
 
-            public ConvertableFieldComparator(int numHits, string field, TypeConverter converter)
+            public NonGenericConvertableFieldComparator(int numHits, string field, TypeConverter converter)
                 : base(numHits, field)
             {
                 this.converter = converter;
