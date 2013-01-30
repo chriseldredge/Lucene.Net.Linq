@@ -6,7 +6,7 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 * Automatically converts PONOs to Documents and back
 * Add, delete and update documents in atomic transaction
 * Unit of Work pattern automatically tracks and flushes updated documents
-* Update/replace documents with [Field(Key=true)] to prevent duplicates
+* Update/replace documents with \[Field(Key=true)\] to prevent duplicates
 * Term queries
 * Prefix queries
 * Range queries and numeric range queries
@@ -35,8 +35,9 @@ the field name and each field is stored and indexed.
         public string Title { get; set; }
         public DateTimeOffset PublishDate { get; set; }
 
-        // Stores the field as a NumericField
-        [NumericField]
+        // Stores the field as a NumericField and use it
+        // as document key.
+        [NumericField(Key = true)]
         public long Id { get; set; }
 
         // Stores the field as text
@@ -93,7 +94,7 @@ Next, create LuceneDataProvider and run some queries:
                           where a.Author == "John Doe" && a.PublishDate > threshold
                           orderby a.Title
                           select a;
-
+ 
             var searchResults = from a in articles
                                  where a.SearchText == "some search query"
                                  select a;
@@ -103,6 +104,31 @@ Next, create LuceneDataProvider and run some queries:
 
 Use a PerFieldAnalyzerWrapper to control how queries and fields are analyzed. For the above example, fields like SearchText (text) should
 generally be analyzed using a stemming analyzer, but fields like Id, IssueNumber and Version should be indexed using a keyword analyzer.
+
+Storing multiple document types
+-------------------------------
+
+Different document types can be stored in a single index as long as each type uses different properties/fields for their keys.
+
+Example:
+
+    public class Article
+    {
+        [Field(Key = true)]
+        public long ArticleId { get; set; }
+
+
+    }
+
+    public class Article
+    {
+        [Field(Key = true)]
+        public long CommentId { get; set; }
+
+        /* snip */
+    }
+
+Note if both types use the same field, collisions may occur.
 
 Upcoming features / ideas
 -------------------------

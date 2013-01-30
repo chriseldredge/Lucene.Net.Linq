@@ -35,6 +35,7 @@ namespace Lucene.Net.Linq
             get { return sorts.Count > 0 ? new Sort(sorts.ToArray()) : new Sort(); }
         }
 
+        public Filter Filter { get; set; }
         public int MaxResults { get; set; }
         public int SkipResults { get; set; }
         public bool Last { get; set; }
@@ -92,6 +93,11 @@ namespace Lucene.Net.Linq
             if (Last)
             {
                 sb.Append(".Last()");
+            }
+
+            if (Filter != null)
+            {
+                sb.Append(" Filter: " + Filter);
             }
 
             return sb.ToString();

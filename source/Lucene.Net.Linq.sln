@@ -7,10 +7,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucene.Net.Linq.Tests", "Lu
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{91DBBF52-CD3F-4737-91DC-CDB7564C32B9}"
 	ProjectSection(SolutionItems) = preProject
-		default.ps1 = default.ps1
-		LICENSE.txt = LICENSE.txt
-		psake.ps1 = psake.ps1
-		README.markdown = README.markdown
+		..\default.ps1 = ..\default.ps1
+		..\LICENSE.txt = ..\LICENSE.txt
+		..\psake.ps1 = ..\psake.ps1
+		..\psake.psm1 = ..\psake.psm1
+		..\psake_ext.ps1 = ..\psake_ext.ps1
+		..\README.markdown = ..\README.markdown
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{95CA6EE1-3FC1-466E-821F-E48BE7DCCA6E}"

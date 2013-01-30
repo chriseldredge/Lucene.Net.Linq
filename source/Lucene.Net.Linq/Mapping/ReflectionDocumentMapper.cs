@@ -12,6 +12,7 @@ namespace Lucene.Net.Linq.Mapping
     {
         IFieldMappingInfo GetMappingInfo(string propertyName);
         IEnumerable<string> AllFields { get; }
+        IEnumerable<string> KeyFields { get; }
     }
 
     internal interface IDocumentMapper<in T> : IFieldMappingInfoProvider
@@ -105,6 +106,11 @@ namespace Lucene.Net.Linq.Mapping
         public bool EnableScoreTracking
         {
             get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
+        }
+
+        IEnumerable<string> IFieldMappingInfoProvider.KeyFields
+        {
+            get { return KeyFields.Select(k => k.FieldName); }
         }
 
         public List<IFieldMapper<T>> KeyFields

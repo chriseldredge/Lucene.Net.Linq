@@ -176,6 +176,26 @@ namespace Lucene.Net.Linq.Tests.Translation
             Assert.That(transformer.Model.DocumentTracker, Is.SameAs(expr.Value));
         }
 
+        [Test]
+        public void SetsQueryFilterOnKeyFields()
+        {
+            mappingInfo.Expect(m => m.KeyFields).Return(new[] {"my-key"});
+
+            transformer.Build(queryModel);
+            
+            Assert.That(transformer.Model.Filter, Is.Not.Null);
+        }
+
+        [Test]
+        public void SetsNullQueryFilterOnEmptyKeyFields()
+        {
+            mappingInfo.Expect(m => m.KeyFields).Return(new string[0]);
+
+            transformer.Build(queryModel);
+
+            Assert.That(transformer.Model.Filter, Is.Null);
+        }
+
         private void AssertSortFieldEquals(SortField sortField, string expectedFieldName, OrderingDirection expectedDirection, int expectedType)
         {
             Assert.That(sortField.Field, Is.EqualTo(expectedFieldName));

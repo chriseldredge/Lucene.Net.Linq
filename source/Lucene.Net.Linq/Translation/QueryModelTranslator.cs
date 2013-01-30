@@ -1,7 +1,10 @@
-﻿using Lucene.Net.Linq.Clauses;
+﻿using System.Linq;
+using Lucene.Net.Index;
+using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Translation.ResultOperatorHandlers;
 using Lucene.Net.Linq.Translation.TreeVisitors;
+using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 
@@ -25,6 +28,8 @@ namespace Lucene.Net.Linq.Translation
         public void Build(QueryModel queryModel)
         {
             queryModel.Accept(this);
+
+            CreateQueryFilterForKeyFields();
         }
 
         public LuceneQueryModel Model
@@ -79,6 +84,22 @@ namespace Lucene.Net.Linq.Translation
         public void VisitTrackRetrievedDocumentsClause(TrackRetrievedDocumentsClause trackRetrievedDocumentsClause, QueryModel queryModel, int index)
         {
             model.DocumentTracker = trackRetrievedDocumentsClause.Tracker.Value;
+        }
+        
+        private void CreateQueryFilterForKeyFields()
+        {
+            var filterQuery = fieldMappingInfoProvider.KeyFields.Aggregate(
+                new BooleanQuery(),
+                (query, key) =>
+                    {
+                        query.Add(new WildcardQuery(new Term(key, "*")), Occur.MUST);
+                        return query;
+                    });
+
+            if (filterQuery.Clauses.Count > 0)
+            {
+                model.Filter = new QueryWrapperFilter(filterQuery);
+            }
         }
     }
 }

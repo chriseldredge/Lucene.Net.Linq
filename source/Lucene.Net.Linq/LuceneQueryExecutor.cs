@@ -30,7 +30,7 @@ namespace Lucene.Net.Linq
         protected override TDocument ConvertDocument(Document doc, float score)
         {
             var item = newItem();
-
+            
             mapper.ToObject(doc, score, item);
             
             return item;
@@ -44,6 +44,11 @@ namespace Lucene.Net.Linq
         public override IEnumerable<string> AllFields
         {
             get { return mapper.AllFields; }
+        }
+
+        public override IEnumerable<string> KeyFields
+        {
+            get { return mapper.KeyFields; }
         }
 
         protected override bool EnableScoreTracking
@@ -105,7 +110,7 @@ namespace Lucene.Net.Linq
 
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, currentItemExpression);
-            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, true));
+            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, throwOnUnmappedReferences: true));
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
@@ -129,8 +134,8 @@ namespace Lucene.Net.Linq
                 {
                     searcher.SetDefaultFieldSortScoring(true, false);
                 }
-
-                var hits = searcher.Search(query, null, maxResults + skipResults, luceneQueryModel.Sort);
+                
+                var hits = searcher.Search(query, luceneQueryModel.Filter, maxResults + skipResults, luceneQueryModel.Sort);
                 
                 if (luceneQueryModel.Last)
                 {
@@ -197,6 +202,7 @@ namespace Lucene.Net.Linq
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
         public abstract IEnumerable<string> AllFields { get; }
+        public abstract IEnumerable<string> KeyFields { get; }
 
         protected abstract TDocument ConvertDocument(Document doc, float score);
         protected abstract bool EnableScoreTracking { get; }
