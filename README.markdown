@@ -120,7 +120,7 @@ Example:
 
     }
 
-    public class Article
+    public class Comment
     {
         [Field(Key = true)]
         public long CommentId { get; set; }
@@ -128,7 +128,26 @@ Example:
         /* snip */
     }
 
-Note if both types use the same field, collisions may occur.
+Alternatively, a \[DocumentKey\] attribute may be applied to the class to give
+it a unique field/value from other documents:
+
+    [DocumentKey(FieldName = "Type", Value = "Article")]
+    public class Article
+    {
+        [Field(Key = true)]
+        public long Id { get; set; }
+
+        /* snip */
+    }
+
+    [DocumentKey(FieldName = "Type", Value = "Comment")]
+    public class Comment
+    {
+        [Field(Key = true)]
+        public long Id { get; set; }
+
+        /* snip */
+    }
 
 Upcoming features / ideas
 -------------------------

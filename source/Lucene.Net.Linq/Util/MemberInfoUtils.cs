@@ -7,7 +7,12 @@ namespace Lucene.Net.Linq.Util
     {
         public static T GetCustomAttribute<T>(this MemberInfo member, bool inherit)
         {
-            return (T) member.GetCustomAttributes(typeof (T), inherit).SingleOrDefault();
+            return member.GetCustomAttributes<T>(inherit).SingleOrDefault();
+        }
+
+        public static T[] GetCustomAttributes<T>(this MemberInfo member, bool inherit)
+        {
+            return member.GetCustomAttributes(typeof (T), inherit).Cast<T>().ToArray();
         }
     }
 }

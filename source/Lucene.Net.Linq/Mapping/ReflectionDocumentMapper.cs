@@ -8,12 +8,10 @@ using Lucene.Net.Linq.Util;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    
-
     internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
     {
         private readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
-        private readonly List<IFieldMapper<T>> keyFields;
+        private readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
 
         public ReflectionDocumentMapper() : this(typeof(T))
         {
@@ -23,6 +21,13 @@ namespace Lucene.Net.Linq.Mapping
         {
             var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
+            BuildFieldMap(props);
+
+            BuildKeyFieldMap(type, props);
+        }
+
+        private void BuildFieldMap(IEnumerable<PropertyInfo> props)
+        {
             foreach (var p in props)
             {
                 if (p.GetCustomAttribute<IgnoreFieldAttribute>(true) != null)
@@ -32,13 +37,23 @@ namespace Lucene.Net.Linq.Mapping
                 var mappingContext = FieldMappingInfoBuilder.Build<T>(p);
                 fieldMap.Add(mappingContext.PropertyName, mappingContext);
             }
+        }
 
+        private void BuildKeyFieldMap(Type type, IEnumerable<PropertyInfo> props)
+        {
             var keyProps = from p in props
                            let a = p.GetCustomAttribute<BaseFieldAttribute>(true)
                            where a != null && a.Key
                            select p;
 
-            keyFields = keyProps.Select(kp => fieldMap[kp.Name]).ToList();
+            keyFields.AddRange(keyProps.Select(kp => fieldMap[kp.Name]));
+
+            foreach (var attr in type.GetCustomAttributes<DocumentKeyAttribute>(true))
+            {
+                var keyField = new DocumentKeyFieldMapper<T>(attr.FieldName, attr.Value);
+                fieldMap.Add(keyField.PropertyName, keyField);
+                keyFields.Add(keyField);
+            }
         }
 
         public IFieldMappingInfo GetMappingInfo(string propertyName)

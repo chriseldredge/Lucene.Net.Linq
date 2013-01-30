@@ -177,14 +177,31 @@ namespace Lucene.Net.Linq.Tests.Translation
         }
 
         [Test]
-        public void SetsQueryFilterOnKeyFields()
+        public void SetsQueryFilterOnKeyField()
         {
             mappingInfo.Expect(m => m.KeyProperties).Return(new[] { "MyProp" });
             mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(new FakeFieldMappingInfo { FieldName = "my-key" });
 
             transformer.Build(queryModel);
-            
-            Assert.That(transformer.Model.Filter, Is.Not.Null);
+
+            var filter = (QueryWrapperFilter)transformer.Model.Filter;
+
+            Assert.That(filter, Is.Not.Null, "transformer.Model.Filter");
+            Assert.That(filter.ToString(), Is.EqualTo("QueryWrapperFilter(+my-key:*)"));
+        }
+
+        [Test]
+        public void SetsQueryFilterOnKeyFieldWithConstraint()
+        {
+            mappingInfo.Expect(m => m.KeyProperties).Return(new[] { "MyProp" });
+            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(new FakeFieldMappingInfo { FieldName = "my-key", KeyConstraint = "fixed-value" });
+
+            transformer.Build(queryModel);
+
+            var filter = (QueryWrapperFilter)transformer.Model.Filter;
+
+            Assert.That(filter, Is.Not.Null, "transformer.Model.Filter");
+            Assert.That(filter.ToString(), Is.EqualTo("QueryWrapperFilter(+my-key:fixed-value)"));
         }
 
         [Test]

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Analysis;
+using Lucene.Net.Index;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
@@ -38,14 +39,22 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             var query = new BooleanQuery();
-            values.Apply(kvp => query.Add(Parse(new QueryParser(version, kvp.Key, analyzer), ConvertToQueryExpression(kvp)), Occur.MUST));
+            values.Apply(kvp => query.Add(ConvertToQueryExpression(kvp, analyzer, version), Occur.MUST));
             return query;
         }
 
-        private string ConvertToQueryExpression(KeyValuePair<string, object> kvp)
+        private Query ConvertToQueryExpression(KeyValuePair<string, object> kvp, Analyzer analyzer, Version version)
         {
             var mapping = mappings[kvp.Key];
-            return mapping.ConvertToQueryExpression(kvp.Value);
+
+            if (!string.IsNullOrWhiteSpace(mapping.KeyConstraint))
+            {
+                return new TermQuery(new Term(mapping.FieldName, mapping.KeyConstraint));
+            }
+
+            var parser = new QueryParser(version, kvp.Key, analyzer);
+
+            return Parse(parser, mapping.ConvertToQueryExpression(kvp.Value));
         }
 
         private Query Parse(QueryParser parser, string value)

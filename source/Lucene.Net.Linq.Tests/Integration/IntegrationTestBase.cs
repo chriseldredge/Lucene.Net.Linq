@@ -32,6 +32,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             return new PorterStemAnalyzer(version);
         }
 
+        [DocumentKey(FieldName = "FixedKey", Value = "SampleDocument")]
         public class SampleDocument
         {
             private static int count;

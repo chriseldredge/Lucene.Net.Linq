@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
 
@@ -9,14 +10,29 @@ namespace Lucene.Net.Linq.Tests.Mapping
     [TestFixture]
     public class ReflectionDocumentMapperTests
     {
-        private ReflectedDocument item1 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
-        private ReflectedDocument item2 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+        private readonly ReflectedDocument item1 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+        private readonly ReflectedDocument item2 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
 
         [Test]
         public void CtrFindsKeyFields()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
             Assert.That(mapper.KeyFields.Select(k => k.FieldName), Is.EquivalentTo(new[] {"Id", "Version", "Number"}));
+        }
+
+        [Test]
+        public void CtrFindsDocumentKeys()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocumentWithKey>();
+            Assert.That(mapper.KeyFields.Select(k => k.FieldName), Is.EquivalentTo(new[] { "Id", "Version", "Number", "Type", "Revision" }));
+        }
+
+        [Test]
+        public void ContainsMetaPropertyForDocumentKey()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocumentWithKey>();
+
+            Assert.That(mapper.KeyProperties.Select(mapper.GetMappingInfo).Count(), Is.EqualTo(5));
         }
 
         [Test]
@@ -57,6 +73,13 @@ namespace Lucene.Net.Linq.Tests.Mapping
         }
 
         [Test]
+        public void ToKey_DocumentKeys()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocumentWithKey>();
+
+            mapper.ToKey(new ReflectedDocumentWithKey { Id = "x", Version = new Version("1.0") });
+        }
+        [Test]
         public void Documents_Equal()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
@@ -94,6 +117,17 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(result, Is.True, "Should be equal when sequences are equal");
         }
 
+        [Test]
+        public void ReadOnlyKey()
+        {
+            var document = new Document();
+
+            var mapper = new ReflectionDocumentMapper<ReflectedDocumentWithReadOnlyKey>();
+            mapper.ToDocument(new ReflectedDocumentWithReadOnlyKey { Id = "a" }, document);
+
+            Assert.That(document.GetField("Type").StringValue, Is.EqualTo("ReflectedDocumentWithReadOnlyKey"));
+        }
+
         public class ReflectedDocument
         {
             [Field(Key = true)]
@@ -113,6 +147,22 @@ namespace Lucene.Net.Linq.Tests.Mapping
             [IgnoreField]
             public string IgnoreMe { get; set; }
         }
+
+        [DocumentKey(FieldName = "Type", Value = "ReflectedDocumentWithKey")]
+        [DocumentKey(FieldName = "Revision", Value = "1")]
+        public class ReflectedDocumentWithKey : ReflectedDocument
+        {
+        }
+
+        public class ReflectedDocumentWithReadOnlyKey
+        {
+            [Field(Key = true)]
+            public string Id { get; set; }
+
+            [Field(Key = true)]
+            public string Type { get { return "ReflectedDocumentWithReadOnlyKey"; } }
+        }
+
     }
 
     

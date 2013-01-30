@@ -7,27 +7,6 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal interface IFieldMapper<in T> : IFieldMappingInfo
-    {
-        void CopyFromDocument(Document source, float score, T target);
-        void CopyToDocument(T source, Document target);
-        object GetPropertyValue(T source);
-    }
-
-    internal interface IFieldMappingInfo
-    {
-        string FieldName { get; }
-        string PropertyName { get; }
-        Type PropertyType { get; }
-        TypeConverter Converter { get; }
-        
-        bool IsNumericField { get; }
-        int SortFieldType { get; }
-        bool CaseSensitive { get; }
-        string KeyConstraint { get; }
-        string ConvertToQueryExpression(object value);
-    }
-
     internal class ReflectionFieldMapper<T> : IFieldMapper<T>
     {
         protected readonly PropertyInfo propertyInfo;
@@ -212,19 +191,10 @@ namespace Lucene.Net.Linq.Mapping
 
         public bool IsNumericField { get { throw new NotSupportedException(); } }
         public bool CaseSensitive { get { throw new NotSupportedException(); } }
-        public string PropertyName { get { throw new NotSupportedException(); } }
-        public string KeyConstraint { get { throw new NotSupportedException(); } }
-        public Type PropertyType { get { throw new NotSupportedException(); } }
-        public TypeConverter Converter { get { throw new NotSupportedException(); } }
-
-        public PropertyInfo PropertyInfo
-        {
-            get { return propertyInfo; }
-        }
-        
-        public string FieldName
-        {
-            get { return null; }
-        }
+        public string PropertyName { get { return propertyInfo.Name; } }
+        public string KeyConstraint { get { return null; } }
+        public Type PropertyType { get { return propertyInfo.PropertyType; } }
+        public TypeConverter Converter { get { return null; } }
+        public string FieldName { get { return null; } }
     }
 }

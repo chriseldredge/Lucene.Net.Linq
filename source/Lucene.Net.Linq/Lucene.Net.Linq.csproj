@@ -81,6 +81,9 @@
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="IRetrievedDocumentTracker.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
+    <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
+    <Compile Include="Mapping\IFieldMapper.cs" />
+    <Compile Include="Mapping\IFieldMappingInfo.cs" />
     <Compile Include="Mapping\IFieldMappingInfoProvider.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />

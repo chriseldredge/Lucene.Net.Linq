@@ -32,6 +32,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.FirstOrDefault().Name, Is.EqualTo(d.Name));
         }
 
+        [DocumentKey(FieldName = "FixedKey", Value = "SampleDocument")]
         class AlternateDocument
         {
             [Field(Key = true)]
