@@ -238,8 +238,9 @@ namespace Lucene.Net.Linq.Tests
         [Test]
         public void Delete_ThrowsOnEmptyKey()
         {
-            mapper.BackToRecord(BackToRecordOptions.Expectations);
+            mapper.BackToRecord(BackToRecordOptions.All);
             mapper.Expect(m => m.ToKey(Arg<Record>.Is.NotNull)).Return(new DocumentKey());
+            mapper.Replay();
 
             var r1 = new Record { Id = "12" };
 

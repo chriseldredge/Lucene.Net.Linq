@@ -88,11 +88,24 @@ namespace Lucene.Net.Linq.Translation
         
         private void CreateQueryFilterForKeyFields()
         {
-            var filterQuery = fieldMappingInfoProvider.KeyFields.Aggregate(
+            var filterQuery = fieldMappingInfoProvider.KeyProperties.Aggregate(
                 new BooleanQuery(),
-                (query, key) =>
+                (query, property) =>
                     {
-                        query.Add(new WildcardQuery(new Term(key, "*")), Occur.MUST);
+                        var fieldMappingInfo = fieldMappingInfoProvider.GetMappingInfo(property);
+                        Query constraintQuery;
+
+                        if (fieldMappingInfo.KeyConstraint != null)
+                        {
+                            constraintQuery = new TermQuery(new Term(fieldMappingInfo.FieldName, fieldMappingInfo.KeyConstraint));
+                        }
+                        else
+                        {
+                            constraintQuery = new WildcardQuery(new Term(fieldMappingInfo.FieldName, "*"));
+                        }
+
+                        query.Add(constraintQuery, Occur.MUST);
+
                         return query;
                     });
 

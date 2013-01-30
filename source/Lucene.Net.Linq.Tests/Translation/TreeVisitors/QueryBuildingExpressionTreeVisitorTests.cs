@@ -70,7 +70,7 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
             get { return new[] { "Id" }; }
         }
 
-        public IEnumerable<string> KeyFields
+        public IEnumerable<string> KeyProperties
         {
             get { return new[] {"Id"}; }
         }

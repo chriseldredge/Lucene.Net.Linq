@@ -8,21 +8,7 @@ using Lucene.Net.Linq.Util;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal interface IFieldMappingInfoProvider
-    {
-        IFieldMappingInfo GetMappingInfo(string propertyName);
-        IEnumerable<string> AllFields { get; }
-        IEnumerable<string> KeyFields { get; }
-    }
-
-    internal interface IDocumentMapper<in T> : IFieldMappingInfoProvider
-    {
-        void ToObject(Document source, float score, T target);
-        void ToDocument(T source, Document target);
-        DocumentKey ToKey(T source);
-        bool Equals(T item1, T item2);
-        bool EnableScoreTracking { get; }
-    }
+    
 
     internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
     {
@@ -76,7 +62,7 @@ namespace Lucene.Net.Linq.Mapping
             }
         }
 
-        public DocumentKey ToKey(T source)
+        public IDocumentKey ToKey(T source)
         {
             var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.GetPropertyValue(source));
 
@@ -108,9 +94,9 @@ namespace Lucene.Net.Linq.Mapping
             get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
         }
 
-        IEnumerable<string> IFieldMappingInfoProvider.KeyFields
+        public IEnumerable<string> KeyProperties
         {
-            get { return KeyFields.Select(k => k.FieldName); }
+            get { return keyFields.Select(k => k.PropertyName); }
         }
 
         public List<IFieldMapper<T>> KeyFields

@@ -179,7 +179,8 @@ namespace Lucene.Net.Linq.Tests.Translation
         [Test]
         public void SetsQueryFilterOnKeyFields()
         {
-            mappingInfo.Expect(m => m.KeyFields).Return(new[] {"my-key"});
+            mappingInfo.Expect(m => m.KeyProperties).Return(new[] { "MyProp" });
+            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(new FakeFieldMappingInfo { FieldName = "my-key" });
 
             transformer.Build(queryModel);
             
@@ -189,7 +190,7 @@ namespace Lucene.Net.Linq.Tests.Translation
         [Test]
         public void SetsNullQueryFilterOnEmptyKeyFields()
         {
-            mappingInfo.Expect(m => m.KeyFields).Return(new string[0]);
+            mappingInfo.Expect(m => m.KeyProperties).Return(new string[0]);
 
             transformer.Build(queryModel);
 

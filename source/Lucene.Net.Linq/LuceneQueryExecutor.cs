@@ -46,9 +46,9 @@ namespace Lucene.Net.Linq
             get { return mapper.AllFields; }
         }
 
-        public override IEnumerable<string> KeyFields
+        public override IEnumerable<string> KeyProperties
         {
-            get { return mapper.KeyFields; }
+            get { return mapper.KeyProperties; }
         }
 
         protected override bool EnableScoreTracking
@@ -202,7 +202,7 @@ namespace Lucene.Net.Linq
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
         public abstract IEnumerable<string> AllFields { get; }
-        public abstract IEnumerable<string> KeyFields { get; }
+        public abstract IEnumerable<string> KeyProperties { get; }
 
         protected abstract TDocument ConvertDocument(Document doc, float score);
         protected abstract bool EnableScoreTracking { get; }

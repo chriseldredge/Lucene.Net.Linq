@@ -24,6 +24,7 @@ namespace Lucene.Net.Linq.Mapping
         bool IsNumericField { get; }
         int SortFieldType { get; }
         bool CaseSensitive { get; }
+        string KeyConstraint { get; }
         string ConvertToQueryExpression(object value);
     }
 
@@ -74,6 +75,14 @@ namespace Lucene.Net.Linq.Mapping
         public bool CaseSensitive
         {
             get { return caseSensitive; }
+        }
+
+        public virtual string KeyConstraint
+        {
+            get
+            {
+                return null;
+            }
         }
 
         public virtual bool IsNumericField { get { return false; } }
@@ -204,6 +213,7 @@ namespace Lucene.Net.Linq.Mapping
         public bool IsNumericField { get { throw new NotSupportedException(); } }
         public bool CaseSensitive { get { throw new NotSupportedException(); } }
         public string PropertyName { get { throw new NotSupportedException(); } }
+        public string KeyConstraint { get { throw new NotSupportedException(); } }
         public Type PropertyType { get { throw new NotSupportedException(); } }
         public TypeConverter Converter { get { throw new NotSupportedException(); } }
 

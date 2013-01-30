@@ -9,7 +9,13 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal class DocumentKey
+    internal interface IDocumentKey
+    {
+        Query ToQuery(Analyzer analyzer, Version version);
+        bool Empty { get; }
+    }
+
+    internal class DocumentKey : IDocumentKey
     {
         private readonly IDictionary<string, object> values;
         private readonly IDictionary<string, IFieldMappingInfo> mappings;

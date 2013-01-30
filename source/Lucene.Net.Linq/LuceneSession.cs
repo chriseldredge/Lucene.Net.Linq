@@ -21,7 +21,7 @@ namespace Lucene.Net.Linq
 
         private readonly List<T> additions = new List<T>();
         private readonly List<Query> deleteQueries = new List<Query>();
-        private readonly ISet<DocumentKey> deleteKeys = new HashSet<DocumentKey>();
+        private readonly ISet<IDocumentKey> deleteKeys = new HashSet<IDocumentKey>();
 
         private readonly SessionDocumentTracker documentTracker;
 
@@ -193,7 +193,8 @@ namespace Lucene.Net.Linq
             var docs = documentTracker.FindModifiedDocuments();
             foreach (var doc in docs)
             {
-                Log.Trace(m => m("Flushing modified document " + doc));
+                var captured = doc;
+                Log.Trace(m => m("Flushing modified document " + captured));
 
                 if (!doc.Key.Empty)
                 {
@@ -229,9 +230,9 @@ namespace Lucene.Net.Linq
             get { return additions; }
         }
 
-        internal IDictionary<DocumentKey, Document> ConvertPendingAdditions()
+        internal IDictionary<IDocumentKey, Document> ConvertPendingAdditions()
         {
-            var map = new Dictionary<DocumentKey, Document>();
+            var map = new Dictionary<IDocumentKey, Document>();
             var reverse = new List<T>(additions);
             reverse.Reverse();
 
@@ -258,9 +259,9 @@ namespace Lucene.Net.Linq
         {
             private readonly T document;
             private readonly T hiddenCopy;
-            private readonly DocumentKey key;
+            private readonly IDocumentKey key;
 
-            internal TrackedDocument(T document, T hiddenCopy, DocumentKey key)
+            internal TrackedDocument(T document, T hiddenCopy, IDocumentKey key)
             {
                 this.document = document;
                 this.hiddenCopy = hiddenCopy;
@@ -277,7 +278,7 @@ namespace Lucene.Net.Linq
                 get { return hiddenCopy; }
             }
 
-            internal DocumentKey Key
+            internal IDocumentKey Key
             {
                 get { return key; }
             }
@@ -286,8 +287,8 @@ namespace Lucene.Net.Linq
         internal class SessionDocumentTracker : IRetrievedDocumentTracker<T>
         {
             private readonly IDocumentMapper<T> mapper;
-            private readonly IDictionary<DocumentKey, T> byKey = new Dictionary<DocumentKey, T>();
-            private readonly ISet<DocumentKey> deletedKeys = new HashSet<DocumentKey>();
+            private readonly IDictionary<IDocumentKey, T> byKey = new Dictionary<IDocumentKey, T>();
+            private readonly ISet<IDocumentKey> deletedKeys = new HashSet<IDocumentKey>();
             private readonly IList<TrackedDocument> items = new List<TrackedDocument>();
 
             public SessionDocumentTracker(IDocumentMapper<T> mapper)
@@ -318,7 +319,7 @@ namespace Lucene.Net.Linq
                 return deletedKeys.Contains(mapper.ToKey(item));
             }
 
-            public void MarkForDeletion(DocumentKey key)
+            public void MarkForDeletion(IDocumentKey key)
             {
                 deletedKeys.Add(key);
             }
