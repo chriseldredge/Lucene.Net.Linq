@@ -34,6 +34,9 @@ namespace Lucene.Net.Linq.Tests.Integration
 
         class AlternateDocument
         {
+            [Field(Key = true)]
+            public string Key { get; set; }
+
             [Field("Name")]
             public string AlternateName { get; set; }
         }
@@ -41,7 +44,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void StoresAndRetrievesByFieldName()
         {
-            var d = new AlternateDocument { AlternateName = "My Document" };
+            var d = new AlternateDocument { AlternateName = "My Document", Key = "0" };
             using (var session = provider.OpenSession<AlternateDocument>())
             {
                 session.Add(d);

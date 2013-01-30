@@ -77,9 +77,24 @@ namespace Lucene.Net.Linq.Mapping
 
         public DocumentKey ToKey(T source)
         {
-            var values = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.PropertyInfo.GetValue(source, null));
+            var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.PropertyInfo.GetValue(source, null));
 
-            return new DocumentKey(values);
+            Validate(keyValues);
+
+            return new DocumentKey(keyValues);
+        }
+
+        private void Validate(Dictionary<IFieldMappingInfo, object> keyValues)
+        {
+            var nulls = keyValues.Where(kv => kv.Value == null).ToArray();
+
+            if (!nulls.Any()) return;
+
+            var message = string.Format("Cannot create key for document of type '{0}' with null value(s) for properties {1} which are marked as Key=true.",
+                typeof(T),
+                string.Join(", ", nulls.Select(n => n.Key.PropertyInfo.Name)));
+
+            throw new InvalidOperationException(message);
         }
 
         public IEnumerable<string> AllFields

@@ -20,19 +20,21 @@ namespace Lucene.Net.Linq.Tests.Mapping
         }
 
         [Test]
-        public void ToKey_NullSafe()
+        public void ToKey_ThrowsOnNullValues()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
-            var key = mapper.ToKey(new ReflectedDocument());
-            Assert.NotNull(key);
+
+            TestDelegate call = () => mapper.ToKey(new ReflectedDocument());
+
+            Assert.That(call, Throws.InvalidOperationException);
         }
 
         [Test]
         public void ToKey_DifferentInstance()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
-            var key1 = mapper.ToKey(new ReflectedDocument());
-            var key2 = mapper.ToKey(new ReflectedDocument());
+            var key1 = mapper.ToKey(new ReflectedDocument { Id = "x", Version = new Version("1.0") });
+            var key2 = mapper.ToKey(new ReflectedDocument { Id = "x", Version = new Version("1.0") });
             Assert.That(key1, Is.Not.SameAs(key2));
         }
 
@@ -40,8 +42,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void ToKey_Equal()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
-            var key1 = mapper.ToKey(new ReflectedDocument());
-            var key2 = mapper.ToKey(new ReflectedDocument());
+            var key1 = mapper.ToKey(new ReflectedDocument { Id = "x", Version = new Version("1.0") });
+            var key2 = mapper.ToKey(new ReflectedDocument { Id = "x", Version = new Version("1.0") });
             Assert.That(key1, Is.EqualTo(key2));
         }
 
@@ -49,8 +51,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void ToKey_NotEqual()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
-            var key1 = mapper.ToKey(new ReflectedDocument { Version = new Version("1.0") });
-            var key2 = mapper.ToKey(new ReflectedDocument { Version = new Version("2.0") });
+            var key1 = mapper.ToKey(new ReflectedDocument { Id = "x", Version = new Version("1.0") });
+            var key2 = mapper.ToKey(new ReflectedDocument { Id = "y", Version = new Version("2.0") });
             Assert.That(key1, Is.Not.EqualTo(key2));
         }
 
