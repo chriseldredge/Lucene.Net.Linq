@@ -44,7 +44,7 @@ namespace Lucene.Net.Linq.Mapping
                     continue;
                 }
                 var mappingContext = FieldMappingInfoBuilder.Build<T>(p);
-                fieldMap.Add(mappingContext.PropertyInfo.Name, mappingContext);
+                fieldMap.Add(mappingContext.PropertyName, mappingContext);
             }
 
             var keyProps = from p in props
@@ -78,7 +78,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public DocumentKey ToKey(T source)
         {
-            var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.PropertyInfo.GetValue(source, null));
+            var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.GetPropertyValue(source));
 
             Validate(keyValues);
 
@@ -93,7 +93,7 @@ namespace Lucene.Net.Linq.Mapping
 
             var message = string.Format("Cannot create key for document of type '{0}' with null value(s) for properties {1} which are marked as Key=true.",
                 typeof(T),
-                string.Join(", ", nulls.Select(n => n.Key.PropertyInfo.Name)));
+                string.Join(", ", nulls.Select(n => n.Key.PropertyName)));
 
             throw new InvalidOperationException(message);
         }
@@ -122,8 +122,8 @@ namespace Lucene.Net.Linq.Mapping
         {
             foreach (var field in fieldMap.Values)
             {
-                var val1 = field.PropertyInfo.GetValue(item1, null);
-                var val2 = field.PropertyInfo.GetValue(item2, null);
+                var val1 = field.GetPropertyValue(item1);
+                var val2 = field.GetPropertyValue(item2);
 
                 if (!ValuesEqual(val1, val2))
                 {

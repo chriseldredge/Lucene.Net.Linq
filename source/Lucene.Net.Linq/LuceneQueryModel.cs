@@ -144,7 +144,7 @@ namespace Lucene.Net.Linq
 
         private FieldComparatorSource GetCustomSort(IFieldMappingInfo fieldMappingInfo)
         {
-            var propertyType = fieldMappingInfo.PropertyInfo.PropertyType;
+            var propertyType = fieldMappingInfo.PropertyType;
 
             if (typeof(IComparable).IsAssignableFrom(propertyType))
             {

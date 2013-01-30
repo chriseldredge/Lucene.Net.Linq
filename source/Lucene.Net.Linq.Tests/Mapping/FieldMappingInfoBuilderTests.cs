@@ -32,7 +32,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void RetainsPropertyInfo()
         {
             var context = FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(stringPropertyInfo);
-            Assert.That(context.PropertyInfo, Is.SameAs(stringPropertyInfo));
+            Assert.That(context.PropertyName, Is.EqualTo(stringPropertyInfo.Name));
+            Assert.That(context.PropertyType, Is.EqualTo(stringPropertyInfo.PropertyType));
         }
 
         [Test]

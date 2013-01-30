@@ -5,7 +5,6 @@ using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
-using Lucene.Net.Linq.Tests.Translation.TreeVisitors;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
@@ -112,7 +111,8 @@ namespace Lucene.Net.Linq.Tests.Translation
             var mapping = MockRepository.GenerateStub<IFieldMappingInfo>();
             mapping.Stub(i => i.IsNumericField).Return(false);
             mapping.Stub(i => i.SortFieldType).Return(-1);
-            mapping.Stub(i => i.PropertyInfo).Return(typeof (Record).GetProperty("Name"));
+            mapping.Stub(i => i.PropertyName).Return("Name");
+            mapping.Stub(i => i.PropertyType).Return(typeof(string));
 
             var orderByClause = new OrderByClause();
             orderByClause.Orderings.Add(new Ordering(new LuceneQueryFieldExpression(typeof(string), "Name"), OrderingDirection.Desc));

@@ -11,13 +11,16 @@ namespace Lucene.Net.Linq.Mapping
     {
         void CopyFromDocument(Document source, float score, T target);
         void CopyToDocument(T source, Document target);
+        object GetPropertyValue(T source);
     }
 
     internal interface IFieldMappingInfo
     {
         string FieldName { get; }
+        string PropertyName { get; }
+        Type PropertyType { get; }
         TypeConverter Converter { get; }
-        PropertyInfo PropertyInfo { get; }
+        
         bool IsNumericField { get; }
         int SortFieldType { get; }
         bool CaseSensitive { get; }
@@ -76,6 +79,14 @@ namespace Lucene.Net.Linq.Mapping
         public virtual bool IsNumericField { get { return false; } }
 
         public virtual int SortFieldType { get { return (Converter != null) ? -1 : SortField.STRING; } }
+
+        public virtual string PropertyName { get { return propertyInfo.Name; } }
+        public virtual Type PropertyType { get { return propertyInfo.PropertyType; } }
+
+        public virtual object GetPropertyValue(T source)
+        {
+            return propertyInfo.GetValue(source, null);
+        }
 
         public virtual void CopyFromDocument(Document source, float score, T target)
         {
@@ -175,36 +186,32 @@ namespace Lucene.Net.Linq.Mapping
             propertyInfo.SetValue(target, score, null);
         }
 
-        public string ConvertToQueryExpression(object value)
-        {
-            throw new NotImplementedException();
-        }
-
         public int SortFieldType
         {
             get { return SortField.SCORE; }
         }
 
-        public bool IsNumericField
+        public string ConvertToQueryExpression(object value)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotSupportedException();
         }
 
-        public bool CaseSensitive
+        public object GetPropertyValue(T source)
         {
-            get { throw new NotImplementedException(); }
+            throw new NotSupportedException();
         }
+
+        public bool IsNumericField { get { throw new NotSupportedException(); } }
+        public bool CaseSensitive { get { throw new NotSupportedException(); } }
+        public string PropertyName { get { throw new NotSupportedException(); } }
+        public Type PropertyType { get { throw new NotSupportedException(); } }
+        public TypeConverter Converter { get { throw new NotSupportedException(); } }
 
         public PropertyInfo PropertyInfo
         {
             get { return propertyInfo; }
         }
-
-        public TypeConverter Converter
-        {
-            get { throw new NotImplementedException(); }
-        }
-
+        
         public string FieldName
         {
             get { return null; }
