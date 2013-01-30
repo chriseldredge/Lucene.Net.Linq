@@ -20,6 +20,14 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 * Specify custom format for DateTime stored as strings
 * Register cache-warming queries to be executed when IndexSearcher is being reloaded
 
+Available on NuGet Gallery
+--------------------------
+
+To install the [Lucene.Net.Linq package](http://nuget.org/packages/Lucene.Net.Linq),
+run the following command in the [Package Manager Console](http://docs.nuget.org/docs/start-here/using-the-package-manager-console)
+
+    PM> Install-Package Lucene.Net.Linq
+
 Example
 ----------
 
