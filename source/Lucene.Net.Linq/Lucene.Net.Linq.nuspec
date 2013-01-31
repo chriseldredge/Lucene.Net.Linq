@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Lucene.Net.Linq</id>
-    <title>LINQ to Lucene</title>
+    <title>Lucene.Net.Linq</title>
     <version>$version$</version>
     <owners>The Motley Fool, LLC</owners>
     <authors>Chris Eldredge</authors>
@@ -12,8 +12,10 @@
     <licenseUrl>https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/LICENSE.txt</licenseUrl>
     <iconUrl>https://svn.apache.org/repos/asf/incubator/lucene.net/trunk/branding/logo/lucene-net-icon-128x128.png</iconUrl>
     <tags>lucene.net lucene linq odata search nosql</tags>
-    <summary>Provides LINQ IQueryable interface over a Lucene.Net index.</summary>
-    <description>Execute LINQ queries on Lucene.Net complete with object to Document mapping.</description>
+    <summary>Provides LINQ IQueryable interface and object/document mapping over a Lucene.Net index.</summary>
+    <description>
+      Execute LINQ queries on Lucene.Net complete with object to Document mapping.
+    </description>
     <releaseNotes>
       * Store different object types in single index.
       * Prevent documents with null values on key properties from being stored.
