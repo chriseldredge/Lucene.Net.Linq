@@ -186,7 +186,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public object GetPropertyValue(T source)
         {
-            throw new NotSupportedException();
+            return 0;
         }
 
         public bool IsNumericField { get { throw new NotSupportedException(); } }
