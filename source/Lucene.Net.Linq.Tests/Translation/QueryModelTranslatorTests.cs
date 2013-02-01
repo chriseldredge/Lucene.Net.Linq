@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
+using Lucene.Net.Index;
 using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
@@ -180,7 +181,8 @@ namespace Lucene.Net.Linq.Tests.Translation
         public void SetsQueryFilterOnKeyField()
         {
             mappingInfo.Expect(m => m.KeyProperties).Return(new[] { "MyProp" });
-            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(new FakeFieldMappingInfo { FieldName = "my-key" });
+            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(
+                new FakeFieldMappingInfo { FieldName = "my-key", KeyConstraint = new WildcardQuery(new Term("my-key", "*"))});
 
             transformer.Build(queryModel);
 
@@ -194,7 +196,12 @@ namespace Lucene.Net.Linq.Tests.Translation
         public void SetsQueryFilterOnKeyFieldWithConstraint()
         {
             mappingInfo.Expect(m => m.KeyProperties).Return(new[] { "MyProp" });
-            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(new FakeFieldMappingInfo { FieldName = "my-key", KeyConstraint = "fixed-value" });
+            mappingInfo.Expect(m => m.GetMappingInfo("MyProp")).Return(
+                new FakeFieldMappingInfo
+                    {
+                        FieldName = "my-key",
+                        KeyConstraint = new TermQuery(new Term("my-key", "fixed-value"))
+                    });
 
             transformer.Build(queryModel);
 

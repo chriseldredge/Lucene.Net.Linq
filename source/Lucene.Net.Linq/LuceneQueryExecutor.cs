@@ -27,12 +27,21 @@ namespace Lucene.Net.Linq
             this.mapper = mapper;
         }
 
-        protected override TDocument ConvertDocument(Document doc, float score)
+        protected override TDocument ConvertDocument(Document doc, IQueryExecutionContext context)
         {
             var item = newItem();
             
-            mapper.ToObject(doc, score, item);
+            mapper.ToObject(doc, context, item);
             
+            return item;
+        }
+
+        protected override TDocument ConvertDocumentForCustomBoost(Document doc)
+        {
+            var item = newItem();
+
+            mapper.ToObject(doc, new QueryExecutionContext(), item);
+
             return item;
         }
 
@@ -51,9 +60,9 @@ namespace Lucene.Net.Linq
             get { return mapper.KeyProperties; }
         }
 
-        protected override bool EnableScoreTracking
+        protected override void PrepareSearchSettings(IQueryExecutionContext context)
         {
-            get { return mapper.EnableScoreTracking; }
+            mapper.PrepareSearchSettings(context);
         }
     }
 
@@ -80,7 +89,10 @@ namespace Lucene.Net.Linq
                 var skipResults = luceneQueryModel.SkipResults;
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc - skipResults);
 
-                var hits = searcher.Search(luceneQueryModel.Query, null, maxResults, luceneQueryModel.Sort);
+                var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
+                PrepareSearchSettings(executionContext);
+
+                var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
 
                 var handler = ScalarResultHandlerRegistry.Instance.GetItem(luceneQueryModel.ResultSetOperator.GetType());
 
@@ -127,15 +139,14 @@ namespace Lucene.Net.Linq
                 var scoreFunction = luceneQueryModel.GetCustomScoreFunction<TDocument>();
                 if (scoreFunction != null)
                 {
-                    query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocument, scoreFunction);
+                    query = new DelegatingCustomScoreQuery<TDocument>(query, ConvertDocumentForCustomBoost, scoreFunction);
                 }
 
-                if (EnableScoreTracking)
-                {
-                    searcher.SetDefaultFieldSortScoring(true, false);
-                }
-                
-                var hits = searcher.Search(query, luceneQueryModel.Filter, maxResults + skipResults, luceneQueryModel.Sort);
+                var executionContext = new QueryExecutionContext(searcher, query, luceneQueryModel.Filter);
+
+                PrepareSearchSettings(executionContext);
+
+                var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults + skipResults, luceneQueryModel.Sort);
                 
                 if (luceneQueryModel.Last)
                 {
@@ -145,12 +156,17 @@ namespace Lucene.Net.Linq
 
                 var tracker = luceneQueryModel.DocumentTracker as IRetrievedDocumentTracker<TDocument>;
 
+                executionContext.Phase = QueryExecutionPhase.ConvertResults;
+                executionContext.Hits = hits;
+
                 for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
                 {
+                    executionContext.CurrentHit = i;
+                    executionContext.CurrentScoreDoc = hits.ScoreDocs[i];
+
                     var doc = hits.ScoreDocs[i].Doc;
-                    var score = hits.ScoreDocs[i].Score;
-                    
-                    var item = ConvertDocument(searcher.Doc(doc), score);
+
+                    var item = ConvertDocument(searcher.Doc(doc), executionContext);
 
                     if (tracker != null)
                     {
@@ -167,7 +183,7 @@ namespace Lucene.Net.Linq
                         }
                         else
                         {
-                            var copy = ConvertDocument(searcher.Doc(doc), score);
+                            var copy = ConvertDocument(searcher.Doc(doc), executionContext);
                             tracker.TrackDocument(item, copy);
                         }
                     }
@@ -204,7 +220,8 @@ namespace Lucene.Net.Linq
         public abstract IEnumerable<string> AllFields { get; }
         public abstract IEnumerable<string> KeyProperties { get; }
 
-        protected abstract TDocument ConvertDocument(Document doc, float score);
-        protected abstract bool EnableScoreTracking { get; }
+        protected abstract TDocument ConvertDocument(Document doc, IQueryExecutionContext context);
+        protected abstract TDocument ConvertDocumentForCustomBoost(Document doc);
+        protected abstract void PrepareSearchSettings(IQueryExecutionContext context);
     }
 }

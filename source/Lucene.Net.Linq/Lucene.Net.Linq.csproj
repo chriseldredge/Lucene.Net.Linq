@@ -79,12 +79,16 @@
     <Compile Include="Clauses\ExtensionClause.cs" />
     <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
+    <Compile Include="IQueryExecutionContext.cs" />
     <Compile Include="IRetrievedDocumentTracker.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
+    <Compile Include="Mapping\IDocumentMapper.cs" />
     <Compile Include="Mapping\IFieldMapper.cs" />
     <Compile Include="Mapping\IFieldMappingInfo.cs" />
     <Compile Include="Mapping\IFieldMappingInfoProvider.cs" />
+    <Compile Include="QueryExecutionContext.cs" />
+    <Compile Include="QueryExecutionPhase.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandlerRegistry.cs" />

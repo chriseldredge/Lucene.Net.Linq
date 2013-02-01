@@ -10,13 +10,25 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal interface IDocumentKey
+    /// <summary>
+    /// Represents a unique key for a document
+    /// </summary>
+    public interface IDocumentKey : IEquatable<IDocumentKey>
     {
+        /// <summary>
+        /// Converts the key to a Lucene.Net <see cref="Query"/>
+        /// that will match a unique document in the index.
+        /// </summary>
         Query ToQuery(Analyzer analyzer, Version version);
+
+        /// <summary>
+        /// Flag indicating if the key is empty, meaning
+        /// that no key fields are defined for the document.
+        /// </summary>
         bool Empty { get; }
     }
 
-    internal class DocumentKey : IDocumentKey
+    public class DocumentKey : IDocumentKey
     {
         private readonly IDictionary<string, object> values;
         private readonly IDictionary<string, IFieldMappingInfo> mappings;
@@ -46,15 +58,16 @@ namespace Lucene.Net.Linq.Mapping
         private Query ConvertToQueryExpression(KeyValuePair<string, object> kvp, Analyzer analyzer, Version version)
         {
             var mapping = mappings[kvp.Key];
-
-            if (!string.IsNullOrWhiteSpace(mapping.KeyConstraint))
+            
+            if (mapping.KeyConstraint != null)
             {
-                return new TermQuery(new Term(mapping.FieldName, mapping.KeyConstraint));
+                return mapping.KeyConstraint;
             }
 
             var parser = new QueryParser(version, kvp.Key, analyzer);
 
             return Parse(parser, mapping.ConvertToQueryExpression(kvp.Value));
+            
         }
 
         private Query Parse(QueryParser parser, string value)
@@ -76,6 +89,11 @@ namespace Lucene.Net.Linq.Mapping
             return values.SequenceEqual(other.values);
         }
         
+        public bool Equals(IDocumentKey other)
+        {
+            return Equals((object)other);
+        }
+
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;

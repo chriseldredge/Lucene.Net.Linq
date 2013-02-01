@@ -44,7 +44,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var doc = new Document();
             doc.Add(new Field("CustomValueType", "2.68", Field.Store.YES, Field.Index.NO));
 
-            mapper.CopyFromDocument(doc, 0, this);
+            mapper.CopyFromDocument(doc, new QueryExecutionContext(), this);
 
             Assert.That(CustomValueType, Is.Not.Null);
             Assert.That(CustomValueType.TheValue, Is.EqualTo(2.68d));

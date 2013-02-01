@@ -1,21 +1,27 @@
 ﻿using System.Collections.Generic;
-using Lucene.Net.Documents;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal interface IFieldMappingInfoProvider
+    /// <summary>
+    /// Provides mapping information for the properties
+    /// of a given type and corresponding field metadata.
+    /// </summary>
+    public interface IFieldMappingInfoProvider
     {
-        IFieldMappingInfo GetMappingInfo(string propertyName);
+        /// <summary>
+        /// Returns the set of fields defined for the given document.
+        /// </summary>
         IEnumerable<string> AllFields { get; }
-        IEnumerable<string> KeyProperties { get; }
-    }
 
-    internal interface IDocumentMapper<in T> : IFieldMappingInfoProvider
-    {
-        void ToObject(Document source, float score, T target);
-        void ToDocument(T source, Document target);
-        IDocumentKey ToKey(T source);
-        bool Equals(T item1, T item2);
-        bool EnableScoreTracking { get; }
+        /// <summary>
+        /// Returns the set of property names used to compose
+        /// a <see cref="IDocumentKey"/> for the document.
+        /// </summary>
+        IEnumerable<string> KeyProperties { get; }
+
+        /// <summary>
+        /// Returns detailed mapping info for a given property name.
+        /// </summary>
+        IFieldMappingInfo GetMappingInfo(string propertyName);
     }
 }

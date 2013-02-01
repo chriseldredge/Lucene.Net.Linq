@@ -21,7 +21,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
-        public void Query()
+        public void ReplacesDirtyDocument()
         {
             var session = provider.OpenSession<SampleDocument>();
             

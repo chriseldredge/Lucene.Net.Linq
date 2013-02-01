@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -15,9 +17,9 @@ namespace Lucene.Net.Linq.Mapping
             this.value = value;
         }
 
-        public string KeyConstraint
+        public Query KeyConstraint
         {
-            get { return value; }
+            get { return new TermQuery(new Term(FieldName, value)); }
         }
 
         public object GetPropertyValue(T source)
@@ -30,7 +32,7 @@ namespace Lucene.Net.Linq.Mapping
             target.Add(new Field(fieldName, value, Field.Store.YES, Field.Index.NOT_ANALYZED));
         }
 
-        public void CopyFromDocument(Document source, float score, T target)
+        public void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
         }
 

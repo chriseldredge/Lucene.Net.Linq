@@ -17,14 +17,14 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void CtrFindsKeyFields()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>();
-            Assert.That(mapper.KeyFields.Select(k => k.FieldName), Is.EquivalentTo(new[] {"Id", "Version", "Number"}));
+            Assert.That(mapper.KeyProperties, Is.EquivalentTo(new[] {"Id", "Version", "Number"}));
         }
 
         [Test]
         public void CtrFindsDocumentKeys()
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocumentWithKey>();
-            Assert.That(mapper.KeyFields.Select(k => k.FieldName), Is.EquivalentTo(new[] { "Id", "Version", "Number", "Type", "Revision" }));
+            Assert.That(mapper.KeyProperties, Is.EquivalentTo(new[] { "Id", "Version", "Number", "**DocumentKey**Type", "**DocumentKey**Revision" }));
         }
 
         [Test]

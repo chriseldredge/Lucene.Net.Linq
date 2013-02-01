@@ -93,19 +93,7 @@ namespace Lucene.Net.Linq.Translation
                 (query, property) =>
                     {
                         var fieldMappingInfo = fieldMappingInfoProvider.GetMappingInfo(property);
-                        Query constraintQuery;
-
-                        if (fieldMappingInfo.KeyConstraint != null)
-                        {
-                            constraintQuery = new TermQuery(new Term(fieldMappingInfo.FieldName, fieldMappingInfo.KeyConstraint));
-                        }
-                        else
-                        {
-                            constraintQuery = new WildcardQuery(new Term(fieldMappingInfo.FieldName, "*"));
-                        }
-
-                        query.Add(constraintQuery, Occur.MUST);
-
+                        query.Add(fieldMappingInfo.KeyConstraint ?? new WildcardQuery(new Term(fieldMappingInfo.FieldName, "*")), Occur.MUST);
                         return query;
                     });
 

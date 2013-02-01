@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
 
@@ -56,7 +57,7 @@ namespace Lucene.Net.Linq.Mapping
             get { return caseSensitive; }
         }
 
-        public virtual string KeyConstraint
+        public virtual Query KeyConstraint
         {
             get
             {
@@ -76,12 +77,12 @@ namespace Lucene.Net.Linq.Mapping
             return propertyInfo.GetValue(source, null);
         }
 
-        public virtual void CopyFromDocument(Document source, float score, T target)
+        public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
             var field = source.GetField(fieldName);
 
             if (field == null) return;
-
+            
             if (!propertyInfo.CanWrite) return;
 
             var fieldValue = ConvertFieldValue(field);
@@ -169,8 +170,9 @@ namespace Lucene.Net.Linq.Mapping
         {
         }
 
-        public void CopyFromDocument(Document source, float score, T target)
+        public void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
+            var score = context.CurrentScoreDoc.Score;
             propertyInfo.SetValue(target, score, null);
         }
 
@@ -192,7 +194,7 @@ namespace Lucene.Net.Linq.Mapping
         public bool IsNumericField { get { throw new NotSupportedException(); } }
         public bool CaseSensitive { get { throw new NotSupportedException(); } }
         public string PropertyName { get { return propertyInfo.Name; } }
-        public string KeyConstraint { get { return null; } }
+        public Query KeyConstraint { get { return null; } }
         public Type PropertyType { get { return propertyInfo.PropertyType; } }
         public TypeConverter Converter { get { return null; } }
         public string FieldName { get { return null; } }

@@ -8,10 +8,10 @@ using Lucene.Net.Linq.Util;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal class ReflectionDocumentMapper<T> : IDocumentMapper<T>
+    public class ReflectionDocumentMapper<T> : IDocumentMapper<T>
     {
-        private readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
-        private readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
+        protected readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
+        protected readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
 
         public ReflectionDocumentMapper() : this(typeof(T))
         {
@@ -56,20 +56,20 @@ namespace Lucene.Net.Linq.Mapping
             }
         }
 
-        public IFieldMappingInfo GetMappingInfo(string propertyName)
+        public virtual IFieldMappingInfo GetMappingInfo(string propertyName)
         {
             return fieldMap[propertyName];
         }
 
-        public void ToObject(Document source, float score, T target)
+        public virtual void ToObject(Document source, IQueryExecutionContext context, T target)
         {
             foreach (var mapping in fieldMap)
             {
-                mapping.Value.CopyFromDocument(source, score, target);
+                mapping.Value.CopyFromDocument(source, context, target);
             }
         }
 
-        public void ToDocument(T source, Document target)
+        public virtual void ToDocument(T source, Document target)
         {
             foreach (var mapping in fieldMap)
             {
@@ -77,16 +77,16 @@ namespace Lucene.Net.Linq.Mapping
             }
         }
 
-        public IDocumentKey ToKey(T source)
+        public virtual IDocumentKey ToKey(T source)
         {
             var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => f.GetPropertyValue(source));
 
-            Validate(keyValues);
+            ValidateKey(keyValues);
 
             return new DocumentKey(keyValues);
         }
 
-        private void Validate(Dictionary<IFieldMappingInfo, object> keyValues)
+        private void ValidateKey(Dictionary<IFieldMappingInfo, object> keyValues)
         {
             var nulls = keyValues.Where(kv => kv.Value == null).ToArray();
 
@@ -99,27 +99,25 @@ namespace Lucene.Net.Linq.Mapping
             throw new InvalidOperationException(message);
         }
 
-        public IEnumerable<string> AllFields
+        public virtual IEnumerable<string> AllFields
         {
             get { return fieldMap.Values.Select(m => m.FieldName); }
         }
 
-        public bool EnableScoreTracking
+        public virtual void PrepareSearchSettings(IQueryExecutionContext context)
         {
-            get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
+            if (EnableScoreTracking)
+            {
+                context.Searcher.SetDefaultFieldSortScoring(true, false);    
+            }
         }
 
-        public IEnumerable<string> KeyProperties
+        public virtual IEnumerable<string> KeyProperties
         {
             get { return keyFields.Select(k => k.PropertyName); }
         }
 
-        public List<IFieldMapper<T>> KeyFields
-        {
-            get { return new List<IFieldMapper<T>>(keyFields); }
-        }
-
-        public bool Equals(T item1, T item2)
+        public virtual bool Equals(T item1, T item2)
         {
             foreach (var field in fieldMap.Values)
             {
@@ -135,7 +133,7 @@ namespace Lucene.Net.Linq.Mapping
             return true;
         }
 
-        public bool ValuesEqual(object val1, object val2)
+        public virtual bool ValuesEqual(object val1, object val2)
         {
             if (val1 is IEnumerable && val2 is IEnumerable)
             {
@@ -143,6 +141,11 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             return Equals(val1, val2);
+        }
+
+        protected virtual bool EnableScoreTracking
+        {
+            get { return fieldMap.Values.Any(m => m is ReflectionScoreMapper<T>); }
         }
     }
 }

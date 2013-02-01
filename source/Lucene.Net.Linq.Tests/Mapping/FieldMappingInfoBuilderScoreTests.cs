@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Search;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Mapping
@@ -28,7 +29,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             const float sampleScore = 0.48f;
 
             var mapper = CreateMapper();
-            mapper.CopyFromDocument(document, sampleScore, this);
+            mapper.CopyFromDocument(document, new QueryExecutionContext { CurrentScoreDoc = new ScoreDoc(1, sampleScore)}, this);
 
             Assert.That(Score, Is.EqualTo(sampleScore));
         }

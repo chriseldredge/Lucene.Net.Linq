@@ -8,10 +8,11 @@ namespace Lucene.Net.Linq.Search.Function
 {
     internal class DelegatingCustomScoreQuery<T> : CustomScoreQuery
     {
-        private readonly Func<Document, float, T> convertFunction;
+        private readonly Func<Document, T> convertFunction;
         private readonly Func<T, float> scoreFunction;
 
-        public DelegatingCustomScoreQuery(Query subQuery, Func<Document, float, T> convertFunction, Func<T, float> scoreFunction) : base(subQuery)
+        public DelegatingCustomScoreQuery(Query subQuery, Func<Document, T> convertFunction, Func<T, float> scoreFunction)
+            : base(subQuery)
         {
             this.convertFunction = convertFunction;
             this.scoreFunction = scoreFunction;
@@ -24,10 +25,10 @@ namespace Lucene.Net.Linq.Search.Function
 
         class DelegatingScoreProvider : CustomScoreProvider
         {
-            private readonly Func<Document, float, T> convertFunction;
+            private readonly Func<Document, T> convertFunction;
             private readonly Func<T, float> scoreFunction;
 
-            public DelegatingScoreProvider(IndexReader reader, Func<Document, float, T> convertFunction, Func<T, float> scoreFunction)
+            public DelegatingScoreProvider(IndexReader reader, Func<Document, T> convertFunction, Func<T, float> scoreFunction)
                 : base(reader)
             {
                 this.convertFunction = convertFunction;
@@ -38,7 +39,7 @@ namespace Lucene.Net.Linq.Search.Function
             {
                 var val = base.CustomScore(doc, subQueryScore, valSrcScore);
 
-                return val * scoreFunction(convertFunction(reader.Document(doc), 0));
+                return val * scoreFunction(convertFunction(reader.Document(doc)));
             }
         }
     }

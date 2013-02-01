@@ -164,10 +164,11 @@ namespace Lucene.Net.Linq
 
             var additionMap = ConvertPendingAdditions();
 
-            deletes = deletes.Union(additionMap.Keys.Where(k => !k.Empty).Select(k => k.ToQuery(context.Analyzer, context.Version)));
+            deletes = deletes.Union(additionMap.Keys.Where(k => !k.Empty).Select(k => k.ToQuery(context.Analyzer, context.Version))).ToArray();
 
             if (deletes.Any())
             {
+                deletes.Apply(query => Log.Trace(m => m("Delete by query: " + query)));
                 writer.DeleteDocuments(deletes.Distinct().ToArray());
             }
 
@@ -176,7 +177,7 @@ namespace Lucene.Net.Linq
                 additionMap.Values.Apply(writer.AddDocument);
             }
 
-            Log.Trace(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additionMap.Count));
+            Log.Debug(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additionMap.Count));
             Log.Info(m => m("Committing."));
 
             writer.Commit();

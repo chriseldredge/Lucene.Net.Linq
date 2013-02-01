@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -17,7 +18,7 @@ namespace Lucene.Net.Linq.Tests
 
         public string PropertyName { get; set; }
         public Type PropertyType { get; set; }
-        public string KeyConstraint { get; set; }
+        public Query KeyConstraint { get; set; }
 
         public string ConvertToQueryExpression(object value)
         {
