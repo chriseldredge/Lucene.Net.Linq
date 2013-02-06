@@ -3,22 +3,60 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Util;
+using Lucene.Net.QueryParsers;
+using Lucene.Net.Search;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
+    /// <summary>
+    /// Maps public properties on <typeparamref name="T"/> to
+    /// Lucene <see cref="Field"/>s using optional metadata
+    /// attributes such as <see cref="FieldAttribute"/>,
+    /// <see cref="NumericFieldAttribute"/>,
+    /// <see cref="IgnoreFieldAttribute"/>,
+    /// <see cref="DocumentKeyAttribute"/>
+    /// and <see cref="QueryScoreAttribute"/>.
+    /// </summary>
     public class ReflectionDocumentMapper<T> : IDocumentMapper<T>
     {
+        protected readonly Analyzer externalAnalyzer;
+        protected readonly PerFieldAnalyzer analyzer;
+        protected readonly Version version;
         protected readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
         protected readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
 
-        public ReflectionDocumentMapper() : this(typeof(T))
+        /// <summary>
+        /// Constructs an instance that will create an <see cref="Analyzer"/>
+        /// using metadata on public properties on the type <typeparamref name="T"/>.
+        /// </summary>
+        /// <param name="version">Version compatibility for analyzers and indexers.</param>
+        public ReflectionDocumentMapper(Version version)
+            : this(version, null, typeof(T))
         {
         }
 
-        public ReflectionDocumentMapper(Type type)
+        /// <summary>
+        /// Constructs an instance with an externall supplied analyzer
+        /// and the compatibility version of the index.
+        /// </summary>
+        /// <param name="version">Version compatibility for analyzers and indexers.</param>
+        /// <param name="externalAnalyzer"></param>
+        public ReflectionDocumentMapper(Version version, Analyzer externalAnalyzer)
+            : this(version, externalAnalyzer, typeof(T))
         {
+        }
+
+        private ReflectionDocumentMapper(Version version, Analyzer externalAnalyzer, Type type)
+        {
+            this.externalAnalyzer = externalAnalyzer;
+            this.version = version;
+            this.analyzer = new PerFieldAnalyzer(new KeywordAnalyzer());
+
             var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
             BuildFieldMap(props);
@@ -34,8 +72,14 @@ namespace Lucene.Net.Linq.Mapping
                 {
                     continue;
                 }
-                var mappingContext = FieldMappingInfoBuilder.Build<T>(p);
+                var mappingContext = FieldMappingInfoBuilder.Build<T>(p, version, externalAnalyzer);
+                
                 fieldMap.Add(mappingContext.PropertyName, mappingContext);
+
+                if (!string.IsNullOrWhiteSpace(mappingContext.FieldName) && mappingContext.Analyzer != null)
+                {
+                    analyzer.AddAnalyzer(mappingContext.FieldName, mappingContext.Analyzer);
+                }
             }
         }
 
@@ -54,6 +98,11 @@ namespace Lucene.Net.Linq.Mapping
                 fieldMap.Add(keyField.PropertyName, keyField);
                 keyFields.Add(keyField);
             }
+        }
+
+        public virtual PerFieldAnalyzer Analyzer
+        {
+            get { return analyzer; }
         }
 
         public virtual IFieldMappingInfo GetMappingInfo(string propertyName)
@@ -99,9 +148,9 @@ namespace Lucene.Net.Linq.Mapping
             throw new InvalidOperationException(message);
         }
 
-        public virtual IEnumerable<string> AllFields
+        public virtual IEnumerable<string> AllProperties
         {
-            get { return fieldMap.Values.Select(m => m.FieldName); }
+            get { return fieldMap.Values.Select(m => m.PropertyName); }
         }
 
         public virtual void PrepareSearchSettings(IQueryExecutionContext context)
@@ -110,6 +159,13 @@ namespace Lucene.Net.Linq.Mapping
             {
                 context.Searcher.SetDefaultFieldSortScoring(true, false);    
             }
+        }
+
+        public Query CreateMultiFieldQuery(string pattern)
+        {
+            // TODO: pattern should be analyzed/converted on per-field basis.
+            var parser = new MultiFieldQueryParser(version, fieldMap.Keys.ToArray(), externalAnalyzer);
+            return parser.Parse(pattern);
         }
 
         public virtual IEnumerable<string> KeyProperties
@@ -133,7 +189,7 @@ namespace Lucene.Net.Linq.Mapping
             return true;
         }
 
-        public virtual bool ValuesEqual(object val1, object val2)
+        protected internal virtual bool ValuesEqual(object val1, object val2)
         {
             if (val1 is IEnumerable && val2 is IEnumerable)
             {

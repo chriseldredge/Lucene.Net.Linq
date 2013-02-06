@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using Lucene.Net.Index;
 using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Translation.ResultOperatorHandlers;
@@ -14,13 +13,11 @@ namespace Lucene.Net.Linq.Translation
     {
         private static readonly ResultOperatorRegistry resultOperators = ResultOperatorRegistry.CreateDefault();
 
-        private readonly Context context;
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
         private readonly LuceneQueryModel model;
 
-        internal QueryModelTranslator(Context context, IFieldMappingInfoProvider fieldMappingInfoProvider)
+        internal QueryModelTranslator(IFieldMappingInfoProvider fieldMappingInfoProvider)
         {
-            this.context = context;
             this.fieldMappingInfoProvider = fieldMappingInfoProvider;
             this.model = new LuceneQueryModel(fieldMappingInfoProvider);
         }
@@ -39,7 +36,7 @@ namespace Lucene.Net.Linq.Translation
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            var visitor = new QueryBuildingExpressionTreeVisitor(context, fieldMappingInfoProvider);
+            var visitor = new QueryBuildingExpressionTreeVisitor(fieldMappingInfoProvider);
             visitor.VisitExpression(whereClause.Predicate);
             
             model.AddQuery(visitor.Query);
@@ -93,7 +90,7 @@ namespace Lucene.Net.Linq.Translation
                 (query, property) =>
                     {
                         var fieldMappingInfo = fieldMappingInfoProvider.GetMappingInfo(property);
-                        query.Add(fieldMappingInfo.KeyConstraint ?? new WildcardQuery(new Term(fieldMappingInfo.FieldName, "*")), Occur.MUST);
+                        query.Add(fieldMappingInfo.CreateQuery("*"), Occur.MUST);
                         return query;
                     });
 

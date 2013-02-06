@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
@@ -10,7 +9,6 @@ using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Search;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -19,7 +17,6 @@ namespace Lucene.Net.Linq.Tests
     {
         private LuceneSession<Record> session;
         private IDocumentMapper<Record> mapper;
-        private Analyzer analyzer;
         private IIndexWriter writer;
         private Context context;
 
@@ -28,11 +25,9 @@ namespace Lucene.Net.Linq.Tests
         {
             mapper = MockRepository.GenerateStrictMock<IDocumentMapper<Record>>();
             writer = MockRepository.GenerateStrictMock<IIndexWriter>();
-            analyzer = new LowercaseKeywordAnalyzer();
+            context = MockRepository.GenerateStub<Context>(null, new object());
 
-            context = MockRepository.GenerateStub<Context>(null, analyzer, Version.LUCENE_29, writer, new object());
-
-            session = new LuceneSession<Record>(mapper, context, null);
+            session = new LuceneSession<Record>(mapper, writer, context, null);
 
             mapper.Expect(m => m.ToKey(Arg<Record>.Is.NotNull))
                 .WhenCalled(mi => mi.ReturnValue = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id"}, ((Record)mi.Arguments[0]).Id } }))
@@ -84,7 +79,7 @@ namespace Lucene.Net.Linq.Tests
 
             session.Delete(q1, q2);
 
-            writer.Expect(w => w.DeleteDocuments(new[] {q1, q2, key.ToQuery(context.Analyzer, context.Version)}));
+            writer.Expect(w => w.DeleteDocuments(new[] {q1, q2, key.ToQuery()}));
             writer.Expect(w => w.Commit());
 
             session.Commit();
@@ -104,7 +99,7 @@ namespace Lucene.Net.Linq.Tests
             session.Add(record);
 
             mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
-            writer.Expect(w => w.DeleteDocuments(new[] {key.ToQuery(context.Analyzer, context.Version)}));
+            writer.Expect(w => w.DeleteDocuments(new[] {key.ToQuery()}));
             writer.Expect(w => w.AddDocument(Arg<Document>.Is.NotNull));
             writer.Expect(w => w.Commit());
 
@@ -120,7 +115,7 @@ namespace Lucene.Net.Linq.Tests
         {
             var record = new Record();
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, "biully" } });
-            var deleteQuery = key.ToQuery(context.Analyzer, Version.LUCENE_29);
+            var deleteQuery = key.ToQuery();
 
             mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
             writer.Expect(w => w.DeleteDocuments(new[] { deleteQuery }));
@@ -258,7 +253,7 @@ namespace Lucene.Net.Linq.Tests
             queryable.Expect(q => q.Provider).Return(provider);
             queryable.Expect(q => q.Expression).Return(Expression.Constant(records));
             provider.Expect(p => p.CreateQuery<Record>(Arg<Expression>.Is.NotNull)).Return(records);
-            session = new LuceneSession<Record>(mapper, context, queryable);
+            session = new LuceneSession<Record>(mapper, writer, context, queryable);
 
             session.Query();
 

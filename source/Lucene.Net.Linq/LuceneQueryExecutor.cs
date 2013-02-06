@@ -9,6 +9,7 @@ using Lucene.Net.Linq.ScalarResultHandlers;
 using Lucene.Net.Linq.Search.Function;
 using Lucene.Net.Linq.Transformation;
 using Lucene.Net.Linq.Translation;
+using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionTreeVisitors;
@@ -50,14 +51,19 @@ namespace Lucene.Net.Linq
             return mapper.GetMappingInfo(propertyName);
         }
 
-        public override IEnumerable<string> AllFields
+        public override IEnumerable<string> AllProperties
         {
-            get { return mapper.AllFields; }
+            get { return mapper.AllProperties; }
         }
 
         public override IEnumerable<string> KeyProperties
         {
             get { return mapper.KeyProperties; }
+        }
+
+        public override Query CreateMultiFieldQuery(string pattern)
+        {
+            return mapper.CreateMultiFieldQuery(pattern);
         }
 
         protected override void PrepareSearchSettings(IQueryExecutionContext context)
@@ -203,7 +209,7 @@ namespace Lucene.Net.Linq
         {
             QueryModelTransformer.TransformQueryModel(queryModel);
 
-            var builder = new QueryModelTranslator(context, this);
+            var builder = new QueryModelTranslator(this);
             builder.Build(queryModel);
 
             Log.Debug(m => m("Lucene query: {0}", builder.Model));
@@ -217,8 +223,9 @@ namespace Lucene.Net.Linq
         }
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
-        public abstract IEnumerable<string> AllFields { get; }
+        public abstract IEnumerable<string> AllProperties { get; }
         public abstract IEnumerable<string> KeyProperties { get; }
+        public abstract Query CreateMultiFieldQuery(string pattern);
 
         protected abstract TDocument ConvertDocument(Document doc, IQueryExecutionContext context);
         protected abstract TDocument ConvertDocumentForCustomBoost(Document doc);

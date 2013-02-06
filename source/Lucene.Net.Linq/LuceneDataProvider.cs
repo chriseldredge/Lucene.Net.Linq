@@ -5,6 +5,7 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
@@ -17,56 +18,78 @@ namespace Lucene.Net.Linq
     /// Provides IQueryable access to a Lucene.Net index as well as an API
     /// for adding, deleting and replacing documents within atomic transactions.
     /// </summary>
-    public class LuceneDataProvider
+    public class LuceneDataProvider : IDisposable
     {
         private static readonly ILog Log = LogManager.GetLogger<LuceneDataProvider>();
 
         private readonly Directory directory;
-        private readonly Analyzer analyzer;
+        private readonly Analyzer externalAnalyzer;
+        private readonly PerFieldAnalyzer perFieldAnalyzer;
         private readonly Version version;
+        private readonly IIndexWriter writer;
         private readonly IQueryParser queryParser;
         private readonly Context context;
+        private readonly bool writerIsExternal;
 
         /// <summary>
         /// Constructs a new read-only instance without supplying an IndexWriter.
         /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="analyzer"></param>
-        /// <param name="version"></param>
-        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version)
-            : this(directory, analyzer, version, null, new object())
+        public LuceneDataProvider(Directory directory, Analyzer externalAnalyzer, Version version)
+            : this(directory, externalAnalyzer, version, null, new object())
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new read-only instance with a client provided <see cref="Analyzer"/>
+        /// and without supplying an IndexWriter.
+        /// </summary>
+        public LuceneDataProvider(Directory directory, Version version)
+            : this(directory, null, version, null, new object())
         {
         }
 
         /// <summary>
         /// Constructs a new instance.
         /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="analyzer"></param>
-        /// <param name="version"></param>
-        /// <param name="indexWriter"></param>
-        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version, IndexWriter indexWriter)
-            : this(directory, analyzer, version, new IndexWriterAdapter(indexWriter), new object())
+        public LuceneDataProvider(Directory directory, Version version, IndexWriter externalWriter)
+            : this(directory, null, version, new IndexWriterAdapter(externalWriter), new object())
         {
         }
 
         /// <summary>
+        /// Constructs a new instance with a client provided <see cref="Analyzer"/>.
+        /// </summary>
+        public LuceneDataProvider(Directory directory, Analyzer externalAnalyzer, Version version, IndexWriter indexWriter)
+            : this(directory, externalAnalyzer, version, new IndexWriterAdapter(indexWriter), new object())
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new instance with a client provided <see cref="Analyzer"/>.
         /// If the supplied IndexWriter will be written to outside of this instance of LuceneDataProvider,
         /// the <paramref name="transactionLock"/> will be used to coordinate writes.
         /// </summary>
-        /// <param name="directory"></param>
-        /// <param name="analyzer"></param>
-        /// <param name="version"></param>
-        /// <param name="indexWriter"></param>
-        /// <param name="transactionLock"></param>
-        public LuceneDataProvider(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
+        public LuceneDataProvider(Directory directory, Version version, IIndexWriter externalWriter, object transactionLock)
+            : this(directory, null, version, externalWriter, transactionLock)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a new instance.
+        /// If the supplied IndexWriter will be written to outside of this instance of LuceneDataProvider,
+        /// the <paramref name="transactionLock"/> will be used to coordinate writes.
+        /// </summary>
+        public LuceneDataProvider(Directory directory, Analyzer externalAnalyzer, Version version, IIndexWriter externalWriter, object transactionLock)
         {
             this.directory = directory;
-            this.analyzer = analyzer;
+            this.externalAnalyzer = externalAnalyzer;
+            this.perFieldAnalyzer = new PerFieldAnalyzer(new KeywordAnalyzer());
             this.version = version;
+            this.writer = externalWriter ?? GetIndexWriter(perFieldAnalyzer);
+            this.writerIsExternal = externalWriter != null;
 
             queryParser = RelinqQueryParserFactory.CreateQueryParser();
-            context = new Context(this.directory, this.analyzer, this.version, indexWriter, transactionLock);
+            context = new Context(this.directory, transactionLock);
         }
 
         /// <summary>
@@ -90,7 +113,7 @@ namespace Lucene.Net.Linq
         /// </summary>
         public IQueryable<T> AsQueryable<T>(Func<T> factory)
         {
-            return AsQueryable(factory, new ReflectionDocumentMapper<T>());
+            return AsQueryable(factory, new ReflectionDocumentMapper<T>(version, externalAnalyzer));
         }
 
         /// <summary>
@@ -126,8 +149,9 @@ namespace Lucene.Net.Linq
         /// </summary>
         public ISession<T> OpenSession<T>(Func<T> factory)
         {
-            return OpenSession(factory, new ReflectionDocumentMapper<T>());
+            return OpenSession(factory, new ReflectionDocumentMapper<T>(version, externalAnalyzer));
         }
+
         /// <summary>
         /// Opens a session for staging changes and then committing them atomically.
         /// </summary>
@@ -136,12 +160,13 @@ namespace Lucene.Net.Linq
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
         public ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper)
         {
-            if (context.IsReadOnly)
-            {
-                throw new InvalidOperationException("This data provider is read-only. To enable writes, construct " + typeof(LuceneDataProvider) + " with an IndexWriter.");
-            }
+            perFieldAnalyzer.Merge(documentMapper.Analyzer);
 
-            return new LuceneSession<T>(documentMapper, context, CreateQueryable(factory, context, documentMapper));
+            return new LuceneSession<T>(
+                documentMapper,
+                IndexWriter,
+                context,
+                CreateQueryable(factory, context, documentMapper));
         }
 
         /// <summary>
@@ -165,7 +190,7 @@ namespace Lucene.Net.Linq
         /// </summary>
         public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, Func<T> factory)
         {
-            RegisterCacheWarmingCallback(callback, factory, new ReflectionDocumentMapper<T>());
+            RegisterCacheWarmingCallback(callback, factory, new ReflectionDocumentMapper<T>(version, null));
         }
 
         /// <summary>
@@ -192,6 +217,56 @@ namespace Lucene.Net.Linq
             };
         }
 
+        /// <summary>
+        /// Retrieves the instance of IndexWriter that will be used by all
+        /// sessions created by this instance.
+        /// </summary>
+        public IIndexWriter IndexWriter
+        {
+            get { return writer; }
+        }
+
+        public void Dispose()
+        {
+            if (writerIsExternal) return;
+            
+            IndexWriter.Dispose();
+        }
+
+        protected virtual IIndexWriter GetIndexWriter(Analyzer analyzer)
+        {
+            return new IndexWriterAdapter(new IndexWriter(directory, analyzer, ShouldCreateIndex, DeletionPolicy, MaxFieldLength));
+        }
+
+        protected virtual bool ShouldCreateIndex
+        {
+            get
+            {
+                bool create;
+
+                try
+                {
+                    create = !directory.ListAll().Any();
+                }
+                catch (NoSuchDirectoryException)
+                {
+                    create = true;
+                }
+
+                return create;
+            }
+        }
+
+        protected virtual IndexDeletionPolicy DeletionPolicy
+        {
+            get { return new KeepOnlyLastCommitDeletionPolicy(); }
+        }
+
+        protected virtual IndexWriter.MaxFieldLength MaxFieldLength
+        {
+            get { return Index.IndexWriter.MaxFieldLength.UNLIMITED; }
+        }
+
         private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, Context context, IDocumentMapper<T> mapper)
         {
             var executor = new LuceneQueryExecutor<T>(context, factory, mapper);
@@ -203,7 +278,7 @@ namespace Lucene.Net.Linq
             private readonly IndexSearcher newSearcher;
 
             internal WarmUpContext(Context target, IndexSearcher newSearcher)
-                : base(target.Directory, target.Analyzer, target.Version, target.IndexWriter, target.TransactionLock)
+                : base(target.Directory, target.TransactionLock)
             {
                 this.newSearcher = newSearcher;
             }
@@ -220,6 +295,11 @@ namespace Lucene.Net.Linq
             {
                 return context;
             }
+        }
+
+        internal PerFieldAnalyzer Analyzer
+        {
+            get { return perFieldAnalyzer; }
         }
     }
 }

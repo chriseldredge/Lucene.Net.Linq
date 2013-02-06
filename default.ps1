@@ -7,7 +7,7 @@ properties {
   $release_build_dir = "$build_dir\bin\release"
   $release_dir = "$base_dir\Release"
   $sln_file = "$source_dir\Lucene.Net.Linq.sln"
-  $version = "1.0.0"
+  $version = "3.1.0"
   $revision = ""
   $tools_dir = "$base_dir\Tools"
   $nunitconsole = "nunit-console.exe"
@@ -26,12 +26,12 @@ task Clean {
 }
 
 task Init -depends Clean {
-	mkdir @($release_dir, $build_dir) | out-null
-	
-	Generate-Assembly-Info `
-		-file "$build_dir\VersionInfo.cs" `
-		-revision $revision `
-		-version $version
+    mkdir @($release_dir, $build_dir) | out-null
+    
+    Generate-Assembly-Info `
+        -file "$build_dir\VersionInfo.cs" `
+        -revision $revision `
+        -version $version
 }
 
 task Compile -depends Init {
@@ -50,8 +50,8 @@ task Package -depends Compile, Test {
 
   foreach ($spec in @($spec_files))
   {
-	$dir =  $($spec.Directory)
-	cd $dir
+    $dir =  $($spec.Directory)
+    cd $dir
     Exec { nuget pack -o $release_dir -Properties Configuration=Release`;OutDir=$release_build_dir\ -Version $version -Symbols } "nuget pack failed."
   }
 }

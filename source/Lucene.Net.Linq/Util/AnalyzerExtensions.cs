@@ -26,7 +26,7 @@ namespace Lucene.Net.Linq.Util
             {
                 if (s.IncrementToken() && s.HasAttribute<ITermAttribute>())
                 {
-					var attr = s.GetAttribute<ITermAttribute>();
+                    var attr = s.GetAttribute<ITermAttribute>();
                     result.Append(attr.Term);
                 }
             }

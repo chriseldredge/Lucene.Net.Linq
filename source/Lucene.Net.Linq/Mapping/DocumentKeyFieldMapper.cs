@@ -1,7 +1,8 @@
 ﻿using System;
-using System.ComponentModel;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
@@ -16,12 +17,7 @@ namespace Lucene.Net.Linq.Mapping
             this.fieldName = fieldName;
             this.value = value;
         }
-
-        public Query KeyConstraint
-        {
-            get { return new TermQuery(new Term(FieldName, value)); }
-        }
-
+        
         public object GetPropertyValue(T source)
         {
             return value;
@@ -41,29 +37,19 @@ namespace Lucene.Net.Linq.Mapping
             return this.value;
         }
 
-        public bool CaseSensitive
+        public Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
         {
-            get { return true; }
+            throw new NotSupportedException();
         }
 
-        public int SortFieldType
+        public Query CreateQuery(string ignored)
         {
-            get { throw new NotSupportedException(); }
+            return new TermQuery(new Term(FieldName, value));
         }
 
-        public bool IsNumericField
+        public SortField CreateSortField(bool reverse)
         {
-            get { return false; }
-        }
-
-        public TypeConverter Converter
-        {
-            get { return null; }
-        }
-
-        public Type PropertyType
-        {
-            get { return typeof (string); }
+            throw new NotSupportedException();
         }
 
         public string PropertyName
@@ -74,6 +60,11 @@ namespace Lucene.Net.Linq.Mapping
         public string FieldName
         {
             get { return fieldName; }
+        }
+
+        public Analyzer Analyzer
+        {
+            get { return new KeywordAnalyzer(); }
         }
     }
 }

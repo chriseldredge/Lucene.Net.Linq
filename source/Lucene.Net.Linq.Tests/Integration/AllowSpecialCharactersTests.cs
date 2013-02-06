@@ -1,7 +1,7 @@
 using System.IO;
 using System.Linq;
 using Lucene.Net.Analysis;
-using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Analysis;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -12,7 +12,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         protected override Analyzer GetAnalyzer(Net.Util.Version version)
         {
             var analyzer = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
-            analyzer.AddAnalyzer("Path", new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer("Path", new CaseInsensitiveKeywordAnalyzer());
             return analyzer;
         }
 

@@ -1,83 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Clauses.Expressions;
-using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
-using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
 {
-    [TestFixture]
-    public class QueryBuildingExpressionTreeVisitorTests_QueryParsing
-    {
-        private static readonly Version version = Version.LUCENE_29;
-        private Analyzer analyzer;
-        private QueryBuildingExpressionTreeVisitor builder;
-        
-        [SetUp]
-        public void SetUp()
-        {
-            analyzer = new PorterStemAnalyzer(version);
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), analyzer, version, null, new object()), null);
-        }
-
-        [Test]
-        public void UsesPorterStemFilter()
-        {
-            var query = builder.Parse(new FakeFieldMappingInfo {FieldName = "Text"}, "values");
-
-            Assert.That(query.ToString(), Is.EqualTo("Text:valu"));
-        }
-
-        [Test]
-        public void ParseMultipleTerms()
-        {
-            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text" }, "x y z");
-            Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
-        }
-
-        [Test]
-        public void ParseLowercaseExpandedTerms()
-        {
-            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text", CaseSensitive = false }, "FOO*");
-            Assert.That(query.ToString(), Is.EqualTo("Text:foo*"));
-        }
-
-        [Test]
-        public void ParseDoNotLowercaseExpandedTerms()
-        {
-            var query = builder.Parse(new FakeFieldMappingInfo { FieldName = "Text", CaseSensitive = true }, "FOO*");
-            Assert.That(query.ToString(), Is.EqualTo("Text:FOO*"));
-        }
-    }
-
-    internal class FieldMappingInfoProviderStub : IFieldMappingInfoProvider
-    {
-        public IFieldMappingInfo GetMappingInfo(string propertyName)
-        {
-            return new FakeFieldMappingInfo { FieldName = propertyName, IsNumericField = IsNumeric };
-        }
-
-        public IEnumerable<string> AllFields
-        {
-            get { return new[] { "Id" }; }
-        }
-
-        public IEnumerable<string> KeyProperties
-        {
-            get { return new[] {"Id"}; }
-        }
-
-        public bool IsNumeric { get; set; }
-    }
-
     [TestFixture]
     public class QueryBuildingExpressionTreeVisitorTests
     {
@@ -92,8 +25,8 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         [SetUp]
         public void SetUp()
         {
-            fieldMappingInfoProvider = new FieldMappingInfoProviderStub { IsNumeric = true };
-            builder = new QueryBuildingExpressionTreeVisitor(new Context(new RAMDirectory(), new LowercaseKeywordAnalyzer(), version, null, new object()), fieldMappingInfoProvider);
+            fieldMappingInfoProvider = new FieldMappingInfoProviderStub();
+            builder = new QueryBuildingExpressionTreeVisitor(fieldMappingInfoProvider);
         }
 
         [Test]
@@ -119,22 +52,6 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         public void GreaterThan()
         {
             var expression = new LuceneQueryPredicateExpression(
-                new LuceneQueryFieldExpression(typeof (int), "Count"),
-                Expression.Constant(5),
-                Occur.MUST,
-                QueryType.GreaterThan);
-
-            builder.VisitExpression(expression);
-
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Count:{5 TO " + int.MaxValue + "]"));
-        }
-
-        [Test]
-        public void GreaterThan_AnalyzesTerm()
-        {
-            fieldMappingInfoProvider.IsNumeric = false;
-
-            var expression = new LuceneQueryPredicateExpression(
                 new LuceneQueryFieldExpression(typeof(string), "Name"),
                 Expression.Constant("SampleName"),
                 Occur.MUST,
@@ -142,51 +59,49 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
 
             builder.VisitExpression(expression);
 
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:{samplename TO *]"));
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:{SampleName TO *]"));
         }
 
         [Test]
         public void GreaterThanOrEqual()
         {
             var expression = new LuceneQueryPredicateExpression(
-                new LuceneQueryFieldExpression(typeof(float), "Count"),
-                Expression.Constant(6f),
+                new LuceneQueryFieldExpression(typeof(string), "Name"),
+                Expression.Constant("SampleName"),
                 Occur.MUST,
                 QueryType.GreaterThanOrEqual);
 
             builder.VisitExpression(expression);
 
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Count:[6 TO " + float.MaxValue + "]"));
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:[SampleName TO *]"));
         }
 
         [Test]
-        public void LessThan_DateTime()
+        public void LessThan()
         {
-            var dateTime = new DateTime(2012, 4, 18, 11, 22, 33);
-
             var expression = new LuceneQueryPredicateExpression(
-                new LuceneQueryFieldExpression(typeof(DateTime), "Published"),
-                Expression.Constant(dateTime),
+                new LuceneQueryFieldExpression(typeof(string), "Name"),
+                Expression.Constant("SampleName"),
                 Occur.MUST,
                 QueryType.LessThan);
 
             builder.VisitExpression(expression);
 
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Published:[" + DateTime.MinValue.ToUniversalTime().Ticks + " TO " + dateTime.ToUniversalTime().Ticks + "}"));
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:[* TO SampleName}"));
         }
 
         [Test]
         public void LessThanOrEqual()
         {
             var expression = new LuceneQueryPredicateExpression(
-                new LuceneQueryFieldExpression(typeof(DateTime), "Average"),
-                Expression.Constant(11.5d),
+                new LuceneQueryFieldExpression(typeof(string), "Name"),
+                Expression.Constant("SampleName"),
                 Occur.MUST,
                 QueryType.LessThanOrEqual);
 
             builder.VisitExpression(expression);
 
-            Assert.That(builder.Query.ToString(), Is.EqualTo("+Average:[" + double.MinValue + " TO 11.5]"));
+            Assert.That(builder.Query.ToString(), Is.EqualTo("+Name:[* TO SampleName]"));
         }
     }
 }

@@ -81,10 +81,10 @@
     <Compile Include="Integration\SessionTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
-    <Compile Include="LowercaseKeywordAnalyzer.cs" />
     <Compile Include="LuceneDataProviderTests.cs" />
     <Compile Include="LuceneSessionTests.cs" />
     <Compile Include="Mapping\DocumentKeyTests.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderAnalyzerTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeOffsetTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericDateTimeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderNumericFieldTests.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="Mapping\FieldMappingInfoBuilderTimeSpanTests.cs" />
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
     <Compile Include="Mapping\ReflectionDocumentMapperTests.cs" />
+    <Compile Include="Mapping\ReflectionFieldMapperTests.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConvertExpressionRemovingVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />
+    <Compile Include="Translation\TreeVisitors\FieldMappingInfoProviderStub.cs" />
     <Compile Include="VersionConverter.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionComplexTypeTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionTests.cs" />

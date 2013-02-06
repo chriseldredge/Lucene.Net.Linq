@@ -31,15 +31,15 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void RetainsPropertyInfo()
         {
-            var context = FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(stringPropertyInfo);
+            var context = (ReflectionFieldMapper<FieldMappingInfoBuilderTests>)FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(stringPropertyInfo);
             Assert.That(context.PropertyName, Is.EqualTo(stringPropertyInfo.Name));
-            Assert.That(context.PropertyType, Is.EqualTo(stringPropertyInfo.PropertyType));
+            Assert.That(context.PropertyInfo, Is.EqualTo(stringPropertyInfo));
         }
 
         [Test]
         public void NoConverterForStrings()
         {
-            var context = FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(stringPropertyInfo);
+            var context = (ReflectionFieldMapper<FieldMappingInfoBuilderTests>)FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(stringPropertyInfo);
             Assert.That(context.Converter, Is.Null, "No converter should be necessary for typeof(string)");
         }
 
@@ -47,7 +47,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void BuildFromIntProperty()
         {
             var propertyInfo = GetType().GetProperty("IntProperty");
-            var context = FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(propertyInfo);
+            var context = (ReflectionFieldMapper<FieldMappingInfoBuilderTests>)FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(propertyInfo);
 
             Assert.That(context.Converter, Is.EqualTo(TypeDescriptor.GetConverter(typeof(int))));
         }
@@ -68,7 +68,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void BuildFromComplexTypeWithCustomConverter()
         {
             var propertyInfo = GetType().GetProperty("ComplexPropertyWithConverter");
-            var context = FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(propertyInfo);
+            var context = (ReflectionFieldMapper<FieldMappingInfoBuilderTests>)FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(propertyInfo);
 
             Assert.That(context.Converter, Is.InstanceOf<ComplexTypeConverter>());
         }

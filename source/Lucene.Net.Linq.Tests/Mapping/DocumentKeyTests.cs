@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Lucene.Net.Analysis;
+using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Util;
+using Lucene.Net.Search;
 using NUnit.Framework;
 using Rhino.Mocks;
 
@@ -23,11 +23,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public void ToQuery()
         {
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object>
-                                    {{new FakeFieldMappingInfo { FieldName = "id" }, "AnalyzeThis"}});
+                                    {{new FakeFieldMappingInfo { FieldName = "id" }, "some value"}});
 
-            var query = key.ToQuery(new LowercaseKeywordAnalyzer(), Version.LUCENE_29);
+            var query = key.ToQuery();
 
-            Assert.That(query.ToString(), Is.EqualTo("+id:analyzethis"));
+            Assert.That(query.ToString(), Is.EqualTo("+id:some value"));
         }
 
         [Test]
@@ -35,7 +35,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id" }, "**mykey**" } });
 
-            var query = key.ToQuery(new LowercaseKeywordAnalyzer(), Version.LUCENE_29);
+            var query = key.ToQuery();
 
             Assert.That(query.ToString(), Is.EqualTo("+id:**mykey**"));
         }
@@ -47,9 +47,10 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var mapping = MockRepository.GenerateStub<IFieldMappingInfo>();
             mapping.Expect(m => m.FieldName).Return("id");
             mapping.Expect(m => m.ConvertToQueryExpression(customValue)).Return("custom*value*as*string");
+            mapping.Expect(m => m.CreateQuery("custom*value*as*string")).Return(new TermQuery(new Term("id", "custom*value*as*string")));
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { mapping, customValue } });
 
-            var query = key.ToQuery(new LowercaseKeywordAnalyzer(), Version.LUCENE_29);
+            var query = key.ToQuery();
 
             Assert.That(query.ToString(), Is.EqualTo("+id:custom*value*as*string"));
         }
@@ -59,7 +60,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "id" }, "" } });
 
-            TestDelegate call = () => key.ToQuery(new LowercaseKeywordAnalyzer(), Version.LUCENE_29);
+            TestDelegate call = () => key.ToQuery();
 
             Assert.That(call, Throws.InvalidOperationException);
         }

@@ -9,7 +9,7 @@ namespace Lucene.Net.Linq.Mapping
         private readonly Type elementType;
 
         public CollectionReflectionFieldMapper(ReflectionFieldMapper<T> inner, Type elementType)
-            : base(inner.PropertyInfo, inner.Store, inner.IndexMode, inner.Converter, inner.FieldName, false)
+            : base(inner.PropertyInfo, inner.Store, inner.IndexMode, inner.Converter, inner.FieldName, inner.CaseSensitive, inner.Analyzer)
         {
             this.elementType = elementType;
         }

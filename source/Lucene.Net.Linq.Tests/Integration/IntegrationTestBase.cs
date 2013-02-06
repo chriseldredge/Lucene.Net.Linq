@@ -66,6 +66,12 @@ namespace Lucene.Net.Linq.Tests.Integration
             public SampleGenericOnlyComparable GenericComparable { get; set; }
         }
 
+        public class ScoreTrackingSampleDocument : SampleDocument
+        {
+            [QueryScore]
+            public float ScoreProperty { get; set; }
+        }
+
         [TypeConverter(typeof(SampleGenericOnlyComparableConverter))]
         public class SampleGenericOnlyComparable : IComparable<SampleGenericOnlyComparable>
         {

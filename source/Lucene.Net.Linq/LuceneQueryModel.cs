@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Text;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.StreamedData;
@@ -112,7 +111,15 @@ namespace Lucene.Net.Linq
         {
             if (expression is LuceneOrderByRelevanceExpression)
             {
-                sorts.Add(SortField.FIELD_SCORE);
+                if (direction == OrderingDirection.Desc)
+                {
+                    sorts.Add(new SortField(SortField.FIELD_SCORE.Field, SortField.FIELD_SCORE.Type, true));
+                }
+                else
+                {
+                    sorts.Add(SortField.FIELD_SCORE);
+                }
+                
                 return;
             }
 
@@ -132,33 +139,9 @@ namespace Lucene.Net.Linq
 
             var mapping = fieldMappingInfoProvider.GetMappingInfo(propertyName);
 
-            if (mapping.SortFieldType >= 0)
-            {
-                sorts.Add(new SortField(mapping.FieldName, mapping.SortFieldType, reverse));
-            }
-            else
-            {
-                sorts.Add(new SortField(mapping.FieldName, GetCustomSort(mapping), reverse));
-            }
+            sorts.Add(mapping.CreateSortField(reverse));
         }
-
-        private FieldComparatorSource GetCustomSort(IFieldMappingInfo fieldMappingInfo)
-        {
-            var propertyType = fieldMappingInfo.PropertyType;
-
-            if (typeof(IComparable).IsAssignableFrom(propertyType))
-            {
-                return new NonGenericConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
-            }
-
-            if (typeof (IComparable<>).MakeGenericType(propertyType).IsAssignableFrom(propertyType))
-            {
-                return new GenericConvertableFieldComparatorSource(propertyType, fieldMappingInfo.Converter);
-            }
-
-            throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " + propertyType);
-        }
-
+        
         public void AddBoostFunction(LambdaExpression expression)
         {
             var scoreFunction = expression.Compile();

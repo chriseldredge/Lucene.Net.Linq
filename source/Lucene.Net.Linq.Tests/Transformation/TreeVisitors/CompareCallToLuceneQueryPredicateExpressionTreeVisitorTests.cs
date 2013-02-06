@@ -60,7 +60,7 @@ namespace Lucene.Net.Linq.Tests.Transformation.TreeVisitors
         {
             // method signature meant to resemble
             // DataServiceProviderMethods.Compare()
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
     }
 }

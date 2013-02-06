@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
+using Lucene.Net.Analysis;
+using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Converters;
 using Lucene.Net.Linq.Util;
 using DateTimeConverter = Lucene.Net.Linq.Converters.DateTimeConverter;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -13,6 +17,11 @@ namespace Lucene.Net.Linq.Mapping
         internal const string DefaultDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
 
         internal static IFieldMapper<T> Build<T>(PropertyInfo p)
+        {
+            return Build<T>(p, Version.LUCENE_30, null);
+        }
+
+        internal static IFieldMapper<T> Build<T>(PropertyInfo p, Version version, Analyzer externalAnalyzer)
         {
             var score = p.GetCustomAttribute<QueryScoreAttribute>(true);
 
@@ -40,7 +49,7 @@ namespace Lucene.Net.Linq.Mapping
             }
             else
             {
-                mapper = BuildPrimitive<T>(p, type, metadata);
+                mapper = BuildPrimitive<T>(p, type, metadata, version, externalAnalyzer);
             }
 
             return isCollection ? new CollectionReflectionFieldMapper<T>(mapper, type) : mapper;
@@ -52,15 +61,31 @@ namespace Lucene.Net.Linq.Mapping
                    typeof (IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }
 
-        private static ReflectionFieldMapper<T> BuildPrimitive<T>(PropertyInfo p, Type type, FieldAttribute metadata)
+        private static ReflectionFieldMapper<T> BuildPrimitive<T>(PropertyInfo p, Type type, FieldAttribute metadata, Version version, Analyzer externalAnalyzer)
         {
             var fieldName = (metadata != null ? metadata.Field : null) ?? p.Name;
             var converter = GetConverter(p, type, metadata);
             var store = metadata != null ? metadata.Store : StoreMode.Yes;
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
             var caseSensitive = GetCaseSensitivity(metadata);
+            var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, version);
 
-            return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName, caseSensitive);
+            return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName, caseSensitive, analyzer);
+        }
+
+        private static Analyzer BuildAnalyzer(FieldAttribute metadata, Version version)
+        {
+            if (metadata != null && metadata.Analyzer != null)
+            {
+                return CreateAnalyzer(metadata.Analyzer, version);
+            }
+
+            if (GetCaseSensitivity(metadata))
+            {
+                return new KeywordAnalyzer();
+            }
+
+            return new CaseInsensitiveKeywordAnalyzer();
         }
 
         internal static bool GetCaseSensitivity(FieldAttribute metadata)
@@ -102,6 +127,30 @@ namespace Lucene.Net.Linq.Mapping
                 throw new NotSupportedException("Property " + p.Name + " of type " + p.PropertyType + " cannot be converted from " + typeof(string));
             }
             return converter;
+        }
+
+        internal static Analyzer CreateAnalyzer(Type analyzer, Version version)
+        {
+            if (!typeof(Analyzer).IsAssignableFrom(analyzer))
+            {
+                throw new InvalidOperationException("The type " + analyzer + " does not inherit from " + typeof(Analyzer));
+            }
+
+            var versionCtr = analyzer.GetConstructor(new[] { typeof(Version) });
+
+            if (versionCtr != null)
+            {
+                return (Analyzer)versionCtr.Invoke(new object[] { version });
+            }
+
+            var defaultCtr = analyzer.GetConstructor(new Type[0]);
+
+            if (defaultCtr != null)
+            {
+                return (Analyzer)defaultCtr.Invoke(null);
+            }
+
+            throw new InvalidOperationException("The analyzer type " + analyzer + " must have a public default constructor or public constructor that accepts " + typeof(Version));
         }
     }
 }

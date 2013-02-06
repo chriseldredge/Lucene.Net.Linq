@@ -17,9 +17,11 @@
       Execute LINQ queries on Lucene.Net complete with object to Document mapping.
     </description>
     <releaseNotes>
+      * Automatically creates Analyzer using metadata attributes like [Field(Analyzer=typeof(StandardAnalyzer)].
       * Store different object types in single index.
       * Prevent documents with null values on key properties from being stored.
       * Enable sorting on types implementing IComparable&lt;T&gt; but not non-generic IComparable.
+      * Allow client to provide custom IDocumentMapper&lt;T&gt; implementations.
     </releaseNotes>
     <dependencies>
       <dependency id="Remotion.Linq" version="[1.13.171, 2.0)" />
@@ -27,4 +29,7 @@
       <dependency id="Lucene.Net" version="[3.0.3, 3.6)" />
     </dependencies>
   </metadata>
+  <files>
+    <file src="readme.txt"/>
+  </files>
 </package>

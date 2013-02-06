@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -16,7 +20,7 @@ namespace Lucene.Net.Linq.Mapping
         private readonly int precisionStep;
 
         public NumericReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, TypeConverter typeToValueTypeConverter, TypeConverter valueTypeToStringConverter, string field, int precisionStep)
-            : base(propertyInfo, store, IndexMode.Analyzed, valueTypeToStringConverter, field, false)
+            : base(propertyInfo, store, IndexMode.Analyzed, valueTypeToStringConverter, field, false, new KeywordAnalyzer())
         {
             this.typeToValueTypeConverter = typeToValueTypeConverter;
             this.precisionStep = precisionStep;
@@ -27,25 +31,16 @@ namespace Lucene.Net.Linq.Mapping
             get { return precisionStep; }
         }
 
-        public override bool IsNumericField
+        public override SortField CreateSortField(bool reverse)
         {
-            get { return true; }
-        }
+            var targetType = propertyInfo.PropertyType;
 
-        public override int SortFieldType
-        {
-            get
+            if (typeToValueTypeConverter != null)
             {
-                if (typeToValueTypeConverter == null)
-                {
-                    return propertyInfo.PropertyType.ToSortField();
-                }
-
-                var targetType = GetUnderlyingValueType();
-
-                return targetType.ToSortField();
-
+                targetType = GetUnderlyingValueType();
             }
+
+            return new SortField(FieldName, targetType.ToSortField(), reverse);
         }
 
         protected internal override object ConvertFieldValue(Field field)
@@ -82,6 +77,16 @@ namespace Lucene.Net.Linq.Mapping
             value = ConvertToSupportedValueType(value);
             
             return ((ValueType) value).ToPrefixCoded();
+        }
+
+        public override Query CreateQuery(string pattern)
+        {
+            return new TermQuery(new Term(FieldName, pattern));
+        }
+
+        public override Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
+        {
+            return NumericRangeUtils.CreateNumericRangeQuery(fieldName, (ValueType)lowerBound, (ValueType)upperBound, lowerRange, upperRange);
         }
 
         private object ConvertToSupportedValueType(object value)

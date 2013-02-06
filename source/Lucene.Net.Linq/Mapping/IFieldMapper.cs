@@ -1,4 +1,5 @@
-﻿using Lucene.Net.Documents;
+﻿using Lucene.Net.Analysis;
+using Lucene.Net.Documents;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -29,5 +30,11 @@ namespace Lucene.Net.Linq.Mapping
         /// to detect dirty objects.
         /// </summary>
         object GetPropertyValue(T source);
+
+        /// <summary>
+        /// Gets the Analyzer to be used for indexing this field
+        /// or parsing queries on this field.
+        /// </summary>
+        Analyzer Analyzer { get; }
     }
 }

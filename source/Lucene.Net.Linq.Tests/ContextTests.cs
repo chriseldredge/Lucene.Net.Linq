@@ -156,7 +156,7 @@ namespace Lucene.Net.Linq.Tests
         class TestableContext : Context
         {
             public TestableContext(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
-                : base(directory, analyzer, version, indexWriter, transactionLock)
+                : base(directory, transactionLock)
             {
             }
 
@@ -195,6 +195,11 @@ namespace Lucene.Net.Linq.Tests
 
         public void Optimize()
         {
+        }
+
+        public IndexReader GetReader()
+        {
+            return null;
         }
     }
 }

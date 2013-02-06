@@ -28,6 +28,9 @@ namespace Lucene.Net.Linq.Abstractions
 
         /// <see cref="IndexWriter.Optimize()"/>
         void Optimize();
+
+        /// <see cref="IndexWriter.GetReader()"/>
+        IndexReader GetReader();
     }
 
     /// <summary>
@@ -76,6 +79,11 @@ namespace Lucene.Net.Linq.Abstractions
         public void Rollback()
         {
             target.Rollback();
+        }
+
+        public IndexReader GetReader()
+        {
+            return target.GetReader();
         }
     }
 }

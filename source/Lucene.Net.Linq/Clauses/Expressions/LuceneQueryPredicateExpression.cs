@@ -12,7 +12,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
         private readonly Expression pattern;
         private readonly Occur occur;
         private readonly QueryType queryType;
-		
+        
         public LuceneQueryPredicateExpression(LuceneQueryFieldExpression field, Expression pattern, Occur occur)
             : this(field, pattern, occur, QueryType.Default)
         {

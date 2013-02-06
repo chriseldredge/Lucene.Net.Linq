@@ -1,14 +1,17 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Reflection;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
-using Lucene.Net.Index;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal class ReflectionFieldMapper<T> : IFieldMapper<T>
+    public class ReflectionFieldMapper<T> : IFieldMapper<T>
     {
         protected readonly PropertyInfo propertyInfo;
         protected readonly StoreMode store;
@@ -16,8 +19,9 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
         protected readonly bool caseSensitive;
+        protected readonly Analyzer analyzer;
 
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TypeConverter converter, string fieldName, bool caseSensitive)
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
@@ -25,53 +29,46 @@ namespace Lucene.Net.Linq.Mapping
             this.converter = converter;
             this.fieldName = fieldName;
             this.caseSensitive = caseSensitive;
+            this.analyzer = analyzer;
         }
 
-        public PropertyInfo PropertyInfo
+        public virtual Analyzer Analyzer
+        {
+            get { return analyzer; }
+        }
+
+        public virtual PropertyInfo PropertyInfo
         {
             get { return propertyInfo; }
         }
 
-        public StoreMode Store
+        public virtual StoreMode Store
         {
             get { return store; }
         }
 
-        public IndexMode IndexMode
+        public virtual IndexMode IndexMode
         {
             get { return index; }
         }
 
-        public TypeConverter Converter
+        public virtual TypeConverter Converter
         {
             get { return converter; }
         }
 
-        public string FieldName
+        public virtual string FieldName
         {
             get { return fieldName; }
         }
 
-        public bool CaseSensitive
+        public virtual bool CaseSensitive
         {
             get { return caseSensitive; }
         }
 
-        public virtual Query KeyConstraint
-        {
-            get
-            {
-                return null;
-            }
-        }
-
-        public virtual bool IsNumericField { get { return false; } }
-
-        public virtual int SortFieldType { get { return (Converter != null) ? -1 : SortField.STRING; } }
-
         public virtual string PropertyName { get { return propertyInfo.Name; } }
-        public virtual Type PropertyType { get { return propertyInfo.PropertyType; } }
-
+        
         public virtual object GetPropertyValue(T source)
         {
             return propertyInfo.GetValue(source, null);
@@ -107,6 +104,57 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             return (string)value;
+        }
+
+        public virtual Query CreateQuery(string pattern)
+        {
+            var queryParser = new QueryParser(Version.LUCENE_30, FieldName, analyzer)
+                {
+                    AllowLeadingWildcard = true,
+                    LowercaseExpandedTerms = !CaseSensitive
+                };
+
+            return queryParser.Parse(pattern);
+        }
+
+        public virtual Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
+        {
+            var minInclusive = lowerRange == RangeType.Inclusive;
+            var maxInclusive = upperRange == RangeType.Inclusive;
+
+            var lowerBoundStr = lowerBound == null ? null : EvaluateExpressionToStringAndAnalyze(lowerBound);
+            var upperBoundStr = upperBound == null ? null : EvaluateExpressionToStringAndAnalyze(upperBound);
+            return new TermRangeQuery(FieldName, lowerBoundStr, upperBoundStr, minInclusive, maxInclusive);
+        }
+
+        public virtual SortField CreateSortField(bool reverse)
+        {
+            if (Converter == null) return new SortField(FieldName, SortField.STRING, reverse);
+
+            var propertyType = propertyInfo.PropertyType;
+
+            FieldComparatorSource source;
+
+            if (typeof(IComparable).IsAssignableFrom(propertyType))
+            {
+                source = new NonGenericConvertableFieldComparatorSource(propertyType, Converter);
+            }
+            else if (typeof(IComparable<>).MakeGenericType(propertyType).IsAssignableFrom(propertyType))
+            {
+                source = new GenericConvertableFieldComparatorSource(propertyType, Converter);
+            }
+            else
+            {
+                throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " +
+                                                propertyType);
+            }
+
+            return new SortField(FieldName, source, reverse);
+        }
+
+        private string EvaluateExpressionToStringAndAnalyze(object value)
+        {
+            return analyzer.Analyze(FieldName, ConvertToQueryExpression(value));
         }
 
         protected internal virtual object ConvertFieldValue(Field field)
@@ -155,48 +203,5 @@ namespace Lucene.Net.Linq.Mapping
                 throw new InvalidOperationException("Unrecognized FieldStore value " + store);
             }
         }
-    }
-
-    internal class ReflectionScoreMapper<T> : IFieldMapper<T>
-    {
-        private readonly PropertyInfo propertyInfo;
-
-        public ReflectionScoreMapper(PropertyInfo propertyInfo)
-        {
-            this.propertyInfo = propertyInfo;
-        }
-
-        public void CopyToDocument(T source, Document target)
-        {
-        }
-
-        public void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
-        {
-            var score = context.CurrentScoreDoc.Score;
-            propertyInfo.SetValue(target, score, null);
-        }
-
-        public int SortFieldType
-        {
-            get { return SortField.SCORE; }
-        }
-
-        public string ConvertToQueryExpression(object value)
-        {
-            throw new NotSupportedException();
-        }
-
-        public object GetPropertyValue(T source)
-        {
-            return 0;
-        }
-
-        public bool IsNumericField { get { throw new NotSupportedException(); } }
-        public bool CaseSensitive { get { throw new NotSupportedException(); } }
-        public string PropertyName { get { return propertyInfo.Name; } }
-        public Query KeyConstraint { get { return null; } }
-        public Type PropertyType { get { return propertyInfo.PropertyType; } }
-        public TypeConverter Converter { get { return null; } }
-        public string FieldName { get { return null; } }
     }
 }

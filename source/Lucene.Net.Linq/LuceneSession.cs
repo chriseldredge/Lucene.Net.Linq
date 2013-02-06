@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
@@ -16,6 +17,7 @@ namespace Lucene.Net.Linq
         private readonly object sessionLock = new object();
         
         private readonly IDocumentMapper<T> mapper;
+        private readonly IIndexWriter writer;
         private readonly Context context;
         private readonly IQueryable<T> queryable;
 
@@ -25,9 +27,10 @@ namespace Lucene.Net.Linq
 
         private readonly SessionDocumentTracker documentTracker;
 
-        public LuceneSession(IDocumentMapper<T> mapper, Context context, IQueryable<T> queryable)
+        public LuceneSession(IDocumentMapper<T> mapper, IIndexWriter writer, Context context, IQueryable<T> queryable)
         {
             this.mapper = mapper;
+            this.writer = writer;
             this.context = context;
             this.queryable = queryable;
             documentTracker = new SessionDocumentTracker(mapper);
@@ -119,7 +122,7 @@ namespace Lucene.Net.Linq
                         Log.Error(m => m("OutOfMemoryException while writing/committing to Lucene index. Closing writer."), ex);
                         try
                         {
-                            context.IndexWriter.Dispose();
+                            writer.Dispose();
                         }
                         catch (Exception ex2)
                         {
@@ -134,7 +137,7 @@ namespace Lucene.Net.Linq
                         Log.Error(m => m("Exception in commit"), ex);
                         try
                         {
-                            context.IndexWriter.Rollback();
+                            writer.Rollback();
                         }
                         catch (Exception ex2)
                         {
@@ -150,7 +153,6 @@ namespace Lucene.Net.Linq
 
         private void CommitInternal()
         {
-            var writer = context.IndexWriter;
             IEnumerable<Query> deletes = new Query[0];
 
             if (DeleteAllFlag)
@@ -164,7 +166,7 @@ namespace Lucene.Net.Linq
 
             var additionMap = ConvertPendingAdditions();
 
-            deletes = deletes.Union(additionMap.Keys.Where(k => !k.Empty).Select(k => k.ToQuery(context.Analyzer, context.Version))).ToArray();
+            deletes = deletes.Union(additionMap.Keys.Where(k => !k.Empty).Select(k => k.ToQuery())).ToArray();
 
             if (deletes.Any())
             {
@@ -224,7 +226,7 @@ namespace Lucene.Net.Linq
 
         internal bool DeleteAllFlag { get; private set; }
         
-        internal IEnumerable<Query> Deletions { get { return deleteQueries.Union(deleteKeys.Select(k => k.ToQuery(context.Analyzer, context.Version))); } }
+        internal IEnumerable<Query> Deletions { get { return deleteQueries.Union(deleteKeys.Select(k => k.ToQuery())); } }
 
         internal List<T> Additions
         {

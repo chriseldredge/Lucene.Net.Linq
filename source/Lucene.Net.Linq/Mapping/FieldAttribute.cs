@@ -1,4 +1,5 @@
 ﻿using System;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
@@ -107,6 +108,16 @@ namespace Lucene.Net.Linq.Mapping
         /// converted to lowercase.
         /// </summary>
         public bool CaseSensitive { get; set; }
+
+        /// <summary>
+        /// When set, supplies a custom analyzer for this field. The analyzer type
+        /// must have either a parameterless public constructor, or a public constructor
+        /// that accepts a <see cref="Net.Util.Version"/> argument.
+        /// 
+        /// When an external Analyzer is provided on <see cref="LuceneDataProvider"/>
+        /// methods it will override this setting.
+        /// </summary>
+        public Type Analyzer { get; set; }
     }
 
     /// <summary>

@@ -40,6 +40,8 @@ the field name and each field is stored and indexed.
     public class Article
     {
         public string Author { get; set; }
+
+        [Field(Analyzer = typeof(StandardAnalyzer))]
         public string Title { get; set; }
         public DateTimeOffset PublishDate { get; set; }
 
@@ -55,7 +57,7 @@ the field name and each field is stored and indexed.
         public string BodyText { get; set; }
 
         // Maps to field "text"
-        [Field("text", Store = false)]
+        [Field("text", Store = false, Analyzer = typeof(PorterStemAnalyzer))]
         public string SearchText
         {
             get { return string.Join(" ", new[] { Author, Title, BodyText }); }
@@ -84,9 +86,8 @@ Next, create LuceneDataProvider and run some queries:
         public static void Main()
         {
             var directory = new RAMDirectory();
-            var writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_29), IndexWriter.MaxFieldLength.UNLIMITED);
 
-            var provider = new LuceneDataProvider(directory, writer.GetAnalyzer(), Version.LUCENE_29, writer);
+            var provider = new LuceneDataProvider(directory, Version.LUCENE_30);
 
             // add some documents
             using (var session = provider.OpenSession<Article>())
@@ -107,6 +108,7 @@ Next, create LuceneDataProvider and run some queries:
                                  where a.SearchText == "some search query"
                                  select a;
 
+            provider.Dispose();
         }
     }
 

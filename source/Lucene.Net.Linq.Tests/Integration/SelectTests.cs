@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Lucene.Net.Analysis;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
 
@@ -15,7 +16,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             analyzer = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
             analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new KeywordAnalyzer());
-            analyzer.AddAnalyzer<SampleDocument>(t => t.Key, new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer<SampleDocument>(t => t.Key, new CaseInsensitiveKeywordAnalyzer());
             return analyzer;
         }
 
@@ -208,7 +209,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_ExactMatch_CaseInsensitive()
         {
-            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new CaseInsensitiveKeywordAnalyzer());
             AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
@@ -222,7 +223,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_IgnoresToLower()
         {
-            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new CaseInsensitiveKeywordAnalyzer());
             AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
@@ -236,7 +237,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_IgnoresToLowerWithinNullSafetyCondition()
         {
-            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new CaseInsensitiveKeywordAnalyzer());
             AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 
@@ -263,7 +264,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void Where_LowercaseKeyword_StartsWith()
         {
-            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new LowercaseKeywordAnalyzer());
+            analyzer.AddAnalyzer<SampleDocument>(t => t.Id, new CaseInsensitiveKeywordAnalyzer());
             AddDocument(new SampleDocument { Name = "Other Document", Key = "X.Y.1.2" });
             AddDocument(new SampleDocument { Name = "My Document", Key = "X.Z.1.3" });
 

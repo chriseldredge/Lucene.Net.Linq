@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using NUnit.Framework;
@@ -78,7 +79,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
 
-            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.INT));
+            Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.INT));
         }
 
         [Test]
@@ -86,7 +87,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
 
-            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.LONG));
+            Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.LONG));
         }
 
         [Test]
@@ -96,7 +97,29 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
 
-            Assert.That(mapper.SortFieldType, Is.EqualTo(SortField.INT));
+            Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.INT));
+        }
+
+        [Test]
+        public void RangeQuery()
+        {
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128);
+
+            var result = mapper.CreateRangeQuery(-5L, 5L, RangeType.Inclusive, RangeType.Exclusive);
+
+            Assert.That(result, Is.InstanceOf<NumericRangeQuery<long>>());
+            Assert.That(result.ToString(), Is.EqualTo("Long:[-5 TO 5}"));
+        }
+
+        [Test]
+        public void RangeQueryUnbounded()
+        {
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128);
+
+            var result = mapper.CreateRangeQuery(100L, null, RangeType.Exclusive, RangeType.Inclusive);
+
+            Assert.That(result, Is.InstanceOf<NumericRangeQuery<long>>());
+            Assert.That(result.ToString(), Is.EqualTo(string.Format("Long:{{100 TO {0}]", long.MaxValue)));
         }
 
         public class SampleConverter : TypeConverter

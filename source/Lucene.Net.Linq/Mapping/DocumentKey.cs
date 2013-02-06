@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lucene.Net.Analysis;
-using Lucene.Net.Index;
 using Lucene.Net.Linq.Util;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -19,7 +15,7 @@ namespace Lucene.Net.Linq.Mapping
         /// Converts the key to a Lucene.Net <see cref="Query"/>
         /// that will match a unique document in the index.
         /// </summary>
-        Query ToQuery(Analyzer analyzer, Version version);
+        Query ToQuery();
 
         /// <summary>
         /// Flag indicating if the key is empty, meaning
@@ -43,7 +39,7 @@ namespace Lucene.Net.Linq.Mapping
             this.mappings = new Dictionary<string, IFieldMappingInfo>(values.ToDictionary(kv => kv.Key.FieldName, kv => kv.Key));
         }
 
-        public Query ToQuery(Analyzer analyzer, Version version)
+        public Query ToQuery()
         {
             if (Empty)
             {
@@ -51,32 +47,20 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             var query = new BooleanQuery();
-            values.Apply(kvp => query.Add(ConvertToQueryExpression(kvp, analyzer, version), Occur.MUST));
+            values.Apply(kvp => query.Add(ConvertToQueryExpression(kvp), Occur.MUST));
             return query;
         }
 
-        private Query ConvertToQueryExpression(KeyValuePair<string, object> kvp, Analyzer analyzer, Version version)
+        private Query ConvertToQueryExpression(KeyValuePair<string, object> kvp)
         {
             var mapping = mappings[kvp.Key];
             
-            if (mapping.KeyConstraint != null)
+            var term = mapping.ConvertToQueryExpression(kvp.Value);
+            if (string.IsNullOrWhiteSpace(term))
             {
-                return mapping.KeyConstraint;
+                throw new InvalidOperationException("Value for key field '" + kvp.Key + "' cannot be null or empty.");
             }
-
-            var parser = new QueryParser(version, kvp.Key, analyzer);
-
-            return Parse(parser, mapping.ConvertToQueryExpression(kvp.Value));
-            
-        }
-
-        private Query Parse(QueryParser parser, string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new InvalidOperationException("The key value for field " + parser.Field + " must not be blank.");
-            }
-            return parser.Parse(QueryParser.Escape(value));
+            return mapping.CreateQuery(term);
         }
 
         public bool Equals(DocumentKey other)

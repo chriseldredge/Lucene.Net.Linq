@@ -1,4 +1,6 @@
-﻿using Lucene.Net.Documents;
+﻿using Lucene.Net.Analysis;
+using Lucene.Net.Documents;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
@@ -45,5 +47,11 @@ namespace Lucene.Net.Linq.Mapping
         /// <see cref="Query"/> and <see cref="Filter"/>.
         /// </summary>
         void PrepareSearchSettings(IQueryExecutionContext context);
+
+        /// <summary>
+        /// Gets an analyzer to be used for preparing queries
+        /// and writing documents.
+        /// </summary>
+        PerFieldAnalyzer Analyzer { get; }
     }
 }

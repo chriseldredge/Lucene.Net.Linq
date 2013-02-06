@@ -22,17 +22,17 @@ $buildNumber = $env:ProjectBuildNumber
 $revision = $env:ProjectRevision
 
 if (!$buildNumber) {
-	$buildNumber = 0
+    $buildNumber = 0
 }
 
 if (!$properties["version"]) {
-	$properties["version"] = "3.0.$buildNumber"
+    $properties["version"] = "3.1.$buildNumber"
 }
 if (!$properties["revision"]) {
-	$properties["revision"] = $revision
+    $properties["revision"] = $revision
 }
 if (!$properties["nunitconsole"] -and $env:NunitConsolePath) {
-	$properties["nunitconsole"] = $env:NunitConsolePath
+    $properties["nunitconsole"] = $env:NunitConsolePath
 }
 
 remove-module psake -ea 'SilentlyContinue'
@@ -47,9 +47,9 @@ invoke-psake $buildFile $taskList $framework $docs $parameters $properties
 
 if (!$psake.build_success)
 {
-	echo "psake failed."
-	$exitcode = 1
-	$host.SetShouldExit($exitcode)
-	exit
+    echo "psake failed."
+    $exitcode = 1
+    $host.SetShouldExit($exitcode)
+    exit
 }
 

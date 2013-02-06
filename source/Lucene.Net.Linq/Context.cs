@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
-using Lucene.Net.Analysis;
-using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
 {
@@ -17,42 +14,21 @@ namespace Lucene.Net.Linq
         public event EventHandler<SearcherLoadEventArgs> SearcherLoading;
 
         private readonly Directory directory;
-        private readonly Analyzer analyzer;
-        private readonly Version version;
-        private readonly IIndexWriter indexWriter;
         private readonly object transactionLock;
 
         private readonly object searcherLock = new object();
         private readonly object reloadLock = new object();
         private SearcherClientTracker tracker;
         
-        public Context(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
+        public Context(Directory directory, object transactionLock)
         {
             this.directory = directory;
-            this.analyzer = analyzer;
-            this.version = version;
-            this.indexWriter = indexWriter;
             this.transactionLock = transactionLock;
-        }
-
-        public Analyzer Analyzer
-        {
-            get { return analyzer; }
-        }
-
-        public Version Version
-        {
-            get { return version; }
         }
 
         public Directory Directory
         {
             get { return directory; }
-        }
-
-        public IIndexWriter IndexWriter
-        {
-            get { return indexWriter; }
         }
 
         public object TransactionLock
@@ -108,11 +84,6 @@ namespace Lucene.Net.Linq
                     return tracker;
                 }
             }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return IndexWriter ==  null; }
         }
 
         protected virtual IndexSearcher CreateSearcher()
