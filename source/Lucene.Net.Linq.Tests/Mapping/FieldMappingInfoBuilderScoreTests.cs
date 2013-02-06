@@ -29,7 +29,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             const float sampleScore = 0.48f;
 
             var mapper = CreateMapper();
-            mapper.CopyFromDocument(document, new QueryExecutionContext { CurrentScoreDoc = new ScoreDoc(1, sampleScore)}, this);
+            mapper.CopyFromDocument(document, new QueryExecutionContext { CurrentScoreDoc = new ScoreDoc(1, sampleScore), Phase = QueryExecutionPhase.ConvertResults }, this);
 
             Assert.That(Score, Is.EqualTo(sampleScore));
         }

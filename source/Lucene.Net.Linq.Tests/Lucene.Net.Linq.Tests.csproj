@@ -95,6 +95,7 @@
     <Compile Include="Mapping\NumericReflectionFieldMapperTests.cs" />
     <Compile Include="Mapping\ReflectionDocumentMapperTests.cs" />
     <Compile Include="Mapping\ReflectionFieldMapperTests.cs" />
+    <Compile Include="Mapping\ReflectionScoreMapperTests.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />

@@ -22,8 +22,11 @@ namespace Lucene.Net.Linq.Mapping
 
         public void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
-            var score = context.CurrentScoreDoc.Score;
-            propertyInfo.SetValue(target, score, null);
+            if (context.Phase == QueryExecutionPhase.ConvertResults)
+            {
+                var score = context.CurrentScoreDoc.Score;
+                propertyInfo.SetValue(target, score, null);
+            }
         }
 
         public SortField CreateSortField(bool reverse)
