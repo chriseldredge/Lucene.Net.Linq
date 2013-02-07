@@ -33,7 +33,9 @@ namespace Lucene.Net.Linq
         /// <summary>
         /// Applies a custom boost function to customize query scoring. When multiple boost functions
         /// are added by calling this method more than once, the return values from each function are
-        /// multiplied to yield a final result.
+        /// multiplied to yield a final result. Warning: this method will cause each document that
+        /// matches the query to be converted to an instance of <typeparamref name="T"/> in order
+        /// for the score to be computed, significantly degrading performance.
         /// </summary>
         public static IQueryable<T> Boost<T>(this IQueryable<T> source, Func<T, float> boostFunction)
         {

@@ -33,7 +33,7 @@ namespace Lucene.Net.Linq.Tests.Integration
                 item.Scalar = 4;
             }
 
-            var result = (from d in session.Query() where d.Name == "a" select d).Single();
+            var result = (from d in provider.AsQueryable<SampleDocument>() where d.Name == "a" select d).Single();
             Assert.That(result.Scalar, Is.EqualTo(4));
         }
 
