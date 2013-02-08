@@ -72,6 +72,7 @@
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\BoostTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
+    <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\SampleProgram.cs" />

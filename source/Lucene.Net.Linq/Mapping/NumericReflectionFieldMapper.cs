@@ -81,6 +81,11 @@ namespace Lucene.Net.Linq.Mapping
 
         public override Query CreateQuery(string pattern)
         {
+            if (pattern.Contains("*"))
+            {
+                return base.CreateQuery(pattern);
+            }
+            
             return new TermQuery(new Term(FieldName, pattern));
         }
 
