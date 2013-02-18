@@ -49,7 +49,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var propertyInfo = GetType().GetProperty("IntProperty");
             var context = (ReflectionFieldMapper<FieldMappingInfoBuilderTests>)FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderTests>(propertyInfo);
 
-            Assert.That(context.Converter, Is.EqualTo(TypeDescriptor.GetConverter(typeof(int))));
+            Assert.That(context.Converter, Is.InstanceOf<Int32Converter>());
         }
 
         [Test]

@@ -14,9 +14,9 @@ namespace Lucene.Net.Linq.Mapping
 {
     internal class FieldMappingInfoBuilder
     {
-        internal const string DefaultDateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss";
+        internal const string DefaultDateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
 
-        internal static IFieldMapper<T> Build<T>(PropertyInfo p)
+		internal static IFieldMapper<T> Build<T>(PropertyInfo p)
         {
             return Build<T>(p, Version.LUCENE_30, null);
         }
