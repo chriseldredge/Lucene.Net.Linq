@@ -211,9 +211,10 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             
             var str = mapping == null ? result.ToString() : mapping.ConvertToQueryExpression(result);
 
-            if (expression.AllowSpecialCharacters) return str;
+            if (expression.AllowSpecialCharacters)
+                return str;
 
-            return QueryParser.Escape(str ?? string.Empty);
+            return mapping != null ? mapping.EscapeSpecialCharacters(str) : str;
         }
     }
 }

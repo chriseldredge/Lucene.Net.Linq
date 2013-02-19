@@ -44,6 +44,11 @@ namespace Lucene.Net.Linq.Mapping
             throw new NotSupportedException();
         }
 
+        public string EscapeSpecialCharacters(string value)
+        {
+            throw new NotSupportedException();
+        }
+
         public Query CreateQuery(string pattern)
         {
             throw new NotSupportedException();

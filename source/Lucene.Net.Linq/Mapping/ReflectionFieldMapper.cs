@@ -106,6 +106,11 @@ namespace Lucene.Net.Linq.Mapping
             return (string)value;
         }
 
+        public virtual string EscapeSpecialCharacters(string value)
+        {
+            return QueryParser.Escape(value ?? string.Empty);
+        }
+
         public virtual Query CreateQuery(string pattern)
         {
             var queryParser = new QueryParser(Version.LUCENE_30, FieldName, analyzer)

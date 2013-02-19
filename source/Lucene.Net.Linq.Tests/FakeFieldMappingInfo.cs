@@ -5,6 +5,7 @@ using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
+using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -25,6 +26,11 @@ namespace Lucene.Net.Linq.Tests
         public string ConvertToQueryExpression(object value)
         {
             return value.ToString();
+        }
+        
+        public string EscapeSpecialCharacters(string value)
+        {
+            return QueryParser.Escape(value ?? string.Empty);
         }
 
         public Query CreateQuery(string pattern)

@@ -4,6 +4,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
+using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Mapping
 {
@@ -35,6 +36,11 @@ namespace Lucene.Net.Linq.Mapping
         public string ConvertToQueryExpression(object value)
         {
             return this.value;
+        }
+
+        public string EscapeSpecialCharacters(string value)
+        {
+            return QueryParser.Escape(value ?? string.Empty);
         }
 
         public Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)

@@ -31,6 +31,12 @@ namespace Lucene.Net.Linq.Mapping
         string ConvertToQueryExpression(object value);
 
         /// <summary>
+        /// Esapes special characters in a query pattern
+        /// such as asterisk (*).
+        /// </summary>
+        string EscapeSpecialCharacters(string str);
+
+        /// <summary>
         /// Creates a query based on the supplied pattern.
         /// The pattern should be analyzed and parsed
         /// (typically by using a <see cref="QueryParser"/>)

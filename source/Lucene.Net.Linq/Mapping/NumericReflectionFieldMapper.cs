@@ -79,9 +79,15 @@ namespace Lucene.Net.Linq.Mapping
             return ((ValueType) value).ToPrefixCoded();
         }
 
+        public override string EscapeSpecialCharacters(string value)
+        {
+            // no need to escape since value will not be parsed.
+            return value;
+        }
+
         public override Query CreateQuery(string pattern)
         {
-            if (pattern.Contains("*"))
+            if (pattern == "*")
             {
                 return base.CreateQuery(pattern);
             }
