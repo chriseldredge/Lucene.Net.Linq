@@ -13,9 +13,8 @@
         public static void Main()
         {
             var directory = new RAMDirectory();
-            var writer = new IndexWriter(directory, new StandardAnalyzer(Version.LUCENE_29), IndexWriter.MaxFieldLength.UNLIMITED);
 
-            var provider = new LuceneDataProvider(directory, writer.Analyzer, Version.LUCENE_29, writer);
+            var provider = new LuceneDataProvider(directory, Version.LUCENE_30);
 
             // add some documents
             using (var session = provider.OpenSession<Article>())

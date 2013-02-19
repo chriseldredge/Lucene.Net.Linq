@@ -65,6 +65,41 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void UsesSameWriterInstance()
+        {
+            var provider = new TestableLuceneDataProvider(new RAMDirectory(), Version.LUCENE_30);
+
+            Assert.That(provider.IndexWriter, Is.SameAs(provider.IndexWriter), "provider.IndexWriter");
+        }
+
+        [Test]
+        public void CreatesNewWriterAfterRollback()
+        {
+            var provider = new TestableLuceneDataProvider(new RAMDirectory(), Version.LUCENE_30);
+
+            var first = provider.IndexWriter;
+
+            first.Expect(iw => iw.IsClosed).Return(true);
+
+            var next = provider.IndexWriter;
+
+            Assert.That(next, Is.Not.SameAs(first), "Should create new writer when current is closed.");
+        }
+        
+        [Test]
+        public void ThrowsWhenExternallyCreatedWriterIsClosed()
+        {
+            var writer = MockRepository.GenerateStrictMock<IIndexWriter>();
+            var provider = new LuceneDataProvider(new RAMDirectory(), Version.LUCENE_30, writer, new object());
+            
+            writer.Expect(iw => iw.IsClosed).Return(true);
+            
+            TestDelegate call = () => provider.IndexWriter.ToString();
+            
+            Assert.That(call, Throws.InvalidOperationException);
+        }
+
+        [Test]
         public void DoesNotDisposeExternallyProvidesWriter()
         {
             var writer = MockRepository.GenerateMock<IIndexWriter>();
@@ -81,11 +116,9 @@ namespace Lucene.Net.Linq.Tests
             {
             }
 
-            private static readonly IIndexWriter writer = MockRepository.GenerateMock<IIndexWriter>();
-
             protected override IIndexWriter GetIndexWriter(Analyzer analyzer)
             {
-                return writer;
+                return MockRepository.GenerateMock<IIndexWriter>();
             }
         }
 

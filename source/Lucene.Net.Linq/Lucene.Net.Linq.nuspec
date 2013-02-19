@@ -17,6 +17,16 @@
       Execute LINQ queries on Lucene.Net complete with object to Document mapping.
     </description>
     <releaseNotes>
+    
+    Current Release
+    ===============
+    
+      * Open new IndexWriter after ISession.Commit fails and calls Rollback on current IndexWriter
+      * Convert objects and keys to documents and queries before writing to IndexWriter
+      
+    3.1.45
+    ======
+    
       * Automatically creates Analyzer using metadata attributes like [Field(Analyzer=typeof(StandardAnalyzer)].
       * Store different object types in single index.
       * Prevent documents with null values on key properties from being stored.

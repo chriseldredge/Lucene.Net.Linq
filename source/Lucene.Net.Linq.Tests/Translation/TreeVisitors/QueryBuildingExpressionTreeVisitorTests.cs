@@ -19,7 +19,6 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
         private static readonly Expression MemberAccessId =
             new LuceneQueryFieldExpression(typeof (int), "Id");
 
-        private static readonly Version version = Version.LUCENE_29;
         private FieldMappingInfoProviderStub fieldMappingInfoProvider;
 
         [SetUp]

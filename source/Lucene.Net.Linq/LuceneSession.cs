@@ -104,7 +104,7 @@ namespace Lucene.Net.Linq
         {
             lock (sessionLock)
             {
-                StageModifiedDocuments();
+                var additions = StageModifiedDocuments();
 
                 if (!PendingChanges)
                 {
@@ -115,7 +115,7 @@ namespace Lucene.Net.Linq
                 {
                     try
                     {
-                        CommitInternal();
+                        CommitInternal(additions);
                     }
                     catch (OutOfMemoryException ex)
                     {
@@ -151,35 +151,26 @@ namespace Lucene.Net.Linq
             }
         }
 
-        private void CommitInternal()
+        private void CommitInternal(IList<Document> additions)
         {
-            IEnumerable<Query> deletes = new Query[0];
+            var deletes = Deletions;
 
             if (DeleteAllFlag)
             {
                 writer.DeleteAll();
             }
-            else if (deleteQueries.Count > 0 || deleteKeys.Count > 0)
-            {
-                deletes = Deletions;
-            }
-
-            var additionMap = ConvertPendingAdditions();
-
-            deletes = deletes.Union(additionMap.Keys.Where(k => !k.Empty).Select(k => k.ToQuery())).ToArray();
-
-            if (deletes.Any())
+            else if (deletes.Any())
             {
                 deletes.Apply(query => Log.Trace(m => m("Delete by query: " + query)));
                 writer.DeleteDocuments(deletes.Distinct().ToArray());
             }
 
-            if (additionMap.Count > 0)
+            if (additions.Count > 0)
             {
-                additionMap.Values.Apply(writer.AddDocument);
+                additions.Apply(writer.AddDocument);
             }
 
-            Log.Debug(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additionMap.Count));
+            Log.Debug(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additions.Count));
             Log.Info(m => m("Committing."));
 
             writer.Commit();
@@ -191,7 +182,7 @@ namespace Lucene.Net.Linq
             Log.Info(m => m("Commit completed."));
         }
 
-        internal void StageModifiedDocuments()
+        internal IList<Document> StageModifiedDocuments()
         {
             var docs = documentTracker.FindModifiedDocuments();
             foreach (var doc in docs)
@@ -206,6 +197,30 @@ namespace Lucene.Net.Linq
 
                 Add(doc.Document);
             }
+
+            var additions = ConvertPendingAdditions();
+
+            Delete(additions.Keys.Where(k => !k.Empty).Select(k => k.ToQuery()).ToArray());
+
+            return additions.Values.ToList();
+        }
+
+        internal IDictionary<IDocumentKey, Document> ConvertPendingAdditions()
+        {
+            var map = new Dictionary<IDocumentKey, Document>();
+            var reverse = new List<T>(additions);
+            reverse.Reverse();
+            
+            foreach (var item in reverse)
+            {
+                var key = mapper.ToKey(item);
+                if (!map.ContainsKey(key))
+                {
+                    map[key] = ToDocument(item);
+                }
+            }
+            
+            return map;
         }
 
         private void ClearPendingChanges()
@@ -231,24 +246,6 @@ namespace Lucene.Net.Linq
         internal List<T> Additions
         {
             get { return additions; }
-        }
-
-        internal IDictionary<IDocumentKey, Document> ConvertPendingAdditions()
-        {
-            var map = new Dictionary<IDocumentKey, Document>();
-            var reverse = new List<T>(additions);
-            reverse.Reverse();
-
-            foreach (var item in reverse)
-            {
-                var key = mapper.ToKey(item);
-                if (!map.ContainsKey(key))
-                {
-                    map[key] = ToDocument(item);
-                }
-            }
-
-            return map;
         }
 
         private Document ToDocument(T i)

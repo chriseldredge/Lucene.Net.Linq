@@ -115,6 +115,7 @@
     <Compile Include="Transformation\TreeVisitors\FlagToBinaryConditionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitorTests.cs" />
+    <Compile Include="Abstractions\IndexWriterAdapterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

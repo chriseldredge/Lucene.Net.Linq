@@ -31,6 +31,13 @@ namespace Lucene.Net.Linq.Abstractions
 
         /// <see cref="IndexWriter.GetReader()"/>
         IndexReader GetReader();
+
+        /// <summary>
+        /// Gets a value indicating whether this instance has been closed either
+        /// by <see cref="Dispose"/> or <see cref="Rollback"/> being called.
+        /// </summary>
+        /// <value><c>true</c> if this instance is closed; otherwise, <c>false</c>.</value>
+        bool IsClosed { get; }
     }
 
     /// <summary>
@@ -39,6 +46,7 @@ namespace Lucene.Net.Linq.Abstractions
     public class IndexWriterAdapter : IIndexWriter
     {
         private readonly IndexWriter target;
+        private bool closed;
 
         /// <param name="target">The IndexWriter instance to delegate method calls to.</param>
         public IndexWriterAdapter(IndexWriter target)
@@ -68,6 +76,7 @@ namespace Lucene.Net.Linq.Abstractions
 
         public void Dispose()
         {
+            closed = true;
             target.Dispose();
         }
 
@@ -78,6 +87,7 @@ namespace Lucene.Net.Linq.Abstractions
 
         public void Rollback()
         {
+            closed = true;
             target.Rollback();
         }
 
@@ -85,5 +95,7 @@ namespace Lucene.Net.Linq.Abstractions
         {
             return target.GetReader();
         }
+
+        public bool IsClosed { get { return closed; } }
     }
 }

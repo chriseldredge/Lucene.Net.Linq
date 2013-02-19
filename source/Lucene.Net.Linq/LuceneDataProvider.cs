@@ -26,10 +26,12 @@ namespace Lucene.Net.Linq
         private readonly Analyzer externalAnalyzer;
         private readonly PerFieldAnalyzer perFieldAnalyzer;
         private readonly Version version;
-        private readonly IIndexWriter writer;
+        private readonly object sync = new object();
         private readonly IQueryParser queryParser;
         private readonly Context context;
         private readonly bool writerIsExternal;
+
+        private IIndexWriter writer;
 
         /// <summary>
         /// Constructs a new read-only instance without supplying an IndexWriter.
@@ -85,8 +87,8 @@ namespace Lucene.Net.Linq
             this.externalAnalyzer = externalAnalyzer;
             this.perFieldAnalyzer = new PerFieldAnalyzer(new KeywordAnalyzer());
             this.version = version;
-            this.writer = externalWriter ?? GetIndexWriter(perFieldAnalyzer);
             this.writerIsExternal = externalWriter != null;
+            this.writer = externalWriter ?? GetIndexWriter(perFieldAnalyzer);
 
             queryParser = RelinqQueryParserFactory.CreateQueryParser();
             context = new Context(this.directory, transactionLock);
@@ -219,11 +221,29 @@ namespace Lucene.Net.Linq
 
         /// <summary>
         /// Retrieves the instance of IndexWriter that will be used by all
-        /// sessions created by this instance.
+        /// sessions created by this instance. If the current writer has
+        /// been disposed or a rollback occurred, a new instance will be
+        /// created, unless the instance was passed in as a constructor
+        /// parameter.
         /// </summary>
         public IIndexWriter IndexWriter
         {
-            get { return writer; }
+            get
+            {
+                lock(sync)
+                {
+                    if (writer != null && !writer.IsClosed) return writer;
+
+                    if (writerIsExternal)
+                    {
+                        throw new InvalidOperationException("Externally created writer has been closed.");
+                    }
+
+                    writer = GetIndexWriter(perFieldAnalyzer);
+                }
+
+                return writer;
+            }
         }
 
         public void Dispose()
@@ -242,18 +262,14 @@ namespace Lucene.Net.Linq
         {
             get
             {
-                bool create;
-
                 try
                 {
-                    create = !directory.ListAll().Any();
+                    return !directory.ListAll().Any();
                 }
                 catch (NoSuchDirectoryException)
                 {
-                    create = true;
+                    return true;
                 }
-
-                return create;
             }
         }
 

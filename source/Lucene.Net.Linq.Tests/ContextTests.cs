@@ -201,5 +201,13 @@ namespace Lucene.Net.Linq.Tests
         {
             return null;
         }
+
+        public bool IsClosed
+        {
+            get
+            {
+                return false;
+            }
+        }
     }
 }
