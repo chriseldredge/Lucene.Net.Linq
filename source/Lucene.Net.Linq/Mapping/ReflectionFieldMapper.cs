@@ -16,20 +16,31 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly PropertyInfo propertyInfo;
         protected readonly StoreMode store;
         protected readonly IndexMode index;
+        protected readonly TermVectorMode termVector;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
         protected readonly bool caseSensitive;
         protected readonly Analyzer analyzer;
+        protected readonly float boost;
 
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer)
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector,
+                                     TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer)
+            : this(propertyInfo, store, index, termVector, converter, fieldName, caseSensitive, analyzer, 1f)
+        {
+            
+        }
+
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer, float boost)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
             this.index = index;
+            this.termVector = termVector;
             this.converter = converter;
             this.fieldName = fieldName;
             this.caseSensitive = caseSensitive;
             this.analyzer = analyzer;
+            this.boost = boost;
         }
 
         public virtual Analyzer Analyzer
@@ -52,6 +63,11 @@ namespace Lucene.Net.Linq.Mapping
             get { return index; }
         }
 
+        public virtual TermVectorMode TermVector
+        {
+            get { return termVector; }
+        }
+
         public virtual TypeConverter Converter
         {
             get { return converter; }
@@ -65,6 +81,11 @@ namespace Lucene.Net.Linq.Mapping
         public virtual bool CaseSensitive
         {
             get { return caseSensitive; }
+        }
+
+        public virtual float Boost
+        {
+            get { return boost; }
         }
 
         public virtual string PropertyName { get { return propertyInfo.Name; } }
@@ -190,7 +211,9 @@ namespace Lucene.Net.Linq.Mapping
 
             if (fieldValue != null)
             {
-                target.Add(new Field(fieldName, fieldValue, FieldStore, index.ToFieldIndex()));
+                var field = new Field(fieldName, fieldValue, FieldStore, (Field.Index) index, (Field.TermVector) TermVector);
+                field.Boost = Boost;
+                target.Add(field);
             }
         }
 
@@ -198,14 +221,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             get
             {
-                switch(store)
-                {
-                    case StoreMode.Yes:
-                        return Field.Store.YES;
-                    case StoreMode.No:
-                        return Field.Store.NO;
-                }
-                throw new InvalidOperationException("Unrecognized FieldStore value " + store);
+                return (Field.Store) store;
             }
         }
     }

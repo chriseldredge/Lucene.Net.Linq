@@ -65,7 +65,8 @@
     <Compile Include="ContextTests.cs" />
     <Compile Include="FakeFieldMappingInfo.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
-    <Compile Include="Integration\BoostTests.cs" />
+    <Compile Include="Integration\IndexBoostTests.cs" />
+    <Compile Include="Integration\QueryBoostTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Integration\SessionTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />
     <Compile Include="Integration\SkipTakeTests.cs" />
+    <Compile Include="Integration\TermVectorTests.cs" />
     <Compile Include="LuceneDataProviderTests.cs" />
     <Compile Include="LuceneSessionTests.cs" />
     <Compile Include="Mapping\DocumentKeyTests.cs" />

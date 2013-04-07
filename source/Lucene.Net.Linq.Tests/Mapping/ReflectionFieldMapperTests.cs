@@ -106,11 +106,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             return new ReflectionFieldMapper<ReflectionFieldMapperTests>(
                 typeof(ReflectionFieldMapperTests).GetProperty(propertyName),
                 StoreMode.Yes,
-                IndexMode.Analyzed,
-                converter,
-                propertyName,
-                caseSensitive,
-                analyzer ?? new KeywordAnalyzer());
+                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, caseSensitive, analyzer ?? new KeywordAnalyzer());
 
         }
 

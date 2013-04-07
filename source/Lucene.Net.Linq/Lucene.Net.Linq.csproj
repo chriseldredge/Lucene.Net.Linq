@@ -86,6 +86,8 @@
     <Compile Include="Mapping\IFieldMappingInfo.cs" />
     <Compile Include="Mapping\IFieldMappingInfoProvider.cs" />
     <Compile Include="Mapping\ReflectionScoreMapper.cs" />
+    <Compile Include="Mapping\TermFreqVectorDocumentMapper.cs" />
+    <Compile Include="Mapping\TermVectorMode.cs" />
     <Compile Include="QueryExecutionContext.cs" />
     <Compile Include="QueryExecutionPhase.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
@@ -148,7 +150,6 @@
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NullSafetyConditionRemovingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\QuerySourceReferencePropertyTransformingTreeVisitor.cs" />
-    <Compile Include="Util\IndexModeUtils.cs" />
     <Compile Include="Util\LinqExtensions.cs" />
     <Compile Include="Util\Log.cs" />
     <Compile Include="Util\MemberInfoUtils.cs" />

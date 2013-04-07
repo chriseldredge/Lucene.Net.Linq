@@ -29,7 +29,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void StoreLong()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT, 1.0f);
 
             var sample = new Sample {Long = 1234L};
             var document = new Document();
@@ -42,7 +42,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void UsesPrecisionStep()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128, 1.0f);
 
             var sample = new Sample { Long = 1234L };
             var document = new Document();
@@ -55,7 +55,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void ConvertsFieldValue()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128, 1.0f);
 
             var result = mapper.ConvertFieldValue(new Field("Int", "100", Field.Store.YES, Field.Index.NO));
 
@@ -67,7 +67,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var valueTypeConverter = new SampleConverter();
 
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128, 1.0f);
 
             var result = mapper.ConvertFieldValue(new Field("Complex", "100", Field.Store.YES, Field.Index.NO));
 
@@ -77,7 +77,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void SortType_Int()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Int"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Int", 128, 1.0f);
 
             Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.INT));
         }
@@ -85,7 +85,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void SortType_Long()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT, 1.0f);
 
             Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.LONG));
         }
@@ -95,7 +95,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var valueTypeConverter = new SampleConverter();
 
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Complex"), StoreMode.Yes, valueTypeConverter, TypeDescriptor.GetConverter(typeof(int)), "Complex", 128, 1.0f);
 
             Assert.That(mapper.CreateSortField(false).Type, Is.EqualTo(SortField.INT));
         }
@@ -103,7 +103,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void RangeQuery()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128, 1.0f);
 
             var result = mapper.CreateRangeQuery(-5L, 5L, RangeType.Inclusive, RangeType.Exclusive);
 
@@ -114,7 +114,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void RangeQueryUnbounded()
         {
-            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128);
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "Long", 128, 1.0f);
 
             var result = mapper.CreateRangeQuery(100L, null, RangeType.Exclusive, RangeType.Inclusive);
 

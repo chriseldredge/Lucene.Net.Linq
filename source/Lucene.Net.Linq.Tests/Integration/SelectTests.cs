@@ -97,7 +97,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             var documents = provider.AsQueryable<SampleDocument>();
 
-// Not redundant because it generates a different Espression tree
+// Not redundant because it generates a different Expression tree
 // ReSharper disable RedundantBoolCompare
             var result = from doc in documents where doc.Flag == true select doc;
 // ReSharper restore RedundantBoolCompare

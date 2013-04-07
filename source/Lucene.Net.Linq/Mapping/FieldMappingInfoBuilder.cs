@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Mapping
     {
         internal const string DefaultDateTimeFormat = "yyyy-MM-ddTHH:mm:ss";
 
-		internal static IFieldMapper<T> Build<T>(PropertyInfo p)
+        internal static IFieldMapper<T> Build<T>(PropertyInfo p)
         {
             return Build<T>(p, Version.LUCENE_30, null);
         }
@@ -67,10 +67,12 @@ namespace Lucene.Net.Linq.Mapping
             var converter = GetConverter(p, type, metadata);
             var store = metadata != null ? metadata.Store : StoreMode.Yes;
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
+            var termVectorMode = metadata != null ? metadata.TermVector : TermVectorMode.No;
+            var boost = metadata != null ? metadata.Boost : 1.0f;
             var caseSensitive = GetCaseSensitivity(metadata);
             var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, version);
-
-            return new ReflectionFieldMapper<T>(p, store, index, converter, fieldName, caseSensitive, analyzer);
+    
+            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, caseSensitive, analyzer, boost);
         }
 
         private static Analyzer BuildAnalyzer(FieldAttribute metadata, Version version)

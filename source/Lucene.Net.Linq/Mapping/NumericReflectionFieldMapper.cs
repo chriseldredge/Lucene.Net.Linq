@@ -19,8 +19,8 @@ namespace Lucene.Net.Linq.Mapping
         private readonly TypeConverter typeToValueTypeConverter;
         private readonly int precisionStep;
 
-        public NumericReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, TypeConverter typeToValueTypeConverter, TypeConverter valueTypeToStringConverter, string field, int precisionStep)
-            : base(propertyInfo, store, IndexMode.Analyzed, valueTypeToStringConverter, field, false, new KeywordAnalyzer())
+        public NumericReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, TypeConverter typeToValueTypeConverter, TypeConverter valueTypeToStringConverter, string field, int precisionStep, float boost)
+            : base(propertyInfo, store, IndexMode.Analyzed, TermVectorMode.No, valueTypeToStringConverter, field, false, new KeywordAnalyzer(), boost)
         {
             this.typeToValueTypeConverter = typeToValueTypeConverter;
             this.precisionStep = precisionStep;
@@ -66,8 +66,9 @@ namespace Lucene.Net.Linq.Mapping
             value = ConvertToSupportedValueType(value);
 
             var numericField = new NumericField(fieldName, precisionStep, FieldStore, true);
-
+            
             numericField.SetValue((ValueType)value);
+            numericField.Boost = Boost;
 
             target.Add(numericField);
         }

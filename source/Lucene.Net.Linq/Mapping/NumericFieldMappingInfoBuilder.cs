@@ -24,7 +24,7 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             return new NumericReflectionFieldMapper<T>(p, metadata.Store, typeToValueTypeConverter, valueTypeToStringConverter, fieldName,
-                                                       metadata.PrecisionStep);
+                                                       metadata.PrecisionStep, metadata.Boost);
         }
 
         private static TypeConverter GetComplexTypeToScalarConverter(Type type, NumericFieldAttribute metadata)

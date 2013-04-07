@@ -6,8 +6,8 @@ namespace Lucene.Net.Linq.Mapping
     public enum StoreMode
     {
         /// <see cref="Field.Store.YES"/>
-        Yes,
+        Yes = Field.Store.YES,
         /// <see cref="Field.Store.NO"/>
-        No
+        No = Field.Store.NO
     }
 }

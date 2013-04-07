@@ -24,6 +24,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             this.field = field;
             Store = StoreMode.Yes;
+            Boost = 1.0f;
         }
 
         /// <summary>
@@ -51,6 +52,12 @@ namespace Lucene.Net.Linq.Mapping
         /// Key fields are used to replace or delete documents.
         /// </summary>
         public bool Key { get; set; }
+
+        /// <summary>
+        /// Specifies a boost to apply when a document is being analyzed during indexing.
+        /// Defaults to <c>1.0f</c>.
+        /// </summary>
+        public float Boost { get; set; }
     }
 
     /// <summary>
@@ -66,6 +73,7 @@ namespace Lucene.Net.Linq.Mapping
         /// Default constructor
         /// </summary>
         public FieldAttribute()
+            :this(IndexMode.Analyzed)
         {
         }
 
@@ -77,7 +85,7 @@ namespace Lucene.Net.Linq.Mapping
 
         /// <param name="field">Backing field used to store data in Lucene index.</param>
         public FieldAttribute(string field)
-            : base(field)
+            : this(field, IndexMode.Analyzed)
         {
         }
 
@@ -118,6 +126,11 @@ namespace Lucene.Net.Linq.Mapping
         /// methods it will override this setting.
         /// </summary>
         public Type Analyzer { get; set; }
+
+        /// <summary>
+        /// Maps to <see cref="Field.TermVector"/>
+        /// </summary>
+        public TermVectorMode TermVector { get; set; }
     }
 
     /// <summary>

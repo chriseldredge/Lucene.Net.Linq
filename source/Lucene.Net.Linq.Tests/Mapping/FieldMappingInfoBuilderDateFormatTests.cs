@@ -36,11 +36,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Field("TimeStamp")]
         public DateTimeOffset? OptionalTimeStampOffset { get; set; }
 
-		[Test]
-		public void MonoParseDateTimeOffset ()
-		{
-			DateTimeOffset.ParseExact("2013-01-02T03:40:50", "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.AssumeUniversal);
-		}
+        [Test]
+        public void MonoParseDateTimeOffset ()
+        {
+            DateTimeOffset.ParseExact("2013-01-02T03:40:50", "yyyy-MM-ddTHH:mm:ss", null, System.Globalization.DateTimeStyles.AssumeUniversal);
+        }
 
         [Test]
         public void DefaultDateTimeUsesSolrFormat_FromDocument([Values("TimeStamp", "OptionalTimeStamp", "OptionalTimeStampOffset")] string propertyName)
