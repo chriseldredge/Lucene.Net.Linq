@@ -31,11 +31,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("Long"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(long)), "Long", NumericUtils.PRECISION_STEP_DEFAULT, 1.0f);
 
-            var sample = new Sample {Long = 1234L};
+            var sample = new Sample { Long = 1234L };
             var document = new Document();
             mapper.CopyToDocument(sample, document);
 
-            var field = (NumericField)document.GetFieldable("Long");
+            var field = document.GetFieldable("Long");
             Assert.That(field.TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
         }
 
@@ -48,7 +48,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var document = new Document();
             mapper.CopyToDocument(sample, document);
 
-            var field = (NumericField)document.GetFieldable("Int");
+            var field = document.GetFieldable("Int");
             Assert.That(field.TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=32,precisionStep=128)"));
         }
 
@@ -126,7 +126,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
-                return sourceType == typeof (int);
+                return sourceType == typeof(int);
             }
 
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
@@ -136,7 +136,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
             {
-                return new Complex {Id = value.ToString()};
+                return new Complex { Id = value.ToString() };
             }
         }
     }

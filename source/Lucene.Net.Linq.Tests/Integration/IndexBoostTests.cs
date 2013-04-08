@@ -27,19 +27,18 @@ namespace Lucene.Net.Linq.Tests.Integration
         [Test]
         public void NormalFieldBoost()
         {
-            AddDocument(new BoostDocument { Title = "car", Body = "truck"});
-            AddDocument(new BoostDocument { Title = "truck", Body = "auto"});
+            AddDocument(new BoostDocument { Title = "car", Body = "truck" });
+            AddDocument(new BoostDocument { Title = "truck", Body = "auto" });
 
             var result = from doc in provider.AsQueryable<BoostDocument>()
                          where doc.Body == "truck" || doc.Title == "truck"
                          select doc;
-            
+
             Assert.That(result.First().Title, Is.EqualTo("truck"));
             Assert.That(result.OrderByDescending(doc => doc.Score()).First().Title, Is.EqualTo("car"));
         }
 
         [Test]
-        [Ignore("See https://issues.apache.org/jira/browse/LUCENENET-519 (NumericField.Boost ignored at index time)")]
         public void NumericFieldBoost()
         {
             AddDocument(new BoostDocument { Body = "5", Popularity = 0 });

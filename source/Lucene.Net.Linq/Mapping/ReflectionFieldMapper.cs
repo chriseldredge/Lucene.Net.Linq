@@ -97,7 +97,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
-            var field = source.GetField(fieldName);
+            var field = source.GetFieldable(fieldName);
 
             if (field == null) return;
             
@@ -183,7 +183,7 @@ namespace Lucene.Net.Linq.Mapping
             return analyzer.Analyze(FieldName, ConvertToQueryExpression(value));
         }
 
-        protected internal virtual object ConvertFieldValue(Field field)
+        protected internal virtual object ConvertFieldValue(IFieldable field)
         {
             var fieldValue = (object)field.StringValue;
 

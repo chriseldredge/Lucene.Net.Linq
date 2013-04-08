@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reflection;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
@@ -96,7 +98,7 @@ namespace Lucene.Net.Linq.Util
 
             throw new NotSupportedException("ValueType " + value.GetType() + " not supported.");
         }
-        
+
         internal static NumericField SetValue(this NumericField field, ValueType value)
         {
             if (value is int)
@@ -117,6 +119,27 @@ namespace Lucene.Net.Linq.Util
             }
 
             throw new ArgumentException("Unable to store ValueType " + value.GetType() + " as NumericField.", "value");
+        }
+
+        /// <summary>
+        /// See https://issues.apache.org/jira/browse/LUCENENET-519.
+        /// <see cref="NumericField"/> uses <see cref="Field.Index.ANALYZED_NO_NORMS"/> and does
+        /// not allow alternative indexing methods to be used. This prevents boost from being applied
+        /// when a document is being indexed.
+        /// </summary>
+        internal static NumericField ForceDisableOmitNorms(this NumericField field)
+        {
+            const string fieldName = "internalOmitNorms";
+            var fieldInfo = typeof(AbstractField).GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic);
+
+            if (fieldInfo == null)
+            {
+                throw new InvalidOperationException(string.Format("Type {0} does not have a non-public field named {1}.", typeof(AbstractField), fieldName));
+            }
+
+            fieldInfo.SetValue(field, false);
+
+            return field;
         }
     }
 

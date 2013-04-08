@@ -43,7 +43,7 @@ namespace Lucene.Net.Linq.Mapping
             return new SortField(FieldName, targetType.ToSortField(), reverse);
         }
 
-        protected internal override object ConvertFieldValue(Field field)
+        protected internal override object ConvertFieldValue(IFieldable field)
         {
             var value = base.ConvertFieldValue(field);
 
@@ -66,11 +66,22 @@ namespace Lucene.Net.Linq.Mapping
             value = ConvertToSupportedValueType(value);
 
             var numericField = new NumericField(fieldName, precisionStep, FieldStore, true);
-            
             numericField.SetValue((ValueType)value);
-            numericField.Boost = Boost;
+
+            SetBoostIfNotDefault(numericField);
 
             target.Add(numericField);
+        }
+
+        private void SetBoostIfNotDefault(NumericField numericField)
+        {
+            const float threshold = 0.002f;
+            var diff = Math.Abs(Boost - 1.0f);
+            
+            if (diff < threshold) return;
+
+            numericField.ForceDisableOmitNorms();
+            numericField.Boost = Boost;
         }
 
         public override string ConvertToQueryExpression(object value)
