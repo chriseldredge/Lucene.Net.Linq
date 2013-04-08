@@ -17,21 +17,23 @@
       Execute LINQ queries on Lucene.Net complete with object to Document mapping.
     </description>
     <releaseNotes>
-    
-    Current Release
-    ===============
-    
+      ## Current Release
+
+      * Enable analyzing and retrieving term vectors using [Field(TermVector = TermVectorMode.Yes)] and TermFreqVectorDocumentMapper
+      * Enable Field level boosting while indexing using [Field(Boost = 5)]
+
+      ## 3.1.46
+
       * Open new IndexWriter after ISession.Commit fails and calls Rollback on current IndexWriter
       * Convert objects and keys to documents and queries before writing to IndexWriter
-      
-    3.1.45
-    ======
-    
-      * Automatically creates Analyzer using metadata attributes like [Field(Analyzer=typeof(StandardAnalyzer)].
-      * Store different object types in single index.
-      * Prevent documents with null values on key properties from being stored.
-      * Enable sorting on types implementing IComparable&lt;T&gt; but not non-generic IComparable.
-      * Allow client to provide custom IDocumentMapper&lt;T&gt; implementations.
+
+      ## 3.1.45
+
+      * Automatically creates Analyzer using metadata attributes like [Field(Analyzer=typeof(StandardAnalyzer)]
+      * Store different object types in single index
+      * Prevent documents with null values on key properties from being stored
+      * Enable sorting on types implementing IComparable&lt;T&gt; but not non-generic IComparable
+      * Allow client to provide custom IDocumentMapper&lt;T&gt; implementations
     </releaseNotes>
     <dependencies>
       <dependency id="Remotion.Linq" version="[1.13.183, 2.0)" />
