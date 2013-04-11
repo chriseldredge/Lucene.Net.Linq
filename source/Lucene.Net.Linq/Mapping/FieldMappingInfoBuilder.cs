@@ -69,10 +69,11 @@ namespace Lucene.Net.Linq.Mapping
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
             var termVectorMode = metadata != null ? metadata.TermVector : TermVectorMode.No;
             var boost = metadata != null ? metadata.Boost : 1.0f;
+			var defaultParserOperator = metadata.DefaultParserOperator;
             var caseSensitive = GetCaseSensitivity(metadata);
             var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, version);
     
-            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, caseSensitive, analyzer, boost);
+            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost);
         }
 
         private static Analyzer BuildAnalyzer(FieldAttribute metadata, Version version)
