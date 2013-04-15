@@ -116,13 +116,7 @@ namespace Lucene.Net.Linq.Mapping
         /// converted to lowercase.
         /// </summary>
         public bool CaseSensitive { get; set; }
-        /// <summary>
-        /// Gets or sets the default parser operator.
-        /// </summary>
-        /// <value>
-        /// The default parser operator.
-        /// </value>
-        public QueryParser.Operator DefaultParserOperator{get;set;}
+
         /// <summary>
         /// When set, supplies a custom analyzer for this field. The analyzer type
         /// must have either a parameterless public constructor, or a public constructor
