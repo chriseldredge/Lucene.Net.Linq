@@ -39,7 +39,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var mapper = CreateMapper("Text", defaultParseOperaor: QueryParser.Operator.AND);
 
             var query = mapper.CreateQuery("x y z");
-            Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
+            Assert.That(query.ToString(), Is.EqualTo("+Text:x +Text:y +Text:z"));
         }
 
         [Test]
