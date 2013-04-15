@@ -1,0 +1,5 @@
+language: c
+install:
+  - sudo apt-get install mono-devel mono-gmcs nunit-consolescript:
+  - xbuild source/Lucene.Net.Linq.sln
+  - nunit-console ./source/Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll -exclude Integration,NotWorkingOnMono
