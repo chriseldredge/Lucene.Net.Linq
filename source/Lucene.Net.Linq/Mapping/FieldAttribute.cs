@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Mapping
         private readonly string field;
 
         protected BaseFieldAttribute()
-            :this(null)
+            : this(null)
         {
         }
 
@@ -73,7 +73,7 @@ namespace Lucene.Net.Linq.Mapping
         /// Default constructor
         /// </summary>
         public FieldAttribute()
-            :this(IndexMode.Analyzed)
+            : this(IndexMode.Analyzed)
         {
         }
 
@@ -116,6 +116,14 @@ namespace Lucene.Net.Linq.Mapping
         /// converted to lowercase.
         /// </summary>
         public bool CaseSensitive { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default parser operator.
+        /// </summary>
+        /// <value>
+        /// The default parser operator.
+        /// </value>
+        public QueryParser.Operator DefaultParserOperator { get; set; }
 
         /// <summary>
         /// When set, supplies a custom analyzer for this field. The analyzer type
