@@ -19,6 +19,7 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly TermVectorMode termVector;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
+        protected readonly QueryParser.Operator defaultParserOperator;
         protected readonly bool caseSensitive;
         protected readonly Analyzer analyzer;
         protected readonly float boost;
@@ -31,6 +32,11 @@ namespace Lucene.Net.Linq.Mapping
         }
 
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer, float boost)
+        : this(propertyInfo, store, index, termVector, converter, fieldName, QueryParser.Operator.OR, caseSensitive, analyzer, boost)
+        {
+
+        }
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
@@ -38,6 +44,7 @@ namespace Lucene.Net.Linq.Mapping
             this.termVector = termVector;
             this.converter = converter;
             this.fieldName = fieldName;
+            this.defaultParserOperator = defaultParserOperator;
             this.caseSensitive = caseSensitive;
             this.analyzer = analyzer;
             this.boost = boost;
@@ -137,7 +144,8 @@ namespace Lucene.Net.Linq.Mapping
             var queryParser = new QueryParser(Version.LUCENE_30, FieldName, analyzer)
                 {
                     AllowLeadingWildcard = true,
-                    LowercaseExpandedTerms = !CaseSensitive
+                    LowercaseExpandedTerms = !CaseSensitive,
+                    DefaultOperator = defaultParserOperator
                 };
 
             return queryParser.Parse(pattern);
