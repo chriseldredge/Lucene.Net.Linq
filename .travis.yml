@@ -1,8 +1,8 @@
 language: c
 
 install:
-  - sudo apt-get install cmake mono-devel mono-gmcs
+  - sudo apt-get install cmake mono-complete mono-devel mono-gmcs nunit-console
+  - mozroots --import --sync
 
 script:
-  - xbuild source/Lucene.Net.Linq.sln
-  - nunit-console ./source/Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll -exclude Integration,NotWorkingOnMono
+  - xbuild IntegratedBuild.proj
