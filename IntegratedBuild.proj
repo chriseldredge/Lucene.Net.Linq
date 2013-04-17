@@ -8,6 +8,8 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
+		<SolutionDir>$(MSBuildProjectDirectory)/source/</SolutionDir>
+
 		<VersionControlInfo Condition=" '$(TRAVIS)' == 'true' ">$(TRAVIS_COMMIT) ($(TRAVIS_BRANCH))</VersionControlInfo>
 		<VersionControlInfo Condition=" '$(VersionControlInfo)' == '' ">(unknown version control revision)</VersionControlInfo>
 
@@ -39,6 +41,11 @@
 		<Exec Command="nunit-console ./source/Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll -noshadow"/>
 	</Target>
 
+	<Target Name="Package">
+		<Exec Command="$(NuGetCommand) pack -o $(MSBuildProjectDirectory)/build -Properties Configuration=Release -Version $(PackageVersion) -Symbols"
+			WorkingDirectory="source/Lucene.Net.Linq"/>
+	</Target>
+
 	<Target Name="GenerateVersionInfo">
 		<MakeDir Directories="build"/>
 		<WriteLinesToFile File="build/VersionInfo.cs" Lines="@(VersionInfoContent)" Overwrite="true"/>
@@ -46,4 +53,6 @@
 		<Message Text="AssemblyVersion: $(AssemblyVersion)"/>
 		<Message Text="AssemblyInformationalVersion: $(AssemblyInformationalVersion)"/>
 	</Target>
+
+	<Import Project="source/.nuget/nuget.targets"/>
 </Project>
