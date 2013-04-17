@@ -1,6 +1,8 @@
 LINQ to Lucene.Net
 =====
 
+[![Build Status](https://travis-ci.org/themotleyfool/Lucene.Net.Linq.png?branch=master)](https://travis-ci.org/themotleyfool/Lucene.Net.Linq)
+
 Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a Lucene.Net index.
 
 * Automatically converts PONOs to Documents and back
