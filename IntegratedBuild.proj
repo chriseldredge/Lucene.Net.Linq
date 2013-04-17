@@ -1,13 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Target Name="Build" DependsOnTargets="Compile;Test"/>
+	<PropertyGroup>
+		<VersionPrefix>3.1.0</VersionPrefix>
+
+		<!-- like alpha, preview, test -->
+		<VersionSuffix></VersionSuffix>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<VersionControlInfo Condition=" '$(TRAVIS)' == 'true' ">$(TRAVIS_COMMIT) ($(TRAVIS_BRANCH))</VersionControlInfo>
+		<VersionControlInfo Condition=" '$(VersionControlInfo)' == '' ">(unknown version control revision)</VersionControlInfo>
+
+		<BuildNumber Condition=" '$(TRAVIS)' == 'true' ">$(TRAVIS_BUILD_NUMBER)</BuildNumber>
+		<BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
+
+		<AssemblyVersion>$(VersionPrefix).$(BuildNumber)</AssemblyVersion>
+
+		<PackageVersion>$(VersionPrefix)</PackageVersion>
+		<PackageVersion Condition=" '$(VersionSuffix)' != '' ">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
+
+		<AssemblyInformationalVersion>$(PackageVersion) $(VersionControlInfo)</AssemblyInformationalVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<VersionInfoContent Include="[assembly: global::System.Reflection.AssemblyVersionAttribute(&quot;$(AssemblyVersion)&quot;)]"/>
+		<VersionInfoContent Include="[assembly: global::System.Reflection.AssemblyFileVersionAttribute(&quot;$(AssemblyVersion)&quot;)]"/>
+		<VersionInfoContent Include="[assembly: global::System.Reflection.AssemblyInformationalVersionAttribute(&quot;$(AssemblyInformationalVersion)&quot;)]"/>
+	</ItemGroup>
+
+	<Target Name="Build" DependsOnTargets="GenerateVersionInfo;Compile;Test"/>
 
 	<Target Name="Compile">
-		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build"/>
+		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Debug"/>
+		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Release;RestorePackages=false"/>
 	</Target>
 
 	<Target Name="Test">
 		<Exec Command="nunit-console ./source/Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll -noshadow"/>
 	</Target>
 
+	<Target Name="GenerateVersionInfo">
+		<MakeDir Directories="build"/>
+		<WriteLinesToFile File="build/VersionInfo.cs" Lines="@(VersionInfoContent)" Overwrite="true"/>
+		<Message Text="PackageVersion: $(PackageVersion)"/>
+		<Message Text="AssemblyVersion: $(AssemblyVersion)"/>
+		<Message Text="AssemblyInformationalVersion: $(AssemblyInformationalVersion)"/>
+	</Target>
 </Project>
