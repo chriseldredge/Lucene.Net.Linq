@@ -58,7 +58,7 @@ namespace Lucene.Net.Linq.Mapping
         private static bool IsCollection(Type type)
         {
             return type.IsGenericType &&
-                   typeof (IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition());
+                   typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition());
         }
 
         private static ReflectionFieldMapper<T> BuildPrimitive<T>(PropertyInfo p, Type type, FieldAttribute metadata, Version version, Analyzer externalAnalyzer)
@@ -69,10 +69,11 @@ namespace Lucene.Net.Linq.Mapping
             var index = metadata != null ? metadata.IndexMode : IndexMode.Analyzed;
             var termVectorMode = metadata != null ? metadata.TermVector : TermVectorMode.No;
             var boost = metadata != null ? metadata.Boost : 1.0f;
+            var defaultParserOperator = metadata != null ? metadata.DefaultParserOperator : QueryParsers.QueryParser.Operator.OR;
             var caseSensitive = GetCaseSensitivity(metadata);
             var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, version);
-    
-            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, caseSensitive, analyzer, boost);
+
+            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost);
         }
 
         private static Analyzer BuildAnalyzer(FieldAttribute metadata, Version version)
@@ -92,7 +93,8 @@ namespace Lucene.Net.Linq.Mapping
 
         internal static bool GetCaseSensitivity(FieldAttribute metadata)
         {
-            if (metadata == null) return false;
+            if (metadata == null)
+                return false;
 
             return metadata.CaseSensitive ||
                    metadata.IndexMode == IndexMode.NotAnalyzed ||
@@ -109,18 +111,19 @@ namespace Lucene.Net.Linq.Mapping
             var formatSpecified = metadata != null && metadata.Format != null;
             var format = (metadata != null ? metadata.Format : null) ?? DefaultDateTimeFormat;
             var propType = p.PropertyType.GetUnderlyingType();
-            
+
             if (propType == typeof(DateTime))
             {
                 return new DateTimeConverter(format);
             }
-            
+
             if (formatSpecified || propType == typeof(DateTimeOffset))
             {
                 return new FormatConverter(propType, format);
             }
 
-            if (p.PropertyType == typeof(string)) return null;
+            if (p.PropertyType == typeof(string))
+                return null;
 
             var converter = TypeDescriptor.GetConverter(type);
 

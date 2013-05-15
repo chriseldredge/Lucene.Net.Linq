@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Mapping
         private readonly string field;
 
         protected BaseFieldAttribute()
-            :this(null)
+            : this(null)
         {
         }
 
@@ -31,19 +31,33 @@ namespace Lucene.Net.Linq.Mapping
         /// Specifies the name of the backing field that the property value will be mapped to.
         /// When not specified, defaults to the name of the property being decorated by this attribute.
         /// </summary>
-        public string Field { get { return field; } }
+        public string Field
+        {
+            get
+            {
+                return field;
+            }
+        }
 
         /// <summary>
         /// Set to true to store value in index for later retrieval, or
         /// false if the field should only be indexed.
         /// </summary>
-        public StoreMode Store { get; set; }
+        public StoreMode Store
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Provides a custom TypeConverter implementation that can convert the property type
         /// to and from strings so they can be stored and indexed by Lucene.Net.
         /// </summary>
-        public Type Converter { get; set; }
+        public Type Converter
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Specifies that the property value, combined with any other properties that also
@@ -51,13 +65,21 @@ namespace Lucene.Net.Linq.Mapping
         /// 
         /// Key fields are used to replace or delete documents.
         /// </summary>
-        public bool Key { get; set; }
+        public bool Key
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Specifies a boost to apply when a document is being analyzed during indexing.
         /// Defaults to <c>1.0f</c>.
         /// </summary>
-        public float Boost { get; set; }
+        public float Boost
+        {
+            get;
+            set;
+        }
     }
 
     /// <summary>
@@ -73,7 +95,7 @@ namespace Lucene.Net.Linq.Mapping
         /// Default constructor
         /// </summary>
         public FieldAttribute()
-            :this(IndexMode.Analyzed)
+            : this(IndexMode.Analyzed)
         {
         }
 
@@ -100,7 +122,13 @@ namespace Lucene.Net.Linq.Mapping
         /// <summary>
         /// How the field should be indexed for searching and sorting.
         /// </summary>
-        public IndexMode IndexMode { get { return indexMode; } }
+        public IndexMode IndexMode
+        {
+            get
+            {
+                return indexMode;
+            }
+        }
 
         /// <summary>
         /// Overrides default format pattern to use when converting ValueType
@@ -108,15 +136,33 @@ namespace Lucene.Net.Linq.Mapping
         /// <c cref="BaseFieldAttribute.Converter">Converter</c> are specified, <c>Converter</c>
         /// will take precedence and <c>Format</c> will be ignored.
         /// </summary>
-        public string Format { get; set; }
+        public string Format
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// When <c>true</c>, causes <c cref="QueryParser.LowercaseExpandedTerms"/> to
         /// be set to false to prevent wildcard queries like <c>Foo*</c> from being
         /// converted to lowercase.
         /// </summary>
-        public bool CaseSensitive { get; set; }
-
+        public bool CaseSensitive
+        {
+            get;
+            set;
+        }
+        /// <summary>
+        /// Gets or sets the default parser operator.
+        /// </summary>
+        /// <value>
+        /// The default parser operator.
+        /// </value>
+        public QueryParser.Operator DefaultParserOperator
+        {
+            get;
+            set;
+        }
         /// <summary>
         /// When set, supplies a custom analyzer for this field. The analyzer type
         /// must have either a parameterless public constructor, or a public constructor
@@ -125,12 +171,20 @@ namespace Lucene.Net.Linq.Mapping
         /// When an external Analyzer is provided on <see cref="LuceneDataProvider"/>
         /// methods it will override this setting.
         /// </summary>
-        public Type Analyzer { get; set; }
+        public Type Analyzer
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Maps to <see cref="Field.TermVector"/>
         /// </summary>
-        public TermVectorMode TermVector { get; set; }
+        public TermVectorMode TermVector
+        {
+            get;
+            set;
+        }
     }
 
     /// <summary>
@@ -160,7 +214,11 @@ namespace Lucene.Net.Linq.Mapping
         }
 
         /// <see cref="NumericRangeQuery"/> 
-        public int PrecisionStep { get; set; }
+        public int PrecisionStep
+        {
+            get;
+            set;
+        }
     }
 
     /// <summary>
@@ -204,11 +262,19 @@ namespace Lucene.Net.Linq.Mapping
         /// <summary>
         /// The field name that will be queried.
         /// </summary>
-        public string FieldName { get; set; }
+        public string FieldName
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// The constant value that will be queried.
         /// </summary>
-        public string Value { get; set; }
+        public string Value
+        {
+            get;
+            set;
+        }
     }
 }

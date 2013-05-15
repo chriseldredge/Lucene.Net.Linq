@@ -7,6 +7,7 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Search;
 using NUnit.Framework;
+using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Tests.Mapping
 {
@@ -30,6 +31,15 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             var query = mapper.CreateQuery("x y z");
             Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
+        }
+
+        [Test]
+        public void ParseMultipleTermsWithDefaultOperatorAND()
+        {
+            var mapper = CreateMapper("Text", defaultParseOperaor: QueryParser.Operator.AND);
+
+            var query = mapper.CreateQuery("x y z");
+            Assert.That(query.ToString(), Is.EqualTo("+Text:x +Text:y +Text:z"));
         }
 
         [Test]
@@ -101,12 +111,12 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
         public string Version { get; set; }
 
-        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, bool caseSensitive = false)
+        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, QueryParser.Operator defaultParseOperaor = QueryParser.Operator.OR, bool caseSensitive = false)
         {
             return new ReflectionFieldMapper<ReflectionFieldMapperTests>(
                 typeof(ReflectionFieldMapperTests).GetProperty(propertyName),
                 StoreMode.Yes,
-                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, caseSensitive, analyzer ?? new KeywordAnalyzer());
+                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, defaultParseOperaor, caseSensitive, analyzer ?? new KeywordAnalyzer(), 1f);
 
         }
 
