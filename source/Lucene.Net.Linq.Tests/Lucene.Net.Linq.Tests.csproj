@@ -31,6 +31,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>signingkey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -71,7 +77,7 @@
     <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
-    <Compile Include="Integration\SampleProgram.cs" />
+    <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
     <Compile Include="Integration\CustomWhereTests.cs" />
@@ -95,6 +101,7 @@
     <Compile Include="Mapping\ReflectionFieldMapperTests.cs" />
     <Compile Include="Mapping\ReflectionScoreMapperTests.cs" />
     <Compile Include="Record.cs" />
+    <Compile Include="Samples\DocumentKeys.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitorTests.cs" />
@@ -124,6 +131,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <None Include="signingkey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lucene.Net.Linq\Lucene.Net.Linq.csproj">
