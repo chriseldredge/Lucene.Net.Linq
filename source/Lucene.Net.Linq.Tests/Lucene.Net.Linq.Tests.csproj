@@ -70,6 +70,15 @@
     </Compile>
     <Compile Include="ContextTests.cs" />
     <Compile Include="FakeFieldMappingInfo.cs" />
+    <Compile Include="Fluent\AnalyzerTests.cs" />
+    <Compile Include="Fluent\ConverterTests.cs" />
+    <Compile Include="Fluent\DocumentKeyTests.cs" />
+    <Compile Include="Fluent\FluentDocumentMapperTestBase.cs" />
+    <Compile Include="Fluent\PropertyTests.cs" />
+    <Compile Include="Fluent\NumericTests.cs" />
+    <Compile Include="Fluent\ScoreTests.cs" />
+    <Compile Include="Fluent\StoreTests.cs" />
+    <Compile Include="Fluent\TermVectorModeTests.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\IndexBoostTests.cs" />
     <Compile Include="Integration\QueryBoostTests.cs" />
@@ -102,6 +111,7 @@
     <Compile Include="Mapping\ReflectionScoreMapperTests.cs" />
     <Compile Include="Record.cs" />
     <Compile Include="Samples\DocumentKeys.cs" />
+    <Compile Include="Samples\FluentConfiguration.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitorTests.cs" />

@@ -38,7 +38,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void CopyFromDocument()
         {
-			var value = 2.68d;
+            var value = 2.68d;
             CustomValueType = null;
             var mapper = CreateMapper();
 
@@ -48,8 +48,8 @@ namespace Lucene.Net.Linq.Tests.Mapping
             mapper.CopyFromDocument(doc, new QueryExecutionContext(), this);
 
             Assert.That(CustomValueType, Is.Not.Null);
-	        
-	        Assert.That(CustomValueType.TheValue, Is.EqualTo(value));
+            
+            Assert.That(CustomValueType.TheValue, Is.EqualTo(value));
         }
 
         private IFieldMapper<FieldMappingInfoBuilderNumericFieldTests> CreateMapper()

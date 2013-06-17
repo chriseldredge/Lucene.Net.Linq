@@ -77,10 +77,17 @@
     <Compile Include="Clauses\ExtensionClause.cs" />
     <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
+    <Compile Include="Fluent\ClassMap.cs" />
+    <Compile Include="Fluent\DocumentKeyPart.cs" />
+    <Compile Include="Fluent\FluentDocumentMapper.cs" />
+    <Compile Include="Fluent\NumericPropertyMap.cs" />
+    <Compile Include="Fluent\PropertyMap.cs" />
+    <Compile Include="Fluent\TermVectorPart.cs" />
     <Compile Include="IQueryExecutionContext.cs" />
     <Compile Include="IRetrievedDocumentTracker.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
+    <Compile Include="Mapping\DocumentMapperBase.cs" />
     <Compile Include="Mapping\IDocumentMapper.cs" />
     <Compile Include="Mapping\IFieldMapper.cs" />
     <Compile Include="Mapping\IFieldMappingInfo.cs" />

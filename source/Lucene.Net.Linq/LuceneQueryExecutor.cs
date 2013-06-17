@@ -165,38 +165,44 @@ namespace Lucene.Net.Linq
                 executionContext.Phase = QueryExecutionPhase.ConvertResults;
                 executionContext.Hits = hits;
 
-                for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
+                foreach (var p in EnumerateHits(hits, executionContext, searcher, tracker, itemHolder, skipResults, projector)) yield return p;
+            }
+        }
+
+        private IEnumerable<T> EnumerateHits<T>(TopDocs hits, QueryExecutionContext executionContext, Searchable searcher, IRetrievedDocumentTracker<TDocument> tracker, ItemHolder itemHolder, int skipResults, Func<TDocument, T> projector)
+        {
+            for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
+            {
+                executionContext.CurrentHit = i;
+                executionContext.CurrentScoreDoc = hits.ScoreDocs[i];
+
+                var docNum = hits.ScoreDocs[i].Doc;
+                var document = searcher.Doc(docNum);
+
+                var item = ConvertDocument(document, executionContext);
+
+                if (tracker != null)
                 {
-                    executionContext.CurrentHit = i;
-                    executionContext.CurrentScoreDoc = hits.ScoreDocs[i];
-
-                    var doc = hits.ScoreDocs[i].Doc;
-
-                    var item = ConvertDocument(searcher.Doc(doc), executionContext);
-
-                    if (tracker != null)
+                    if (tracker.IsMarkedForDeletion(item))
                     {
-                        if (tracker.IsMarkedForDeletion(item))
-                        {
-                            continue;
-                        }
-
-                        TDocument tracked;
-
-                        if (tracker.TryGetTrackedDocument(item, out tracked))
-                        {
-                            item = tracked;
-                        }
-                        else
-                        {
-                            var copy = ConvertDocument(searcher.Doc(doc), executionContext);
-                            tracker.TrackDocument(item, copy);
-                        }
+                        continue;
                     }
 
-                    itemHolder.Current = item;
-                    yield return projector(itemHolder.Current);
+                    TDocument tracked;
+
+                    if (tracker.TryGetTrackedDocument(item, out tracked))
+                    {
+                        item = tracked;
+                    }
+                    else
+                    {
+                        var copy = ConvertDocument(document, executionContext);
+                        tracker.TrackDocument(item, copy);
+                    }
                 }
+
+                itemHolder.Current = item;
+                yield return projector(itemHolder.Current);
             }
         }
 
