@@ -28,6 +28,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
         [Test]
+        public void Any_Not_AfterSkip()
+        {
+            Assert.That(documents.Skip(100).Any(), Is.False);
+        }
+
+        [Test]
         public void Any_Not()
         {
             Assert.That(documents.Any(d => d.Name == "nonesuch"), Is.False);
@@ -55,6 +61,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void CountAfterSkip()
         {
             Assert.That(documents.Skip(1).Count(), Is.EqualTo(2), "Skip(1).Count()");
+        }
+
+        [Test]
+        public void CountAfterSkipOutOfBounds()
+        {
+            Assert.That(documents.Skip(1000).Count(), Is.EqualTo(0), "Skip(1).Count()");
         }
 
         [Test]

@@ -95,14 +95,23 @@ namespace Lucene.Net.Linq
                 var skipResults = luceneQueryModel.SkipResults;
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc - skipResults);
 
-                var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
-                PrepareSearchSettings(executionContext);
+                TopFieldDocs hits;
 
-                var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
+                if (maxResults > 0)
+                {
+                    var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
+                    PrepareSearchSettings(executionContext);
+
+                    hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
+                }
+                else
+                {
+                    hits = new TopFieldDocs(0, new ScoreDoc[0], new SortField[0], 0);
+                }
 
                 var handler = ScalarResultHandlerRegistry.Instance.GetItem(luceneQueryModel.ResultSetOperator.GetType());
 
-                return handler.Execute<T>(hits);
+                return handler.Execute<T>(luceneQueryModel, hits);
             }
         }
 

@@ -94,7 +94,7 @@ namespace Lucene.Net.Linq.Translation
                         return query;
                     });
 
-            if (filterQuery.Clauses.Count > 0)
+            if (filterQuery.Clauses.Any())
             {
                 model.Filter = new QueryWrapperFilter(filterQuery);
             }
