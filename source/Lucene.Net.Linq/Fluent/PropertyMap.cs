@@ -25,6 +25,7 @@ namespace Lucene.Net.Linq.Fluent
         private StoreMode store = StoreMode.Yes;
         private float boost = 1.0f;
         private bool caseSensitive;
+        private QueryParser.Operator defaultParseOperator = QueryParser.OR_OPERATOR;
 
         internal PropertyMap(ClassMap<T> classMap, PropertyInfo propInfo, bool isKey = false)
             :this(classMap, propInfo, null)
@@ -184,6 +185,29 @@ namespace Lucene.Net.Linq.Fluent
             }
         }
 
+        /// <summary>
+        /// Set the <see cref="QueryParser.DefaultOperator"/> to
+        /// use <see cref="QueryParser.AND_OPERATOR"/> by default
+        /// when parsing queries that contain multiple terms.
+        /// </summary>
+        public PropertyMap<T> ParseWithAndOperatorByDefault()
+        {
+            defaultParseOperator = QueryParser.Operator.AND;
+            return this;
+        }
+
+        /// <summary>
+        /// Set the <see cref="QueryParser.DefaultOperator"/> to
+        /// use <see cref="QueryParser.OR_OPERATOR"/> by default
+        /// when parsing queries that contain multiple terms. This
+        /// is the default behavior.
+        /// </summary>
+        public PropertyMap<T> ParseWithOrOperatorByDefault()
+        {
+            defaultParseOperator = QueryParser.Operator.OR;
+            return this;
+        }
+
         protected internal string PropertyName
         {
             get { return propInfo.Name; }
@@ -199,7 +223,8 @@ namespace Lucene.Net.Linq.Fluent
         protected internal virtual IFieldMapper<T> ToFieldMapper()
         {
             return new ReflectionFieldMapper<T>(propInfo, store, indexMode, TermVectorMode,
-                                                converter, fieldName, caseSensitive, analyzer, boost);
+                                                converter, fieldName, defaultParseOperator,
+                                                caseSensitive, analyzer, boost);
         }
 
         private void SetDefaults(PropertyInfo propInfo, PropertyMap<T> copy)

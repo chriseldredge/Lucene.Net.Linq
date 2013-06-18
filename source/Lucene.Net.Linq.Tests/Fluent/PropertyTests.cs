@@ -1,4 +1,5 @@
 ﻿using Lucene.Net.Linq.Mapping;
+using Lucene.Net.QueryParsers;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Fluent
@@ -22,6 +23,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
             Assert.That(info.TermVector, Is.EqualTo(TermVectorMode.No));
             Assert.That(info.Converter, Is.Null);
             Assert.That(info.FieldName, Is.EqualTo("Name"));
+            Assert.That(info.DefaultParseOperator, Is.EqualTo(QueryParser.OR_OPERATOR));
             Assert.That(info.PropertyName, Is.EqualTo("Name"));
             Assert.That(info.PropertyInfo, Is.Not.Null);
         }
@@ -60,6 +62,16 @@ namespace Lucene.Net.Linq.Tests.Fluent
             var info = GetMappingInfo("Name");
 
             Assert.That(info.CaseSensitive, Is.True);
+        }
+
+        [Test]
+        public void DefaultParseOperator()
+        {
+            map.Property(x => x.Name).ParseWithAndOperatorByDefault();
+
+            var info = GetMappingInfo("Name");
+
+            Assert.That(info.DefaultParseOperator, Is.EqualTo(QueryParser.AND_OPERATOR));
         }
     }
 }

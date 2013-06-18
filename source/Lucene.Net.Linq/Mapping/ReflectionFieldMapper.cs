@@ -130,6 +130,14 @@ namespace Lucene.Net.Linq.Mapping
             }
         }
 
+        public virtual QueryParser.Operator DefaultParseOperator
+        {
+            get
+            {
+                return defaultParserOperator;
+            }
+        }
+
         public virtual object GetPropertyValue(T source)
         {
             return propertyInfo.GetValue(source, null);
