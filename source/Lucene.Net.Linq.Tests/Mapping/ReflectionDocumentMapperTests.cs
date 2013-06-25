@@ -113,7 +113,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             var mapper = new ReflectionDocumentMapper<ReflectedDocument>(LuceneVersion.LUCENE_30);
 
-            var result = mapper.ValuesEqual(new[] {"a", "b"}, new List<string> {"a", "b"});
+            var result = mapper.ValuesEquals(new[] {"a", "b"}, new List<string> {"a", "b"});
 
             Assert.That(result, Is.True, "Should be equal when sequences are equal");
         }

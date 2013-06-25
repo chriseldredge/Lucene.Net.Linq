@@ -47,6 +47,8 @@ namespace Lucene.Net.Linq.Mapping
             get { return analyzer; }
         }
 
+        
+
         public virtual IEnumerable<string> AllProperties
         {
             get { return fieldMap.Values.Select(m => m.PropertyName); }
@@ -120,6 +122,11 @@ namespace Lucene.Net.Linq.Mapping
             return parser.Parse(pattern);
         }
 
+        public virtual object[] GetFieldValues(T item)
+        {
+            return fieldMap.Values.Select(field => field.GetPropertyValue(item)).ToArray();
+        }
+
         public virtual bool Equals(T item1, T item2)
         {
             foreach (var field in fieldMap.Values)
@@ -127,7 +134,7 @@ namespace Lucene.Net.Linq.Mapping
                 var val1 = field.GetPropertyValue(item1);
                 var val2 = field.GetPropertyValue(item2);
 
-                if (!ValuesEqual(val1, val2))
+                if (!ValuesEquals(val1, val2))
                 {
                     return false;
                 }
@@ -136,7 +143,7 @@ namespace Lucene.Net.Linq.Mapping
             return true;
         }
 
-        protected internal virtual bool ValuesEqual(object val1, object val2)
+        public virtual bool ValuesEquals(object val1, object val2)
         {
             if (val1 is IEnumerable && val2 is IEnumerable)
             {
