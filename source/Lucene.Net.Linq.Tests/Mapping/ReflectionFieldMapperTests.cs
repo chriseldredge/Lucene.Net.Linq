@@ -7,6 +7,7 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
 using Lucene.Net.Search;
 using NUnit.Framework;
+using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Tests.Mapping
 {
@@ -16,7 +17,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void SpecifyAnalyzer()
         {
-            var mapper = CreateMapper("Text", analyzer:new PorterStemAnalyzer(Net.Util.Version.LUCENE_30));
+            var mapper = CreateMapper("Text", analyzer: new PorterStemAnalyzer(Net.Util.Version.LUCENE_30));
 
             var query = mapper.CreateQuery("values");
 
@@ -33,6 +34,15 @@ namespace Lucene.Net.Linq.Tests.Mapping
         }
 
         [Test]
+        public void ParseMultipleTermsWithDefaultOperatorAnd()
+        {
+            var mapper = CreateMapper("Text", defaultParseOperaor: QueryParser.Operator.AND);
+
+            var query = mapper.CreateQuery("x y z");
+            Assert.That(query.ToString(), Is.EqualTo("+Text:x +Text:y +Text:z"));
+        }
+
+        [Test]
         public void ParseLowercaseExpandedTerms()
         {
             var mapper = CreateMapper("Text");
@@ -45,7 +55,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void ParseDoNotLowercaseExpandedTerms()
         {
-            var mapper = CreateMapper("Text", caseSensitive:true);
+            var mapper = CreateMapper("Text", caseSensitive: true);
 
             var query = mapper.CreateQuery("FOO*");
 
@@ -69,7 +79,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
             var mapper = CreateMapper("Version", new VersionConverter());
 
             var result = mapper.CreateRangeQuery(new Version("2.0"), null, RangeType.Exclusive, RangeType.Inclusive);
-            
+
             Assert.That(result, Is.InstanceOf<TermRangeQuery>());
             Assert.That(result.ToString(), Is.EqualTo("Version:{2.0 TO *]"));
         }
@@ -88,7 +98,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void CustomSort()
         {
-            var mapper = CreateMapper("Version", analyzer: new KeywordAnalyzer(), converter:new VersionConverter());
+            var mapper = CreateMapper("Version", analyzer: new KeywordAnalyzer(), converter: new VersionConverter());
 
             var sort = mapper.CreateSortField(reverse: false);
 
@@ -101,12 +111,12 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
         public string Version { get; set; }
 
-        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, bool caseSensitive = false)
+        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, QueryParser.Operator defaultParseOperaor = QueryParser.Operator.OR, bool caseSensitive = false)
         {
             return new ReflectionFieldMapper<ReflectionFieldMapperTests>(
                 typeof(ReflectionFieldMapperTests).GetProperty(propertyName),
                 StoreMode.Yes,
-                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, caseSensitive, analyzer ?? new KeywordAnalyzer());
+                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, defaultParseOperaor, caseSensitive, analyzer ?? new KeywordAnalyzer(), 1f);
 
         }
 

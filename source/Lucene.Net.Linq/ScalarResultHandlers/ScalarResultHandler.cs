@@ -9,12 +9,12 @@ namespace Lucene.Net.Linq.ScalarResultHandlers
     {
         public abstract IEnumerable<Type> SupportedTypes { get; }
 
-        public T Execute<T>(TopFieldDocs hits)
+        public T Execute<T>(LuceneQueryModel luceneQueryModel, TopFieldDocs hits)
         {
-            return (T) Convert.ChangeType(Execute(hits), typeof (T));
+            return (T) Convert.ChangeType(Execute(luceneQueryModel, hits), typeof (T));
         }
 
-        protected abstract object Execute(TopFieldDocs hits);
+        protected abstract object Execute(LuceneQueryModel luceneQueryModel, TopFieldDocs hits);
     }
 
     internal class CountResultHandler : ScalarResultHandler
@@ -24,9 +24,9 @@ namespace Lucene.Net.Linq.ScalarResultHandlers
             get { return new[] {typeof (CountResultOperator), typeof (LongCountResultOperator)}; }
         }
 
-        protected override object Execute(TopFieldDocs hits)
+        protected override object Execute(LuceneQueryModel luceneQueryModel, TopFieldDocs hits)
         {
-            return hits.ScoreDocs.Length;
+            return Math.Max(hits.TotalHits - luceneQueryModel.SkipResults, 0);
         }
     }
 
@@ -37,9 +37,9 @@ namespace Lucene.Net.Linq.ScalarResultHandlers
             get { return new[] { typeof(AnyResultOperator) }; }
         }
 
-        protected override object Execute(TopFieldDocs hits)
+        protected override object Execute(LuceneQueryModel luceneQueryModel, TopFieldDocs hits)
         {
-            return hits.ScoreDocs.Length > 0;
+            return hits.TotalHits - luceneQueryModel.SkipResults > 0;
         }
     }
 }

@@ -31,6 +31,12 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>signingkey.pfx</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
@@ -64,6 +70,15 @@
     </Compile>
     <Compile Include="ContextTests.cs" />
     <Compile Include="FakeFieldMappingInfo.cs" />
+    <Compile Include="Fluent\AnalyzerTests.cs" />
+    <Compile Include="Fluent\ConverterTests.cs" />
+    <Compile Include="Fluent\DocumentKeyTests.cs" />
+    <Compile Include="Fluent\FluentDocumentMapperTestBase.cs" />
+    <Compile Include="Fluent\PropertyTests.cs" />
+    <Compile Include="Fluent\NumericTests.cs" />
+    <Compile Include="Fluent\ScoreTests.cs" />
+    <Compile Include="Fluent\StoreTests.cs" />
+    <Compile Include="Fluent\TermVectorModeTests.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\IndexBoostTests.cs" />
     <Compile Include="Integration\QueryBoostTests.cs" />
@@ -71,7 +86,7 @@
     <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
-    <Compile Include="Integration\SampleProgram.cs" />
+    <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
     <Compile Include="Integration\CustomWhereTests.cs" />
@@ -95,6 +110,8 @@
     <Compile Include="Mapping\ReflectionFieldMapperTests.cs" />
     <Compile Include="Mapping\ReflectionScoreMapperTests.cs" />
     <Compile Include="Record.cs" />
+    <Compile Include="Samples\DocumentKeys.cs" />
+    <Compile Include="Samples\FluentConfiguration.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitorTests.cs" />
@@ -124,6 +141,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
+    <None Include="signingkey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Lucene.Net.Linq\Lucene.Net.Linq.csproj">

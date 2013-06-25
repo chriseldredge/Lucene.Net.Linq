@@ -32,22 +32,24 @@ namespace Lucene.Net.Linq.Tests.Mapping
             mapper.CopyToDocument(this, doc);
 
             Assert.That(doc.GetFieldable("CustomValueType").TokenStreamValue.ToString(), Is.EqualTo("(numeric,valSize=64,precisionStep=4)"));
-            Assert.That(doc.GetFieldable("CustomValueType").StringValue, Is.EqualTo("1.34"));
+            Assert.That(doc.GetFieldable("CustomValueType").StringValue, Is.EqualTo(CustomValueType.TheValue.ToString()));
         }
 
         [Test]
         public void CopyFromDocument()
         {
+            var value = 2.68d;
             CustomValueType = null;
             var mapper = CreateMapper();
 
             var doc = new Document();
-            doc.Add(new Field("CustomValueType", "2.68", Field.Store.YES, Field.Index.NO));
+            doc.Add(new Field("CustomValueType", value.ToString(), Field.Store.YES, Field.Index.NO));
 
             mapper.CopyFromDocument(doc, new QueryExecutionContext(), this);
 
             Assert.That(CustomValueType, Is.Not.Null);
-            Assert.That(CustomValueType.TheValue, Is.EqualTo(2.68d));
+            
+            Assert.That(CustomValueType.TheValue, Is.EqualTo(value));
         }
 
         private IFieldMapper<FieldMappingInfoBuilderNumericFieldTests> CreateMapper()

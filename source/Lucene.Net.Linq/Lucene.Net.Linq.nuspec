@@ -19,6 +19,12 @@
     <releaseNotes>
       ## Current Release
 
+      * Add support for fluent mapping interface. Example:  https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/source/Lucene.Net.Linq.Tests/Samples/FluentConfiguration.cs
+      * Add DefaultParserOperator property to FieldAttribute to specify QueryParser.DefaultParseOperator for a given property/field.
+      * Performance - Use TotalHits instead of ScoreDocs.length when computing Count()/Any()
+
+      ## 3.1.48
+
       * Enable analyzing and retrieving term vectors using [Field(TermVector = TermVectorMode.Yes)] and TermFreqVectorDocumentMapper
       * Enable Field level boosting while indexing using [Field(Boost = 5)]
 

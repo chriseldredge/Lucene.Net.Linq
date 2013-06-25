@@ -95,14 +95,23 @@ namespace Lucene.Net.Linq
                 var skipResults = luceneQueryModel.SkipResults;
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc - skipResults);
 
-                var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
-                PrepareSearchSettings(executionContext);
+                TopFieldDocs hits;
 
-                var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
+                if (maxResults > 0)
+                {
+                    var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
+                    PrepareSearchSettings(executionContext);
+
+                    hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
+                }
+                else
+                {
+                    hits = new TopFieldDocs(0, new ScoreDoc[0], new SortField[0], 0);
+                }
 
                 var handler = ScalarResultHandlerRegistry.Instance.GetItem(luceneQueryModel.ResultSetOperator.GetType());
 
-                return handler.Execute<T>(hits);
+                return handler.Execute<T>(luceneQueryModel, hits);
             }
         }
 
@@ -165,38 +174,44 @@ namespace Lucene.Net.Linq
                 executionContext.Phase = QueryExecutionPhase.ConvertResults;
                 executionContext.Hits = hits;
 
-                for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
+                foreach (var p in EnumerateHits(hits, executionContext, searcher, tracker, itemHolder, skipResults, projector)) yield return p;
+            }
+        }
+
+        private IEnumerable<T> EnumerateHits<T>(TopDocs hits, QueryExecutionContext executionContext, Searchable searcher, IRetrievedDocumentTracker<TDocument> tracker, ItemHolder itemHolder, int skipResults, Func<TDocument, T> projector)
+        {
+            for (var i = skipResults; i < hits.ScoreDocs.Length; i++)
+            {
+                executionContext.CurrentHit = i;
+                executionContext.CurrentScoreDoc = hits.ScoreDocs[i];
+
+                var docNum = hits.ScoreDocs[i].Doc;
+                var document = searcher.Doc(docNum);
+
+                var item = ConvertDocument(document, executionContext);
+
+                if (tracker != null)
                 {
-                    executionContext.CurrentHit = i;
-                    executionContext.CurrentScoreDoc = hits.ScoreDocs[i];
-
-                    var doc = hits.ScoreDocs[i].Doc;
-
-                    var item = ConvertDocument(searcher.Doc(doc), executionContext);
-
-                    if (tracker != null)
+                    if (tracker.IsMarkedForDeletion(item))
                     {
-                        if (tracker.IsMarkedForDeletion(item))
-                        {
-                            continue;
-                        }
-
-                        TDocument tracked;
-
-                        if (tracker.TryGetTrackedDocument(item, out tracked))
-                        {
-                            item = tracked;
-                        }
-                        else
-                        {
-                            var copy = ConvertDocument(searcher.Doc(doc), executionContext);
-                            tracker.TrackDocument(item, copy);
-                        }
+                        continue;
                     }
 
-                    itemHolder.Current = item;
-                    yield return projector(itemHolder.Current);
+                    TDocument tracked;
+
+                    if (tracker.TryGetTrackedDocument(item, out tracked))
+                    {
+                        item = tracked;
+                    }
+                    else
+                    {
+                        var copy = ConvertDocument(document, executionContext);
+                        tracker.TrackDocument(item, copy);
+                    }
                 }
+
+                itemHolder.Current = item;
+                yield return projector(itemHolder.Current);
             }
         }
 

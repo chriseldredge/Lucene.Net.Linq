@@ -34,7 +34,7 @@ namespace Lucene.Net.Linq
         private IIndexWriter writer;
 
         /// <summary>
-        /// Constructs a new read-only instance without supplying an IndexWriter.
+        /// Constructs a new instance with a client-provided <see cref="Analyzer"/>
         /// </summary>
         public LuceneDataProvider(Directory directory, Analyzer externalAnalyzer, Version version)
             : this(directory, externalAnalyzer, version, null, new object())
@@ -42,8 +42,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// Constructs a new read-only instance with a client provided <see cref="Analyzer"/>
-        /// and without supplying an IndexWriter.
+        /// Constructs a new instance.
         /// </summary>
         public LuceneDataProvider(Directory directory, Version version)
             : this(directory, null, version, null, new object())
@@ -51,7 +50,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// Constructs a new instance.
+        /// Constructs a new instance with an externally provided <see cref="IndexWriter"/>
         /// </summary>
         public LuceneDataProvider(Directory directory, Version version, IndexWriter externalWriter)
             : this(directory, null, version, new IndexWriterAdapter(externalWriter), new object())
@@ -59,7 +58,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// Constructs a new instance with a client provided <see cref="Analyzer"/>.
+        /// Constructs a new instance with a client-provided <see cref="Analyzer"/> and <see cref="IndexWriter"/>
         /// </summary>
         public LuceneDataProvider(Directory directory, Analyzer externalAnalyzer, Version version, IndexWriter indexWriter)
             : this(directory, externalAnalyzer, version, new IndexWriterAdapter(indexWriter), new object())
@@ -88,7 +87,7 @@ namespace Lucene.Net.Linq
             this.perFieldAnalyzer = new PerFieldAnalyzer(new KeywordAnalyzer());
             this.version = version;
             this.writerIsExternal = externalWriter != null;
-            this.writer = externalWriter ?? GetIndexWriter(perFieldAnalyzer);
+            this.writer = externalWriter ?? IndexWriter;
 
             queryParser = RelinqQueryParserFactory.CreateQueryParser();
             context = new Context(this.directory, transactionLock);

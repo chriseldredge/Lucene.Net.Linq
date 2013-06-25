@@ -19,6 +19,7 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly TermVectorMode termVector;
         protected readonly TypeConverter converter;
         protected readonly string fieldName;
+        protected readonly QueryParser.Operator defaultParserOperator;
         protected readonly bool caseSensitive;
         protected readonly Analyzer analyzer;
         protected readonly float boost;
@@ -27,10 +28,15 @@ namespace Lucene.Net.Linq.Mapping
                                      TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer)
             : this(propertyInfo, store, index, termVector, converter, fieldName, caseSensitive, analyzer, 1f)
         {
-            
+
         }
 
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer, float boost)
+            : this(propertyInfo, store, index, termVector, converter, fieldName, QueryParser.Operator.OR, caseSensitive, analyzer, boost)
+        {
+
+        }
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
@@ -38,6 +44,7 @@ namespace Lucene.Net.Linq.Mapping
             this.termVector = termVector;
             this.converter = converter;
             this.fieldName = fieldName;
+            this.defaultParserOperator = defaultParserOperator;
             this.caseSensitive = caseSensitive;
             this.analyzer = analyzer;
             this.boost = boost;
@@ -45,51 +52,92 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual Analyzer Analyzer
         {
-            get { return analyzer; }
+            get
+            {
+                return analyzer;
+            }
         }
 
         public virtual PropertyInfo PropertyInfo
         {
-            get { return propertyInfo; }
+            get
+            {
+                return propertyInfo;
+            }
         }
 
         public virtual StoreMode Store
         {
-            get { return store; }
+            get
+            {
+                return store;
+            }
         }
 
         public virtual IndexMode IndexMode
         {
-            get { return index; }
+            get
+            {
+                return index;
+            }
         }
 
         public virtual TermVectorMode TermVector
         {
-            get { return termVector; }
+            get
+            {
+                return termVector;
+            }
         }
 
         public virtual TypeConverter Converter
         {
-            get { return converter; }
+            get
+            {
+                return converter;
+            }
         }
 
         public virtual string FieldName
         {
-            get { return fieldName; }
+            get
+            {
+                return fieldName;
+            }
         }
 
         public virtual bool CaseSensitive
         {
-            get { return caseSensitive; }
+            get
+            {
+                return caseSensitive;
+            }
         }
 
         public virtual float Boost
         {
-            get { return boost; }
+            get
+            {
+                return boost;
+            }
         }
 
-        public virtual string PropertyName { get { return propertyInfo.Name; } }
-        
+        public virtual string PropertyName
+        {
+            get
+            {
+                return propertyInfo.Name;
+            }
+        }
+
+        public virtual QueryParser.Operator DefaultParseOperator
+        {
+            get
+            {
+                return defaultParserOperator;
+            }
+        }
+
         public virtual object GetPropertyValue(T source)
         {
             return propertyInfo.GetValue(source, null);
@@ -99,9 +147,11 @@ namespace Lucene.Net.Linq.Mapping
         {
             var field = source.GetFieldable(fieldName);
 
-            if (field == null) return;
-            
-            if (!propertyInfo.CanWrite) return;
+            if (field == null)
+                return;
+
+            if (!propertyInfo.CanWrite)
+                return;
 
             var fieldValue = ConvertFieldValue(field);
 
@@ -135,10 +185,11 @@ namespace Lucene.Net.Linq.Mapping
         public virtual Query CreateQuery(string pattern)
         {
             var queryParser = new QueryParser(Version.LUCENE_30, FieldName, analyzer)
-                {
-                    AllowLeadingWildcard = true,
-                    LowercaseExpandedTerms = !CaseSensitive
-                };
+            {
+                AllowLeadingWildcard = true,
+                LowercaseExpandedTerms = !CaseSensitive,
+                DefaultOperator = defaultParserOperator
+            };
 
             return queryParser.Parse(pattern);
         }
@@ -155,7 +206,8 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual SortField CreateSortField(bool reverse)
         {
-            if (Converter == null) return new SortField(FieldName, SortField.STRING, reverse);
+            if (Converter == null)
+                return new SortField(FieldName, SortField.STRING, reverse);
 
             var propertyType = propertyInfo.PropertyType;
 
@@ -196,7 +248,8 @@ namespace Lucene.Net.Linq.Mapping
 
         protected internal void AddField(Document target, object value)
         {
-            if (value == null) return;
+            if (value == null)
+                return;
 
             var fieldValue = (string)null;
 
@@ -211,7 +264,7 @@ namespace Lucene.Net.Linq.Mapping
 
             if (fieldValue != null)
             {
-                var field = new Field(fieldName, fieldValue, FieldStore, (Field.Index) index, (Field.TermVector) TermVector);
+                var field = new Field(fieldName, fieldValue, FieldStore, (Field.Index)index, (Field.TermVector)TermVector);
                 field.Boost = Boost;
                 target.Add(field);
             }
@@ -221,7 +274,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             get
             {
-                return (Field.Store) store;
+                return (Field.Store)store;
             }
         }
     }

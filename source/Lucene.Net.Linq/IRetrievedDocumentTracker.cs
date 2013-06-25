@@ -1,5 +1,3 @@
-using Lucene.Net.Linq.Mapping;
-
 namespace Lucene.Net.Linq
 {
     internal interface IRetrievedDocumentTracker<T>
