@@ -64,6 +64,10 @@ namespace Lucene.Net.Linq.Tests.Integration
             public string Alias { get; set; }
 
             public SampleGenericOnlyComparable GenericComparable { get; set; }
+
+            public DateTime DateTime { get; set; }
+
+            public DateTime DateTimeOffset { get; set; }
         }
 
         public class ScoreTrackingSampleDocument : SampleDocument
