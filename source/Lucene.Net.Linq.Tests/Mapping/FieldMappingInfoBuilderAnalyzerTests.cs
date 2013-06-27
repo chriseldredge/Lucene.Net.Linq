@@ -79,6 +79,16 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(mapper.Analyzer, Is.InstanceOf<SimpleAnalyzer>());
         }
 
+        public DateTime DateTime { get; set; }
+
+        [Test]
+        public void UseKeywordAnalyzerForDateTime()
+        {
+            var mapper = Build("DateTime");
+
+            Assert.That(mapper.Analyzer, Is.TypeOf<KeywordAnalyzer>());
+        }
+
         [Test]
         public void AnalyzerMustInheritFromBase()
         {

@@ -81,6 +81,7 @@
     <Compile Include="Fluent\TermVectorModeTests.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\IndexBoostTests.cs" />
+    <Compile Include="Integration\OrderByDateTimeTests.cs" />
     <Compile Include="Integration\QueryBoostTests.cs" />
     <Compile Include="Integration\IntegrationTestBase.cs" />
     <Compile Include="Integration\NumericKeyTests.cs" />
