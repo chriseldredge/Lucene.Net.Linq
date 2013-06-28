@@ -70,20 +70,20 @@ namespace Lucene.Net.Linq.Mapping
             var termVectorMode = metadata != null ? metadata.TermVector : TermVectorMode.No;
             var boost = metadata != null ? metadata.Boost : 1.0f;
             var defaultParserOperator = metadata != null ? metadata.DefaultParserOperator : QueryParsers.QueryParser.Operator.OR;
-            var caseSensitive = GetCaseSensitivity(metadata);
-            var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, version);
+            var caseSensitive = GetCaseSensitivity(metadata, converter);
+            var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, converter, version);
 
             return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost);
         }
 
-        private static Analyzer BuildAnalyzer(FieldAttribute metadata, Version version)
+        private static Analyzer BuildAnalyzer(FieldAttribute metadata, TypeConverter converter, Version version)
         {
             if (metadata != null && metadata.Analyzer != null)
             {
                 return CreateAnalyzer(metadata.Analyzer, version);
             }
 
-            if (GetCaseSensitivity(metadata))
+            if (GetCaseSensitivity(metadata, converter))
             {
                 return new KeywordAnalyzer();
             }
@@ -91,9 +91,9 @@ namespace Lucene.Net.Linq.Mapping
             return new CaseInsensitiveKeywordAnalyzer();
         }
 
-        internal static bool GetCaseSensitivity(FieldAttribute metadata)
+        internal static bool GetCaseSensitivity(FieldAttribute metadata, TypeConverter converter)
         {
-            if (metadata == null) return false;
+            if (metadata == null) return converter != null;
 
             return metadata.CaseSensitive ||
                    metadata.IndexMode == IndexMode.NotAnalyzed ||

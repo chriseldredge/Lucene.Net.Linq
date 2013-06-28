@@ -88,35 +88,35 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void CaseSensitive_WhenPropertySet()
         {
-            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute {CaseSensitive = true});
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute {CaseSensitive = true}, null);
             Assert.That(flag, Is.True);
         }
 
         [Test]
         public void CaseSensitive_IndexMode_NotAnalayzed()
         {
-            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzed) { CaseSensitive = false });
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzed) { CaseSensitive = false }, null);
             Assert.That(flag, Is.True);
         }
 
         [Test]
         public void CaseSensitive_IndexMode_NotAnalyzedNoNorms()
         {
-            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzedNoNorms) { CaseSensitive = false });
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(IndexMode.NotAnalyzedNoNorms) { CaseSensitive = false }, null);
             Assert.That(flag, Is.True);
         }
 
         [Test]
         public void CaseSensitive_False()
         {
-            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute());
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(new FieldAttribute(), null);
             Assert.That(flag, Is.False);
         }
 
         [Test]
         public void CaseSensitive_NullMetadata_False()
         {
-            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(null);
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(null, null);
             Assert.That(flag, Is.False);
         }
 

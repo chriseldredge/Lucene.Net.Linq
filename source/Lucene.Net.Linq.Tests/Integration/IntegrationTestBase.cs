@@ -19,7 +19,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         protected static readonly Version version = Version.LUCENE_29;
 
         [SetUp]
-        public void SetUp()
+        public virtual void InitializeLucene()
         {
             directory = new RAMDirectory();
             writer = new IndexWriter(directory, GetAnalyzer(version), IndexWriter.MaxFieldLength.UNLIMITED);
