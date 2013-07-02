@@ -12,7 +12,7 @@ namespace Lucene.Net.Linq.Search
         GreaterThan,
         GreaterThanOrEqual,
         LessThan,
-        LessThanOrEqual,
+        LessThanOrEqual 
     }
 
     public enum RangeType
