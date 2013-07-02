@@ -24,6 +24,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 occur = Occur.MUST_NOT;
             }
 
+            
             LuceneQueryFieldExpression fieldExpression;
             Expression pattern;
 
@@ -50,6 +51,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                         break;
                     case QueryType.LessThanOrEqual:
                         queryType = QueryType.GreaterThanOrEqual;
+
                         break;
                 }
             }
@@ -57,7 +59,7 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             {
                 throw new NotSupportedException("Expected Left or Right to be LuceneQueryFieldExpression");
             }
-
+            
             return new LuceneQueryPredicateExpression(fieldExpression, pattern, occur, queryType);
         }
     }

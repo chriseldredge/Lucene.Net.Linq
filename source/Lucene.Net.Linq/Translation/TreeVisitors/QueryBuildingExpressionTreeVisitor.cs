@@ -84,7 +84,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             var occur = expression.Occur;
             
-            if (string.IsNullOrEmpty(pattern))
+            if (string.IsNullOrEmpty(pattern) || pattern == "\"\"")
             {
                 pattern = "*";
                 occur = Negate(occur);
@@ -130,6 +130,14 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                 case QueryType.Suffix:
                     pattern = "*" + pattern;
                     break;
+                default:
+                {
+                    if (!expression.AllowSpecialCharacters && expression.QueryField.Type == typeof(string))
+                    {
+                        pattern = "\"" + pattern + "\"";
+                    }
+                    break;
+                }
             }
             return pattern;
         }

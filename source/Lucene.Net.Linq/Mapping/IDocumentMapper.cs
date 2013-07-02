@@ -1,4 +1,5 @@
-﻿using Lucene.Net.Analysis;
+﻿using System.Collections.Generic;
+using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Search;
@@ -53,5 +54,16 @@ namespace Lucene.Net.Linq.Mapping
         /// and writing documents.
         /// </summary>
         PerFieldAnalyzer Analyzer { get; }
+
+
+        /// <summary>
+        /// Get values of each of the fields in the object
+        /// </summary>
+        object[] GetFieldValues(T t);
+
+        /// <summary>
+        /// Do a deep value comparison
+        /// </summary>
+        bool ValuesEquals(object val1, object val2);
     }
 }

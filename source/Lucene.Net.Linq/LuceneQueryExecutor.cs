@@ -18,28 +18,33 @@ namespace Lucene.Net.Linq
 {
     internal class LuceneQueryExecutor<TDocument> : LuceneQueryExecutorBase<TDocument>
     {
-        private readonly Func<TDocument> newItem;
+        private readonly Func<Document, TDocument> getObjectForDocument;
         private readonly IDocumentMapper<TDocument> mapper;
 
-        public LuceneQueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
+        public LuceneQueryExecutor(Context context, Func<Document, TDocument> getObjectForDocument, IDocumentMapper<TDocument> mapper)
             : base(context)
         {
-            this.newItem = newItem;
+            this.getObjectForDocument = getObjectForDocument;
             this.mapper = mapper;
         }
 
         protected override TDocument ConvertDocument(Document doc, IQueryExecutionContext context)
         {
-            var item = newItem();
+            var item = getObjectForDocument(doc);
             
             mapper.ToObject(doc, context, item);
             
             return item;
         }
 
+        protected override object[] ConvertDocumentToFieldValues(Document document, IQueryExecutionContext queryExecutionContext)
+        {
+            return mapper.GetFieldValues(getObjectForDocument(document)).ToArray();
+        }
+
         protected override TDocument ConvertDocumentForCustomBoost(Document doc)
         {
-            var item = newItem();
+            var item = getObjectForDocument(doc);
 
             mapper.ToObject(doc, new QueryExecutionContext(), item);
 
@@ -205,7 +210,7 @@ namespace Lucene.Net.Linq
                     }
                     else
                     {
-                        var copy = ConvertDocument(document, executionContext);
+                        var copy = ConvertDocumentToFieldValues(document, executionContext);
                         tracker.TrackDocument(item, copy);
                     }
                 }
@@ -214,6 +219,8 @@ namespace Lucene.Net.Linq
                 yield return projector(itemHolder.Current);
             }
         }
+
+        
 
         private ISearcherHandle CheckoutSearcher()
         {
@@ -243,6 +250,8 @@ namespace Lucene.Net.Linq
         public abstract Query CreateMultiFieldQuery(string pattern);
 
         protected abstract TDocument ConvertDocument(Document doc, IQueryExecutionContext context);
+        protected abstract object[] ConvertDocumentToFieldValues(Document doc, IQueryExecutionContext context);
+
         protected abstract TDocument ConvertDocumentForCustomBoost(Document doc);
         protected abstract void PrepareSearchSettings(IQueryExecutionContext context);
     }

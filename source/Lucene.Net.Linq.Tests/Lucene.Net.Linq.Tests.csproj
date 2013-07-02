@@ -87,6 +87,10 @@
     <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
+    <Compile Include="OriginalObjectLookup\Key.cs" />
+    <Compile Include="OriginalObjectLookup\StringLookupDocumentMapper.cs" />
+    <Compile Include="OriginalObjectLookup\OriginalObjectLookupTests.cs" />
+    <Compile Include="OriginalObjectLookup\SomeObject.cs" />
     <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />

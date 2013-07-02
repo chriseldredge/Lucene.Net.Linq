@@ -258,13 +258,13 @@ namespace Lucene.Net.Linq
         internal class TrackedDocument
         {
             private readonly T document;
-            private readonly T hiddenCopy;
+            private readonly IEnumerable<object> _originalFieldValues;
             private readonly IDocumentKey key;
 
-            internal TrackedDocument(T document, T hiddenCopy, IDocumentKey key)
+            internal TrackedDocument(T document, IEnumerable<object> originalFieldValues, IDocumentKey key)
             {
                 this.document = document;
-                this.hiddenCopy = hiddenCopy;
+                this._originalFieldValues = originalFieldValues;
                 this.key = key;
             }
 
@@ -273,9 +273,9 @@ namespace Lucene.Net.Linq
                 get { return document; }
             }
 
-            internal T HiddenCopy
+            internal IEnumerable<object> OriginalFieldValues
             {
-                get { return hiddenCopy; }
+                get { return _originalFieldValues; }
             }
 
             internal IDocumentKey Key
@@ -306,12 +306,12 @@ namespace Lucene.Net.Linq
                 return byKey.TryGetValue(key, out tracked);
             }
 
-            public void TrackDocument(T item, T hiddenCopy)
+            public void TrackDocument(T item, IEnumerable<object> storedFieldValuesForChangeTracking)
             {
                 var key = mapper.ToKey(item);
                 byKey.Add(key, item);
 
-                items.Add(new TrackedDocument(item, hiddenCopy, mapper.ToKey(hiddenCopy)));
+                items.Add(new TrackedDocument(item, storedFieldValuesForChangeTracking, mapper.ToKey(item)));
             }
 
             public bool IsMarkedForDeletion(T item)
@@ -327,7 +327,7 @@ namespace Lucene.Net.Linq
             public IEnumerable<TrackedDocument> FindModifiedDocuments()
             {
                 return items
-                    .Where(t => !mapper.Equals(t.Document, t.HiddenCopy))
+                    .Where(t => !mapper.GetFieldValues(t.Document).SequenceEqual(t.OriginalFieldValues, new MapperComparer<T>(mapper))) //compare the new fields with the old ones
                     .Where(t => !IsMarkedForDeletion(t.Document));
             }
 
@@ -337,6 +337,26 @@ namespace Lucene.Net.Linq
                 items.Clear();
                 deletedKeys.Clear();
             }
+        }
+    }
+
+    internal class MapperComparer<T> : IEqualityComparer<object>
+    {
+        private readonly IDocumentMapper<T> _mapper;
+
+        public MapperComparer(IDocumentMapper<T> mapper)
+        {
+            _mapper = mapper;
+        }
+
+        public bool Equals(object x, object y)
+        {
+            return _mapper.ValuesEquals(x, y);
+        }
+
+        public int GetHashCode(object obj)
+        {
+            throw new NotImplementedException();
         }
     }
 }

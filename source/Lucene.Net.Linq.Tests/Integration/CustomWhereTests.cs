@@ -26,5 +26,18 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
         }
+
+        [Test]
+        public void WhereUsingExpression()
+        {
+            AddDocument(new SampleDocument { Name = "Documents Bill", Id = "X.Y.1.2" });
+            AddDocument(new SampleDocument { Name = "Bills Document", Id = "X.Z.1.3" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = documents.Where(d => d.Name == "Bills Document");
+
+            Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
+        }
     }
 }

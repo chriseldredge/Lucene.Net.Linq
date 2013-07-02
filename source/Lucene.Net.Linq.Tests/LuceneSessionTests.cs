@@ -266,9 +266,12 @@ namespace Lucene.Net.Linq.Tests
         {
             var record = new Record();
             var copy = new Record();
-            mapper.Expect(m => m.Equals(record, copy)).Return(false);
+            mapper.Expect(m => m.GetFieldValues(record)).Return(new object[]{ "updated value"});
+            mapper.Expect(m => m.GetFieldValues(copy)).Return(new object[] { "previous value" });
+
+            mapper.Expect(m => m.ValuesEquals("updated value", "previous value")).Return(false);
             mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
-            session.DocumentTracker.TrackDocument(record, copy);
+            session.DocumentTracker.TrackDocument(record, mapper.GetFieldValues(copy));
             record.Id = "1";
 
             session.StageModifiedDocuments();
