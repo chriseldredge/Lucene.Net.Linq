@@ -90,7 +90,7 @@
     <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
-    <Compile Include="Integration\CustomWhereTests.cs" />
+    <Compile Include="Integration\WhereExtensionTests.cs" />
     <Compile Include="Integration\SelectTests.cs" />
     <Compile Include="Integration\SessionTests.cs" />
     <Compile Include="Integration\SingleResultTests.cs" />

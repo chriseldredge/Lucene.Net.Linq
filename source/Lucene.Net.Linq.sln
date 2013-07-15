@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{91DBBF52-CD3F-4737-91DC-CDB7564C32B9}"
 	ProjectSection(SolutionItems) = preProject
 		..\default.ps1 = ..\default.ps1
+		..\IntegratedBuild.proj = ..\IntegratedBuild.proj
 		..\LICENSE.txt = ..\LICENSE.txt
 		..\psake.ps1 = ..\psake.ps1
 		..\psake.psm1 = ..\psake.psm1
@@ -28,15 +29,16 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{40D157FA-178B-4906-9179-E5D623F5BA03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{40D157FA-178B-4906-9179-E5D623F5BA03}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{40D157FA-178B-4906-9179-E5D623F5BA03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77AD18CC-93A3-4BC9-9F31-2C16D873F088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{77AD18CC-93A3-4BC9-9F31-2C16D873F088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{77AD18CC-93A3-4BC9-9F31-2C16D873F088}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{77AD18CC-93A3-4BC9-9F31-2C16D873F088}.Release|Any CPU.Build.0 = Release|Any CPU
+		{40D157FA-178B-4906-9179-E5D623F5BA03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{40D157FA-178B-4906-9179-E5D623F5BA03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{40D157FA-178B-4906-9179-E5D623F5BA03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = Lucene.Net.Linq\Lucene.Net.Linq.csproj
@@ -69,8 +71,5 @@ Global
 		$3.inheritsSet = Mono
 		$3.inheritsScope = text/x-csharp
 		$3.scope = text/x-csharp
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

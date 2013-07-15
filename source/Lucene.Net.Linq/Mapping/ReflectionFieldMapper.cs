@@ -1,8 +1,10 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
@@ -184,6 +186,13 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual Query CreateQuery(string pattern)
         {
+            Query query;
+
+            if (TryParseKeywordContainingWhitespace(pattern, out query))
+            {
+                return query;
+            }
+
             var queryParser = new QueryParser(Version.LUCENE_30, FieldName, analyzer)
             {
                 AllowLeadingWildcard = true,
@@ -192,6 +201,58 @@ namespace Lucene.Net.Linq.Mapping
             };
 
             return queryParser.Parse(pattern);
+        }
+
+        /// <summary>
+        /// Attempt to determine if a given query pattern contains whitespace and
+        /// the analyzer does not tokenize on whitespace. This is a work-around
+        /// for cases when QueryParser would split a keyword that contains whitespace
+        /// into multiple tokens.
+        /// </summary>
+        protected virtual bool TryParseKeywordContainingWhitespace(string pattern, out Query query)
+        {
+            query = null;
+
+            if (pattern.IndexOfAny(new[] { ' ', '\t', '\r', '\n' }) < 0) return false;
+
+            var terms = Analyzer.GetTerms(FieldName, pattern).ToList();
+
+            if (terms.Count > 1) return false;
+            
+            var termValue = Unescape(terms.Single());
+            var term = new Term(FieldName, termValue);
+
+            if (IsWildcardPattern(termValue))
+            {
+                query = new WildcardQuery(term);
+            }
+            else
+            {
+                query = new TermQuery(term);
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determine if a (potentially escaped) pattern contains
+        /// any non-escaped wildcard characters such as <c>*</c> or <c>?</c>.
+        /// </summary>
+        protected virtual bool IsWildcardPattern(string pattern)
+        {
+            var unescaped = pattern.Replace(@"\\", "");
+            return unescaped.Replace(@"\*", "").Contains("*")
+                || unescaped.Replace(@"\?", "").Contains("?");
+        }
+
+        /// <summary>
+        /// Remove escape characters from a pattern. This method
+        /// is called when a <see cref="Query"/> is being created without using
+        /// <see cref="QueryParser.Parse"/>.
+        /// </summary>
+        protected virtual string Unescape(string pattern)
+        {
+            return pattern.Replace(@"\", "");
         }
 
         public virtual Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)

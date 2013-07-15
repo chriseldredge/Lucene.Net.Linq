@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Tokenattributes;
@@ -8,6 +10,11 @@ namespace Lucene.Net.Linq.Util
     internal static class AnalyzerExtensions
     {
         internal static string Analyze(this Analyzer analyzer, string fieldName, string pattern)
+        {
+            return analyzer.GetTerms(fieldName, pattern).Single();
+        }
+
+        internal static IEnumerable<string> GetTerms(this Analyzer analyzer, string fieldName, string pattern)
         {
             TokenStream s;
 
@@ -20,22 +27,20 @@ namespace Lucene.Net.Linq.Util
                 s = analyzer.TokenStream(fieldName, new StringReader(pattern));
             }
 
-            var result = new StringBuilder();
-
             try
             {
-                if (s.IncrementToken() && s.HasAttribute<ITermAttribute>())
+                while (s.IncrementToken())
                 {
+                    if (!s.HasAttribute<ITermAttribute>()) continue;
+
                     var attr = s.GetAttribute<ITermAttribute>();
-                    result.Append(attr.Term);
+                    yield return attr.Term;
                 }
             }
             finally
             {
                 s.Dispose();
             }
-
-            return result.ToString();
         }
     }
 }

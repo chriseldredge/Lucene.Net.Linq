@@ -261,6 +261,32 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
+        [Test(Description = "https://github.com/themotleyfool/Lucene.Net.Linq/issues/30")]
+        public void Where_Keyword_WithSpace()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "1 2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "1 3" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Key == "1 3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test(Description = "https://github.com/themotleyfool/Lucene.Net.Linq/issues/30")]
+        public void Where_Keyword_WithSpaceAndAsterisk()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "1 * 2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "1 * 3" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Key == "1 * 3" select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
         [Test]
         public void Where_LowercaseKeyword_StartsWith()
         {

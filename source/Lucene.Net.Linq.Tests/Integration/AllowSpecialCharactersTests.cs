@@ -1,4 +1,3 @@
-using System.IO;
 using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Analysis;
@@ -13,6 +12,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             var analyzer = new PerFieldAnalyzerWrapper(base.GetAnalyzer(version));
             analyzer.AddAnalyzer("Path", new CaseInsensitiveKeywordAnalyzer());
+            analyzer.AddAnalyzer("Key", new KeywordAnalyzer());
             return analyzer;
         }
 
@@ -63,6 +63,19 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             var result = (from doc in documents where (doc.Name == "\"Apple Banana\"").AllowSpecialCharacters() select doc).ToList();
             Assert.That(result.Count(), Is.EqualTo(1));
+        }
+
+        [Test(Description = "https://github.com/themotleyfool/Lucene.Net.Linq/issues/30")]
+        public void AllowSpecialCharacters_WithWildcardAndSpace()
+        {
+            AddDocument(new SampleDocument { Name = "Other Document", Key = "1 * 2" });
+            AddDocument(new SampleDocument { Name = "My Document", Key = "1 2 3" });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from doc in documents where doc.Key == "1 ? 3".AllowSpecialCharacters() select doc;
+
+            Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
         public class PathDocument

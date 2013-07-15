@@ -7,7 +7,7 @@ properties {
   $release_build_dir = "$build_dir\bin\release"
   $release_dir = "$base_dir\Release"
   $sln_file = "$source_dir\Lucene.Net.Linq.sln"
-  $version = "3.1.0"
+  $version = "3.2.0"
   $revision = ""
   $tools_dir = "$base_dir\Tools"
   $nunitconsole = "nunit-console.exe"

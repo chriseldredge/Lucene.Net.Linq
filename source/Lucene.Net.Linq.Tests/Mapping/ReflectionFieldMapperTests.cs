@@ -27,16 +27,25 @@ namespace Lucene.Net.Linq.Tests.Mapping
         [Test]
         public void ParseMultipleTerms()
         {
-            var mapper = CreateMapper("Text");
+            var mapper = CreateMapper("Text", analyzer: new StandardAnalyzer(Net.Util.Version.LUCENE_30));
 
             var query = mapper.CreateQuery("x y z");
             Assert.That(query.ToString(), Is.EqualTo("Text:x Text:y Text:z"));
         }
 
         [Test]
+        public void ParseKeywordWithWhitespace()
+        {
+            var mapper = CreateMapper("Text");
+
+            var query = mapper.CreateQuery("x y z");
+            Assert.That(query.ToString(), Is.EqualTo("Text:x y z"));
+        }
+
+        [Test]
         public void ParseMultipleTermsWithDefaultOperatorAnd()
         {
-            var mapper = CreateMapper("Text", defaultParseOperaor: QueryParser.Operator.AND);
+            var mapper = CreateMapper("Text", analyzer: new StandardAnalyzer(Net.Util.Version.LUCENE_30), defaultParseOperaor: QueryParser.Operator.AND);
 
             var query = mapper.CreateQuery("x y z");
             Assert.That(query.ToString(), Is.EqualTo("+Text:x +Text:y +Text:z"));
