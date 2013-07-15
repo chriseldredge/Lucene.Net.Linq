@@ -6,7 +6,7 @@
     <version>$version$</version>
     <owners>The Motley Fool, LLC</owners>
     <authors>Chris Eldredge</authors>
-    <copyright>Copyright 2012 The Motley Fool, LLC</copyright>
+    <copyright>Copyright 2012-2013 The Motley Fool, LLC</copyright>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectUrl>https://github.com/themotleyfool/Lucene.Net.Linq</projectUrl>
     <licenseUrl>https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/LICENSE.txt</licenseUrl>
@@ -17,29 +17,7 @@
       Execute LINQ queries on Lucene.Net complete with object to Document mapping.
     </description>
     <releaseNotes>
-      ## Current Release
-
-      * Add support for fluent mapping interface. Example:  https://github.com/themotleyfool/Lucene.Net.Linq/blob/master/source/Lucene.Net.Linq.Tests/Samples/FluentConfiguration.cs
-      * Add DefaultParserOperator property to FieldAttribute to specify QueryParser.DefaultParseOperator for a given property/field.
-      * Performance - Use TotalHits instead of ScoreDocs.length when computing Count()/Any()
-
-      ## 3.1.48
-
-      * Enable analyzing and retrieving term vectors using [Field(TermVector = TermVectorMode.Yes)] and TermFreqVectorDocumentMapper
-      * Enable Field level boosting while indexing using [Field(Boost = 5)]
-
-      ## 3.1.46
-
-      * Open new IndexWriter after ISession.Commit fails and calls Rollback on current IndexWriter
-      * Convert objects and keys to documents and queries before writing to IndexWriter
-
-      ## 3.1.45
-
-      * Automatically creates Analyzer using metadata attributes like [Field(Analyzer=typeof(StandardAnalyzer)]
-      * Store different object types in single index
-      * Prevent documents with null values on key properties from being stored
-      * Enable sorting on types implementing IComparable&lt;T&gt; but not non-generic IComparable
-      * Allow client to provide custom IDocumentMapper&lt;T&gt; implementations
+      See https://github.com/themotleyfool/Lucene.Net.Linq/releases
     </releaseNotes>
     <dependencies>
       <dependency id="Remotion.Linq" version="[1.13.183, 2.0)" />
