@@ -114,6 +114,7 @@
     <Compile Include="Record.cs" />
     <Compile Include="Samples\DocumentKeys.cs" />
     <Compile Include="Samples\FluentConfiguration.cs" />
+    <Compile Include="Samples\PropertyChangeExample.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\CompareCallToLuceneQueryPredicateExpressionTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitorTests.cs" />
