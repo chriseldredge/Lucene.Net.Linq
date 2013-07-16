@@ -1,5 +1,6 @@
 ﻿using System;
 using Lucene.Net.Analysis;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Fluent;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
@@ -9,6 +10,16 @@ namespace Lucene.Net.Linq.Tests.Fluent
     [TestFixture]
     public class AnalyzerTests : FluentDocumentMapperTestBase
     {
+        [Test]
+        public void DefaultAnalyzer()
+        {
+            map.Property(x => x.Date);
+
+            var mapper = GetMappingInfo("Date");
+
+            Assert.That(mapper.Analyzer, Is.TypeOf<CaseInsensitiveKeywordAnalyzer>());
+        }
+
         [Test]
         public void SpecifyAnalyzer()
         {
@@ -20,7 +31,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
 
             Assert.That(mapper.Analyzer, Is.SameAs(analyzer));
         }
-
+        
         [Test]
         public void SpecifyIndexMode()
         {
@@ -49,13 +60,13 @@ namespace Lucene.Net.Linq.Tests.Fluent
             [Test]
             public void NotAnalyzed()
             {
-                Test(p => p.NotAnalyzed(), IndexMode.NotAnalyzed);
+                Test(p => p.NotAnalyzed(), IndexMode.NotAnalyzed, typeof(KeywordAnalyzer));
             }
 
             [Test]
             public void NotAnalyzedNoNorms()
             {
-                Test(p => p.NotAnalyzedNoNorms(), IndexMode.NotAnalyzedNoNorms);
+                Test(p => p.NotAnalyzedNoNorms(), IndexMode.NotAnalyzedNoNorms, typeof(KeywordAnalyzer));
             }
 
             [Test]
@@ -64,12 +75,14 @@ namespace Lucene.Net.Linq.Tests.Fluent
                 Test(p => p.NotIndexed(), IndexMode.NotIndexed);
             }
 
-            protected void Test(Action<PropertyMap<Sample>> setIndexMode, IndexMode expectedIndexMode)
+            protected void Test(Action<PropertyMap<Sample>> setIndexMode, IndexMode expectedIndexMode, Type expectedAnalyzerType = null)
             {
                 setIndexMode(map.Property(x => x.Name));
                 var mapper = GetMappingInfo("Name");
 
                 Assert.That(mapper.IndexMode, Is.EqualTo(expectedIndexMode));
+
+                Assert.That(mapper.Analyzer, Is.TypeOf(expectedAnalyzerType ?? typeof(CaseInsensitiveKeywordAnalyzer)));
             }
         }
     }

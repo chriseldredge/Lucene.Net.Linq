@@ -1,4 +1,6 @@
-﻿using Lucene.Net.Linq.Mapping;
+﻿using Lucene.Net.Analysis;
+using Lucene.Net.Linq.Analysis;
+using Lucene.Net.Linq.Mapping;
 using Lucene.Net.QueryParsers;
 using NUnit.Framework;
 
@@ -17,7 +19,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
             Assert.That(info, Is.Not.Null);
             Assert.That(info.Store, Is.EqualTo(StoreMode.Yes));
             Assert.That(info.IndexMode, Is.EqualTo(IndexMode.Analyzed));
-            Assert.That(info.Analyzer, Is.Null);
+            Assert.That(info.Analyzer, Is.InstanceOf<CaseInsensitiveKeywordAnalyzer>());
             Assert.That(info.Boost, Is.EqualTo(1.0f));
             Assert.That(info.CaseSensitive, Is.False);
             Assert.That(info.TermVector, Is.EqualTo(TermVectorMode.No));
@@ -62,6 +64,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
             var info = GetMappingInfo("Name");
 
             Assert.That(info.CaseSensitive, Is.True);
+            Assert.That(info.Analyzer, Is.TypeOf<KeywordAnalyzer>());
         }
 
         [Test]

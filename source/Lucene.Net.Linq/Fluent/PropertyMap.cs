@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
+using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.QueryParsers;
 
@@ -224,7 +225,18 @@ namespace Lucene.Net.Linq.Fluent
         {
             return new ReflectionFieldMapper<T>(propInfo, store, indexMode, TermVectorMode,
                                                 converter, fieldName, defaultParseOperator,
-                                                caseSensitive, analyzer, boost);
+                                                caseSensitive, ResolveAnalyzer(), boost);
+        }
+
+        private Analyzer ResolveAnalyzer()
+        {
+            if (analyzer != null) return analyzer;
+
+            var fakeAttr = new FieldAttribute(indexMode) {CaseSensitive = caseSensitive};
+
+            var flag = FieldMappingInfoBuilder.GetCaseSensitivity(fakeAttr, converter);
+
+            return flag ? new KeywordAnalyzer() : new CaseInsensitiveKeywordAnalyzer();
         }
 
         private void SetDefaults(PropertyInfo propInfo, PropertyMap<T> copy)

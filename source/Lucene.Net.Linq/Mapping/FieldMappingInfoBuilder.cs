@@ -76,7 +76,7 @@ namespace Lucene.Net.Linq.Mapping
             return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost);
         }
 
-        private static Analyzer BuildAnalyzer(FieldAttribute metadata, TypeConverter converter, Version version)
+        internal static Analyzer BuildAnalyzer(FieldAttribute metadata, TypeConverter converter, Version version)
         {
             if (metadata != null && metadata.Analyzer != null)
             {
