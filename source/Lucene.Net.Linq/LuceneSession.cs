@@ -27,13 +27,14 @@ namespace Lucene.Net.Linq
 
         private readonly SessionDocumentTracker documentTracker;
 
-        public LuceneSession(IDocumentMapper<T> mapper, IIndexWriter writer, Context context, IQueryable<T> queryable)
+        public LuceneSession(IDocumentMapper<T> mapper, IDocumentModificationDetector<T> detector, IIndexWriter writer, Context context, IQueryable<T> queryable)
         {
             this.mapper = mapper;
             this.writer = writer;
             this.context = context;
             this.queryable = queryable;
-            documentTracker = new SessionDocumentTracker(mapper);
+
+            documentTracker = new SessionDocumentTracker(detector);
         }
 
         public IQueryable<T> Query()
@@ -195,7 +196,7 @@ namespace Lucene.Net.Linq
                     deleteKeys.Add(doc.Key);
                 }
 
-                Add(doc.Document);
+                Add(doc.Item);
             }
 
             var additions = ConvertPendingAdditions();
@@ -257,25 +258,25 @@ namespace Lucene.Net.Linq
 
         internal class TrackedDocument
         {
-            private readonly T document;
-            private readonly T hiddenCopy;
+            private readonly T item;
+            private readonly Document document;
             private readonly IDocumentKey key;
 
-            internal TrackedDocument(T document, T hiddenCopy, IDocumentKey key)
+            internal TrackedDocument(T item, Document document, IDocumentKey key)
             {
+                this.item = item;
                 this.document = document;
-                this.hiddenCopy = hiddenCopy;
                 this.key = key;
             }
 
-            internal T Document
+            internal T Item
             {
-                get { return document; }
+                get { return item; }
             }
 
-            internal T HiddenCopy
+            internal Document Document
             {
-                get { return hiddenCopy; }
+                get { return document; }
             }
 
             internal IDocumentKey Key
@@ -286,37 +287,34 @@ namespace Lucene.Net.Linq
 
         internal class SessionDocumentTracker : IRetrievedDocumentTracker<T>
         {
-            private readonly IDocumentMapper<T> mapper;
+            private readonly IDocumentModificationDetector<T> detector;
             private readonly IDictionary<IDocumentKey, T> byKey = new Dictionary<IDocumentKey, T>();
             private readonly ISet<IDocumentKey> deletedKeys = new HashSet<IDocumentKey>();
             private readonly IList<TrackedDocument> items = new List<TrackedDocument>();
 
-            public SessionDocumentTracker(IDocumentMapper<T> mapper)
+            public SessionDocumentTracker(IDocumentModificationDetector<T> detector)
             {
-                this.mapper = mapper;
+                this.detector = detector;
             }
 
-            public bool TryGetTrackedDocument(T item, out T tracked)
+            public bool TryGetTrackedDocument(IDocumentKey key, out T tracked)
             {
                 tracked = default(T);
 
-                var key = mapper.ToKey(item);
                 if (key.Empty) return false;
                 
                 return byKey.TryGetValue(key, out tracked);
             }
 
-            public void TrackDocument(T item, T hiddenCopy)
+            public void TrackDocument(IDocumentKey key, T item, Document doc)
             {
-                var key = mapper.ToKey(item);
                 byKey.Add(key, item);
-
-                items.Add(new TrackedDocument(item, hiddenCopy, mapper.ToKey(hiddenCopy)));
+                items.Add(new TrackedDocument(item, doc, key));
             }
 
-            public bool IsMarkedForDeletion(T item)
+            public bool IsMarkedForDeletion(IDocumentKey key)
             {
-                return deletedKeys.Contains(mapper.ToKey(item));
+                return deletedKeys.Contains(key);
             }
 
             public void MarkForDeletion(IDocumentKey key)
@@ -327,8 +325,8 @@ namespace Lucene.Net.Linq
             public IEnumerable<TrackedDocument> FindModifiedDocuments()
             {
                 return items
-                    .Where(t => !mapper.Equals(t.Document, t.HiddenCopy))
-                    .Where(t => !IsMarkedForDeletion(t.Document));
+                    .Where(t => detector.IsModified(t.Item, t.Document))
+                    .Where(t => !IsMarkedForDeletion(t.Key));
             }
 
             public void Clear()

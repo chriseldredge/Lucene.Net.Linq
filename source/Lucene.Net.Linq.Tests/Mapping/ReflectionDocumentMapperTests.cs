@@ -11,8 +11,15 @@ namespace Lucene.Net.Linq.Tests.Mapping
     [TestFixture]
     public class ReflectionDocumentMapperTests
     {
-        private readonly ReflectedDocument item1 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
-        private readonly ReflectedDocument item2 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+        private ReflectedDocument item1;
+        private ReflectedDocument item2;
+
+        [SetUp]
+        public void SetUp()
+        {
+            item1 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+            item2 = new ReflectedDocument { Id = "1", Version = new Version("1.2.3.4"), Location = "New York", Name = "Fun things", Number = 12 };
+        }
 
         [Test]
         public void CtrFindsKeyFields()
@@ -80,6 +87,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper.ToKey(new ReflectedDocumentWithKey { Id = "x", Version = new Version("1.0") });
         }
+
         [Test]
         public void Documents_Equal()
         {
@@ -106,6 +114,40 @@ namespace Lucene.Net.Linq.Tests.Mapping
             item1.Version = new Version("5.6.7.8");
 
             Assert.That(mapper.Equals(item1, item2), Is.False);
+        }
+
+        [Test]
+        public void IsModified_Equal()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>(LuceneVersion.LUCENE_30);
+            var doc = new Document();
+            mapper.ToDocument(item1, doc);
+
+            Assert.That(mapper.IsModified(item1, doc), Is.False);
+        }
+
+        [Test]
+        public void IsModified_IgnoredField()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>(LuceneVersion.LUCENE_30);
+            var doc = new Document();
+            mapper.ToDocument(item1, doc);
+
+            item1.IgnoreMe = "different";
+
+            Assert.That(mapper.IsModified(item1, doc), Is.False);
+        }
+
+        [Test]
+        public void IsModified_Equal_Not()
+        {
+            var mapper = new ReflectionDocumentMapper<ReflectedDocument>(LuceneVersion.LUCENE_30);
+            var doc = new Document();
+            mapper.ToDocument(item1, doc);
+
+            item1.Version = new Version("5.6.7.8");
+
+            Assert.That(mapper.IsModified(item1, doc), Is.True);
         }
 
         [Test]

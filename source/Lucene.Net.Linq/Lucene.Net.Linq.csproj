@@ -88,7 +88,10 @@
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
     <Compile Include="Mapping\DocumentMapperBase.cs" />
+    <Compile Include="Mapping\IDocumentFieldConverter.cs" />
+    <Compile Include="Mapping\IDocumentKeyConverter.cs" />
     <Compile Include="Mapping\IDocumentMapper.cs" />
+    <Compile Include="Mapping\IDocumentModificationDetector.cs" />
     <Compile Include="Mapping\IFieldMapper.cs" />
     <Compile Include="Mapping\IFieldMappingInfo.cs" />
     <Compile Include="Mapping\IFieldMappingInfoProvider.cs" />

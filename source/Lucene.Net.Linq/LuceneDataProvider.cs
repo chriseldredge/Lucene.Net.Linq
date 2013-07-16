@@ -150,7 +150,9 @@ namespace Lucene.Net.Linq
         /// </summary>
         public ISession<T> OpenSession<T>(Func<T> factory)
         {
-            return OpenSession(factory, new ReflectionDocumentMapper<T>(version, externalAnalyzer));
+            var reflectionDocumentMapper = new ReflectionDocumentMapper<T>(version, externalAnalyzer);
+
+            return OpenSession(factory, reflectionDocumentMapper, reflectionDocumentMapper);
         }
 
         /// <summary>
@@ -161,10 +163,36 @@ namespace Lucene.Net.Linq
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
         public ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper)
         {
+            var documentModificationDetector = documentMapper as IDocumentModificationDetector<T>;
+
+            if (documentModificationDetector == null)
+            {
+                throw new ArgumentException(
+                    string.Format("The type {0} must implement {1} or else a separate implementation of {1} must be provided using an alternate overload.",
+                                  documentMapper.GetType(),
+                                  typeof(IDocumentModificationDetector<T>)),
+                    "documentMapper");
+            }
+
+            return OpenSession(factory, documentMapper, documentModificationDetector);
+        }
+
+        /// <summary>
+        /// Opens a session for staging changes and then committing them atomically.
+        /// </summary>
+        /// <param name="factory">Factory delegate that creates new instances of <typeparamref name="T"/></param>
+        /// <param name="documentMapper">Mapper that will convert documents to objects and vice versa.</param>
+        /// <param name="documentModificationDetector">Helper to determine when instances of <typeparamref name="T"/> are modified
+        /// and need to be updated in the index when the session is committed.
+        /// </param>
+        /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
+        public ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
+        {
             perFieldAnalyzer.Merge(documentMapper.Analyzer);
 
             return new LuceneSession<T>(
                 documentMapper,
+                documentModificationDetector,
                 IndexWriter,
                 context,
                 CreateQueryable(factory, context, documentMapper));

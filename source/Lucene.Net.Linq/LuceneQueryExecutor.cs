@@ -20,12 +20,14 @@ namespace Lucene.Net.Linq
     {
         private readonly Func<TDocument> newItem;
         private readonly IDocumentMapper<TDocument> mapper;
+        private readonly IDocumentKeyConverter keyConverter;
 
         public LuceneQueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
             : base(context)
         {
             this.newItem = newItem;
             this.mapper = mapper;
+            this.keyConverter = mapper as IDocumentKeyConverter;
         }
 
         protected override TDocument ConvertDocument(Document doc, IQueryExecutionContext context)
@@ -37,10 +39,22 @@ namespace Lucene.Net.Linq
             return item;
         }
 
+        protected override IDocumentKey GetDocumentKey(Document doc, IQueryExecutionContext context)
+        {
+            if (keyConverter != null)
+            {
+                return keyConverter.ToKey(doc);
+            }
+
+            var item = ConvertDocument(doc, context);
+
+            return mapper.ToKey(item);
+        }
+
         protected override TDocument ConvertDocumentForCustomBoost(Document doc)
         {
             var item = newItem();
-
+            
             mapper.ToObject(doc, new QueryExecutionContext(), item);
 
             return item;
@@ -162,7 +176,7 @@ namespace Lucene.Net.Linq
                 PrepareSearchSettings(executionContext);
 
                 var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults + skipResults, luceneQueryModel.Sort);
-                
+
                 if (luceneQueryModel.Last)
                 {
                     skipResults = hits.ScoreDocs.Length - 1;
@@ -188,26 +202,25 @@ namespace Lucene.Net.Linq
                 var docNum = hits.ScoreDocs[i].Doc;
                 var document = searcher.Doc(docNum);
 
-                var item = ConvertDocument(document, executionContext);
-
-                if (tracker != null)
+                if (tracker == null)
                 {
-                    if (tracker.IsMarkedForDeletion(item))
-                    {
-                        continue;
-                    }
+                    itemHolder.Current = ConvertDocument(document, executionContext);
+                    yield return projector(itemHolder.Current);
+                    continue;
+                }
 
-                    TDocument tracked;
+                var key = GetDocumentKey(document, executionContext);
 
-                    if (tracker.TryGetTrackedDocument(item, out tracked))
-                    {
-                        item = tracked;
-                    }
-                    else
-                    {
-                        var copy = ConvertDocument(document, executionContext);
-                        tracker.TrackDocument(item, copy);
-                    }
+                if (tracker.IsMarkedForDeletion(key))
+                {
+                    continue;
+                }
+
+                TDocument item;
+                if (!tracker.TryGetTrackedDocument(key, out item))
+                {
+                    item = ConvertDocument(document, executionContext);
+                    tracker.TrackDocument(key, item, document);
                 }
 
                 itemHolder.Current = item;
@@ -242,6 +255,7 @@ namespace Lucene.Net.Linq
         public abstract IEnumerable<string> KeyProperties { get; }
         public abstract Query CreateMultiFieldQuery(string pattern);
 
+        protected abstract IDocumentKey GetDocumentKey(Document doc, IQueryExecutionContext context);
         protected abstract TDocument ConvertDocument(Document doc, IQueryExecutionContext context);
         protected abstract TDocument ConvertDocumentForCustomBoost(Document doc);
         protected abstract void PrepareSearchSettings(IQueryExecutionContext context);

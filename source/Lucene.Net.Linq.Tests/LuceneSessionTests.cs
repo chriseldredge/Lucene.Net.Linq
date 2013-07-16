@@ -17,17 +17,19 @@ namespace Lucene.Net.Linq.Tests
     {
         private LuceneSession<Record> session;
         private IDocumentMapper<Record> mapper;
+        private IDocumentModificationDetector<Record> detector;
         private IIndexWriter writer;
         private Context context;
-
+        
         [SetUp]
         public void SetUp()
         {
             mapper = MockRepository.GenerateStrictMock<IDocumentMapper<Record>>();
+            detector = MockRepository.GenerateStrictMock<IDocumentModificationDetector<Record>>();
             writer = MockRepository.GenerateStrictMock<IIndexWriter>();
             context = MockRepository.GenerateStub<Context>(null, new object());
 
-            session = new LuceneSession<Record>(mapper, writer, context, null);
+            session = new LuceneSession<Record>(mapper, detector, writer, context, null);
 
             mapper.Expect(m => m.ToKey(Arg<Record>.Is.NotNull))
                 .WhenCalled(mi => mi.ReturnValue = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id"}, ((Record)mi.Arguments[0]).Id } }))
@@ -202,22 +204,24 @@ namespace Lucene.Net.Linq.Tests
         public void Delete_MarkedForDeletion()
         {
             var r1 = new Record { Id = "12" };
-            
-            session.Delete(r1);
+            var key = mapper.ToKey(r1);
 
-            Assert.That(session.DocumentTracker.IsMarkedForDeletion(r1), Is.True, "IsMarkedForDeletion");
+            session.Delete(r1);
+            
+            Assert.That(session.DocumentTracker.IsMarkedForDeletion(key), Is.True, "IsMarkedForDeletion");
         }
 
         [Test]
         public void Delete_MarkedForDeletion_ClearedOnRollback()
         {
             var r1 = new Record { Id = "12" };
+            var key = mapper.ToKey(r1);
 
             session.Delete(r1);
 
             session.Rollback();
 
-            Assert.That(session.DocumentTracker.IsMarkedForDeletion(r1), Is.False, "IsMarkedForDeletion");
+            Assert.That(session.DocumentTracker.IsMarkedForDeletion(key), Is.False, "IsMarkedForDeletion");
         }
 
         [Test]
@@ -253,7 +257,7 @@ namespace Lucene.Net.Linq.Tests
             queryable.Expect(q => q.Provider).Return(provider);
             queryable.Expect(q => q.Expression).Return(Expression.Constant(records));
             provider.Expect(p => p.CreateQuery<Record>(Arg<Expression>.Is.NotNull)).Return(records);
-            session = new LuceneSession<Record>(mapper, writer, context, queryable);
+            session = new LuceneSession<Record>(mapper, detector, writer, context, queryable);
 
             session.Query();
 
@@ -264,16 +268,36 @@ namespace Lucene.Net.Linq.Tests
         [Test]
         public void PendingChanges_DirtyDocuments()
         {
-            var record = new Record();
-            var copy = new Record();
-            mapper.Expect(m => m.Equals(record, copy)).Return(false);
+            var record = new Record { Id = "0" };
+            var document = new Document();
+            var key = mapper.ToKey(record);
+
+            detector.Expect(d => d.IsModified(record, document)).Return(true);
             mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
-            session.DocumentTracker.TrackDocument(record, copy);
+            session.DocumentTracker.TrackDocument(key, record, document);
             record.Id = "1";
 
             session.StageModifiedDocuments();
 
             Assert.That(session.PendingChanges, Is.True, "Should detect modified document.");
+        }
+
+        [Test]
+        public void PendingChanges_NoDirtyDocuments()
+        {
+            var record = new Record { Id = "1" };
+            var document = new Document();
+            document.Add(new Field("Id", "1", Field.Store.YES, Field.Index.NOT_ANALYZED));
+
+            var key = mapper.ToKey(record);
+
+            detector.Expect(d => d.IsModified(record, document)).Return(false);
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
+            session.DocumentTracker.TrackDocument(key, record, document);
+
+            session.StageModifiedDocuments();
+
+            Assert.That(session.PendingChanges, Is.False, "Should not stage unmodified document.");
         }
 
         [Test]

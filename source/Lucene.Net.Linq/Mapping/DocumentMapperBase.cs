@@ -11,7 +11,7 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public abstract class DocumentMapperBase<T> : IDocumentMapper<T>
+    public abstract class DocumentMapperBase<T> : IDocumentMapper<T>, IDocumentKeyConverter, IDocumentModificationDetector<T>
     {
         protected readonly Analyzer externalAnalyzer;
         protected PerFieldAnalyzer analyzer;
@@ -92,6 +92,29 @@ namespace Lucene.Net.Linq.Mapping
             return new DocumentKey(keyValues);
         }
 
+        public IDocumentKey ToKey(Document document)
+        {
+            var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => GetFieldValue(f, document));
+
+            ValidateKey(keyValues);
+
+            return new DocumentKey(keyValues);
+        }
+
+        private object GetFieldValue(IFieldMappingInfo fieldMapper, Document document)
+        {
+            var fieldConverter = fieldMapper as IDocumentFieldConverter;
+
+            if (fieldConverter == null)
+            {
+                throw new NotSupportedException(
+                    string.Format("The field mapping of type {0} for field {1} must implement {2}.",
+                    fieldMapper.GetType(), fieldMapper.FieldName, typeof(IDocumentFieldConverter)));
+            }
+
+            return fieldConverter.GetFieldValue(document);
+        }
+
         private void ValidateKey(Dictionary<IFieldMappingInfo, object> keyValues)
         {
             var nulls = keyValues.Where(kv => kv.Value == null).ToArray();
@@ -118,6 +141,22 @@ namespace Lucene.Net.Linq.Mapping
             // TODO: pattern should be analyzed/converted on per-field basis.
             var parser = new MultiFieldQueryParser(version, fieldMap.Keys.ToArray(), externalAnalyzer);
             return parser.Parse(pattern);
+        }
+
+        public virtual bool IsModified(T item, Document document)
+        {
+            foreach (var field in fieldMap.Values)
+            {
+                var val1 = field.GetPropertyValue(item);
+                var val2 = GetFieldValue(field, document);
+
+                if (!ValuesEqual(val1, val2))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public virtual bool Equals(T item1, T item2)

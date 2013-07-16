@@ -13,7 +13,7 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    public class ReflectionFieldMapper<T> : IFieldMapper<T>
+    public class ReflectionFieldMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
         protected readonly PropertyInfo propertyInfo;
         protected readonly StoreMode store;
@@ -147,17 +147,22 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
-            var field = source.GetFieldable(fieldName);
-
-            if (field == null)
-                return;
-
-            if (!propertyInfo.CanWrite)
-                return;
-
-            var fieldValue = ConvertFieldValue(field);
+            var fieldValue = GetFieldValue(source);
 
             propertyInfo.SetValue(target, fieldValue, null);
+        }
+
+        public object GetFieldValue(Document document)
+        {
+            var field = document.GetFieldable(fieldName);
+
+            if (field == null)
+                return null;
+
+            if (!propertyInfo.CanWrite)
+                return null;
+
+            return ConvertFieldValue(field);
         }
 
         public virtual void CopyToDocument(T source, Document target)

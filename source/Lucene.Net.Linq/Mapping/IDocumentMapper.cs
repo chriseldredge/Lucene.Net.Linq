@@ -1,5 +1,4 @@
-﻿using Lucene.Net.Analysis;
-using Lucene.Net.Documents;
+﻿using Lucene.Net.Documents;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Search;
 
@@ -39,6 +38,10 @@ namespace Lucene.Net.Linq.Mapping
         /// objects are dirty and need to be updated during
         /// commit.
         /// </summary>
+        /// <remarks>
+        /// This method has been replaced by <see cref="IDocumentModificationDetector{T}.IsModified"/> 
+        /// in 3.2 and may be removed in future versions.
+        /// </remarks>
         bool Equals(T item1, T item2);
 
         /// <summary>

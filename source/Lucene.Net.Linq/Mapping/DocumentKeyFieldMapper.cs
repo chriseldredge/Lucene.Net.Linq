@@ -8,7 +8,7 @@ using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal class DocumentKeyFieldMapper<T> : IFieldMapper<T>
+    internal class DocumentKeyFieldMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
         private readonly string fieldName;
         private readonly string value;
@@ -27,6 +27,11 @@ namespace Lucene.Net.Linq.Mapping
         public void CopyToDocument(T source, Document target)
         {
             target.Add(new Field(fieldName, value, Field.Store.YES, Field.Index.NOT_ANALYZED));
+        }
+
+        public object GetFieldValue(Document document)
+        {
+            return value;
         }
 
         public void CopyFromDocument(Document source, IQueryExecutionContext context, T target)

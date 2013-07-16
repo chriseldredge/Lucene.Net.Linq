@@ -1,14 +1,14 @@
+using System;
 using System.Linq;
 using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
-using Lucene.Net.Util;
 using NUnit.Framework;
 using Rhino.Mocks;
+using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -28,6 +28,16 @@ namespace Lucene.Net.Linq.Tests
             TestDelegate call = () => provider.OpenSession<Item>();
 
             Assert.That(call, Throws.Nothing);
+        }
+
+        [Test]
+        public void OpenSessionThrowsWhenDocumentMapperDoesNotImplementModificationDetector()
+        {
+            var provider = new LuceneDataProvider(new RAMDirectory(), new SimpleAnalyzer(), Version.LUCENE_29);
+
+            TestDelegate call = () => provider.OpenSession(MockRepository.GenerateStrictMock<IDocumentMapper<Item>>());
+
+            Assert.That(call, Throws.ArgumentException.With.Property("ParamName").EqualTo("documentMapper"));
         }
 
         [Test]
