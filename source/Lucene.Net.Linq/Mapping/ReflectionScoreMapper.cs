@@ -7,13 +7,18 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Mapping
 {
-    internal class ReflectionScoreMapper<T> : IFieldMapper<T>
+    internal class ReflectionScoreMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
         private readonly PropertyInfo propertyInfo;
 
         public ReflectionScoreMapper(PropertyInfo propertyInfo)
         {
             this.propertyInfo = propertyInfo;
+        }
+
+        public object GetFieldValue(Document document)
+        {
+            return null;
         }
 
         public void CopyToDocument(T source, Document target)

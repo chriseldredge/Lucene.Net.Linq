@@ -147,6 +147,12 @@ namespace Lucene.Net.Linq.Mapping
         {
             foreach (var field in fieldMap.Values)
             {
+                // IFieldMapper should tell us if the field is transient/non-comparable
+                if (field is ReflectionScoreMapper<T>)
+                {
+                    continue;
+                }
+
                 var val1 = field.GetPropertyValue(item);
                 var val2 = GetFieldValue(field, document);
 

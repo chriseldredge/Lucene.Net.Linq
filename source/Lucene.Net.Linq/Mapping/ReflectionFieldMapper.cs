@@ -147,6 +147,8 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
         {
+            if (!propertyInfo.CanWrite) return;
+
             var fieldValue = GetFieldValue(source);
 
             propertyInfo.SetValue(target, fieldValue, null);

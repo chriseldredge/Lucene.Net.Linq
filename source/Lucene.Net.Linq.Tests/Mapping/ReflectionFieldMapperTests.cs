@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
+using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
@@ -119,6 +120,18 @@ namespace Lucene.Net.Linq.Tests.Mapping
         public string Text { get; set; }
 
         public string Version { get; set; }
+
+        public string ReadOnly { get { return "You can't write to me"; } }
+
+        [Test]
+        public void CopyFromDocument_ReadOnlyProperty()
+        {
+            var mapper = CreateMapper("ReadOnly");
+
+            TestDelegate call = () => mapper.CopyFromDocument(new Document(), new QueryExecutionContext(), this);
+
+            Assert.That(call, Throws.Nothing);
+        }
 
         private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, QueryParser.Operator defaultParseOperaor = QueryParser.Operator.OR, bool caseSensitive = false)
         {

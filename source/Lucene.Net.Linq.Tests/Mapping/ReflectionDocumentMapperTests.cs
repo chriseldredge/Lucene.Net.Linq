@@ -203,6 +203,9 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             [IgnoreField]
             public string IgnoreMe { get; set; }
+
+            [QueryScore]
+            public decimal Score { get; set; }
         }
 
         [DocumentKey(FieldName = "Type", Value = "ReflectedDocumentWithKey")]
