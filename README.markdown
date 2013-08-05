@@ -30,6 +30,7 @@ run the following command in the [Package Manager Console](http://docs.nuget.org
 
 ## Examples
 
+1. Using [fluent syntax](source/Lucene.Net.Linq.Tests/Samples/FluentConfiguration.cs) to configure mappings
 1. Using [attributes](source/Lucene.Net.Linq.Tests/Samples/AttributeConfiguration.cs) to configure mappings
 1. Specifying [document keys](source/Lucene.Net.Linq.Tests/Samples/DocumentKeys.cs)
 

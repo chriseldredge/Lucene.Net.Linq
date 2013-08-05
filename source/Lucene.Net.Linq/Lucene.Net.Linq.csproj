@@ -100,6 +100,7 @@
     <Compile Include="Mapping\TermVectorMode.cs" />
     <Compile Include="QueryExecutionContext.cs" />
     <Compile Include="QueryExecutionPhase.cs" />
+    <Compile Include="ReadOnlyLuceneDataProvider.cs" />
     <Compile Include="RelinqQueryParserFactory.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandler.cs" />
     <Compile Include="ScalarResultHandlers\ScalarResultHandlerRegistry.cs" />

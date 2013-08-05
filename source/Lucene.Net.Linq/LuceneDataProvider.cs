@@ -186,7 +186,7 @@ namespace Lucene.Net.Linq
         /// and need to be updated in the index when the session is committed.
         /// </param>
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
-        public ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
+        public virtual ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
         {
             perFieldAnalyzer.Merge(documentMapper.Analyzer);
 
@@ -276,8 +276,11 @@ namespace Lucene.Net.Linq
         public void Dispose()
         {
             if (writerIsExternal) return;
-            
-            IndexWriter.Dispose();
+
+            if (writer != null)
+            {
+                writer.Dispose(); 
+            }
         }
 
         protected virtual IIndexWriter GetIndexWriter(Analyzer analyzer)

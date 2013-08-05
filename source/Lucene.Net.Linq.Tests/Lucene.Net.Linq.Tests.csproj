@@ -88,6 +88,7 @@
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
+    <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />
     <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
     <Compile Include="Integration\SelectCollectionTests.cs" />
