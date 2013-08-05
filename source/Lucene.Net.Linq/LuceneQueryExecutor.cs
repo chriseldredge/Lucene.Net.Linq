@@ -18,11 +18,11 @@ namespace Lucene.Net.Linq
 {
     internal class LuceneQueryExecutor<TDocument> : LuceneQueryExecutorBase<TDocument>
     {
-        private readonly Func<TDocument> newItem;
+        private readonly ObjectLookup<TDocument> newItem;
         private readonly IDocumentMapper<TDocument> mapper;
         private readonly IDocumentKeyConverter keyConverter;
 
-        public LuceneQueryExecutor(Context context, Func<TDocument> newItem, IDocumentMapper<TDocument> mapper)
+        public LuceneQueryExecutor(Context context, ObjectLookup<TDocument> newItem, IDocumentMapper<TDocument> mapper)
             : base(context)
         {
             this.newItem = newItem;
@@ -32,11 +32,22 @@ namespace Lucene.Net.Linq
 
         protected override TDocument ConvertDocument(Document doc, IQueryExecutionContext context)
         {
-            var item = newItem();
+            var key = (IDocumentKey) null;
+            if (keyConverter != null)
+            {
+                key = keyConverter.ToKey(doc);
+            }
+
+            var item = newItem(key);
             
             mapper.ToObject(doc, context, item);
             
             return item;
+        }
+        
+        protected override TDocument ConvertDocumentForCustomBoost(Document doc)
+        {
+            return ConvertDocument(doc, new QueryExecutionContext());
         }
 
         protected override IDocumentKey GetDocumentKey(Document doc, IQueryExecutionContext context)
@@ -49,15 +60,6 @@ namespace Lucene.Net.Linq
             var item = ConvertDocument(doc, context);
 
             return mapper.ToKey(item);
-        }
-
-        protected override TDocument ConvertDocumentForCustomBoost(Document doc)
-        {
-            var item = newItem();
-            
-            mapper.ToObject(doc, new QueryExecutionContext(), item);
-
-            return item;
         }
 
         public override IFieldMappingInfo GetMappingInfo(string propertyName)

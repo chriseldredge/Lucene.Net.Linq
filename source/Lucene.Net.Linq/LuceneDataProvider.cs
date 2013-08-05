@@ -14,6 +14,9 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
 {
+    public delegate T ObjectFactory<T>();
+    public delegate T ObjectLookup<T>(IDocumentKey key);
+
     /// <summary>
     /// Provides IQueryable access to a Lucene.Net index as well as an API
     /// for adding, deleting and replacing documents within atomic transactions.
@@ -94,7 +97,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// <see cref="AsQueryable{T}(System.Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public IQueryable<T> AsQueryable<T>() where T : new()
         {
@@ -102,7 +105,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// <see cref="AsQueryable{T}(System.Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public IQueryable<T> AsQueryable<T>(IDocumentMapper<T> documentMapper) where T : new()
         {
@@ -110,11 +113,27 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// <see cref="AsQueryable{T}(System.Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
-        public IQueryable<T> AsQueryable<T>(Func<T> factory)
+        public IQueryable<T> AsQueryable<T>(ObjectFactory<T> factory)
         {
-            return AsQueryable(factory, new ReflectionDocumentMapper<T>(version, externalAnalyzer));
+            return AsQueryable(_ => factory());
+        }
+
+        /// <summary>
+        /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
+        /// </summary>
+        public IQueryable<T> AsQueryable<T>(ObjectLookup<T> lookup)
+        {
+            return AsQueryable(lookup, new ReflectionDocumentMapper<T>(version, externalAnalyzer));
+        }
+
+        /// <summary>
+        /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
+        /// </summary>
+        public IQueryable<T> AsQueryable<T>(ObjectFactory<T> factory, IDocumentMapper<T> documentMapper)
+        {
+            return AsQueryable(_ => factory(), documentMapper);
         }
 
         /// <summary>
@@ -122,15 +141,15 @@ namespace Lucene.Net.Linq
         /// from <c cref="Document"/> is constructed by a factory delegate.
         /// </summary>
         /// <typeparam name="T">The type of object that Document will be mapped onto.</typeparam>
-        /// <param name="factory">Factory method to instantiate new instances of T.</param>
+        /// <param name="lookup">Factory method to instantiate new instances of T.</param>
         /// <param name="documentMapper">Mapper that will convert documents to objects and vice versa.</param>
-        public IQueryable<T> AsQueryable<T>(Func<T> factory, IDocumentMapper<T> documentMapper)
+        public IQueryable<T> AsQueryable<T>(ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper)
         {
-            return CreateQueryable(factory, context, documentMapper);
+            return CreateQueryable(lookup, context, documentMapper);
         }
 
         /// <summary>
-        /// <see cref="OpenSession{T}(Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="OpenSession{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public ISession<T> OpenSession<T>() where T : new()
         {
@@ -138,7 +157,7 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// <see cref="OpenSession{T}(Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="OpenSession{T}(ObjectFactory{T}, IDocumentMapper{T})"/>
         /// </summary>
         public ISession<T> OpenSession<T>(IDocumentMapper<T> documentMapper) where T : new()
         {
@@ -146,22 +165,38 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
-        /// <see cref="OpenSession{T}(Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="OpenSession{T}(ObjectFactory{T}, IDocumentMapper{T})"/>
         /// </summary>
-        public ISession<T> OpenSession<T>(Func<T> factory)
+        public ISession<T> OpenSession<T>(ObjectFactory<T> factory)
+        {
+            return OpenSession(_ => factory());
+        }
+
+        /// <summary>
+        /// <see cref="OpenSession{T}(ObjectLookup{T}, IDocumentMapper{T}, IDocumentModificationDetector{T})"/>
+        /// </summary>
+        public ISession<T> OpenSession<T>(ObjectLookup<T> lookup)
         {
             var reflectionDocumentMapper = new ReflectionDocumentMapper<T>(version, externalAnalyzer);
 
-            return OpenSession(factory, reflectionDocumentMapper, reflectionDocumentMapper);
+            return OpenSession(lookup, reflectionDocumentMapper, reflectionDocumentMapper);
+        }
+
+        /// <summary>
+        /// <see cref="OpenSession{T}(ObjectLookup{T}, IDocumentMapper{T}, IDocumentModificationDetector{T})"/>
+        /// </summary>
+        public ISession<T> OpenSession<T>(ObjectFactory<T> factory, IDocumentMapper<T> documentMapper)
+        {
+            return OpenSession(_ => factory(), documentMapper);
         }
 
         /// <summary>
         /// Opens a session for staging changes and then committing them atomically.
         /// </summary>
-        /// <param name="factory">Factory delegate that creates new instances of <typeparamref name="T"/></param>
+        /// <param name="lookup">Factory delegate that creates new instances of <typeparamref name="T"/></param>
         /// <param name="documentMapper">Mapper that will convert documents to objects and vice versa.</param>
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
-        public ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper)
+        public ISession<T> OpenSession<T>(ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper)
         {
             var documentModificationDetector = documentMapper as IDocumentModificationDetector<T>;
 
@@ -174,7 +209,7 @@ namespace Lucene.Net.Linq
                     "documentMapper");
             }
 
-            return OpenSession(factory, documentMapper, documentModificationDetector);
+            return OpenSession(lookup, documentMapper, documentModificationDetector);
         }
 
         /// <summary>
@@ -183,10 +218,24 @@ namespace Lucene.Net.Linq
         /// <param name="factory">Factory delegate that creates new instances of <typeparamref name="T"/></param>
         /// <param name="documentMapper">Mapper that will convert documents to objects and vice versa.</param>
         /// <param name="documentModificationDetector">Helper to determine when instances of <typeparamref name="T"/> are modified
-        /// and need to be updated in the index when the session is committed.
+        ///     and need to be updated in the index when the session is committed.
         /// </param>
         /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
-        public virtual ISession<T> OpenSession<T>(Func<T> factory, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
+        public ISession<T> OpenSession<T>(ObjectFactory<T> factory, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
+        {
+            return OpenSession(_ => factory(), documentMapper, documentModificationDetector);
+        }
+
+        /// <summary>
+        /// Opens a session for staging changes and then committing them atomically.
+        /// </summary>
+        /// <param name="lookup">Factory delegate that resolves instances of <typeparamref name="T"/></param>
+        /// <param name="documentMapper">Mapper that will convert documents to objects and vice versa.</param>
+        /// <param name="documentModificationDetector">Helper to determine when instances of <typeparamref name="T"/> are modified
+        ///     and need to be updated in the index when the session is committed.
+        /// </param>
+        /// <typeparam name="T">The type of object that will be mapped to <c cref="Document"/>.</typeparam>
+        public virtual ISession<T> OpenSession<T>(ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper, IDocumentModificationDetector<T> documentModificationDetector)
         {
             perFieldAnalyzer.Merge(documentMapper.Analyzer);
 
@@ -195,31 +244,47 @@ namespace Lucene.Net.Linq
                 documentModificationDetector,
                 IndexWriter,
                 context,
-                CreateQueryable(factory, context, documentMapper));
+                CreateQueryable(lookup, context, documentMapper));
         }
 
         /// <summary>
-        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback) where T : new()
         {
-            RegisterCacheWarmingCallback(callback, () => new T());
+            RegisterCacheWarmingCallback(callback, _ => new T());
         }
 
         /// <summary>
-        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, IDocumentMapper<T> documentMapper) where T : new()
         {
-            RegisterCacheWarmingCallback(callback, () => new T(), documentMapper);
+            RegisterCacheWarmingCallback(callback, _ => new T(), documentMapper);
         }
 
         /// <summary>
-        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, Func{T}, IDocumentMapper{T})"/>
+        /// <see cref="RegisterCacheWarmingCallback{T}(Action{System.Linq.IQueryable{T}}, ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
-        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, Func<T> factory)
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, ObjectFactory<T> factory)
         {
-            RegisterCacheWarmingCallback(callback, factory, new ReflectionDocumentMapper<T>(version, null));
+            RegisterCacheWarmingCallback(callback, _ => factory());
+        }
+
+        /// <summary>
+        /// <see cref="RegisterCacheWarmingCallback{T}(System.Action{System.Linq.IQueryable{T}}, ObjectLookup{T}, IDocumentMapper{T})"/>
+        /// </summary>
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, ObjectFactory<T> factory, IDocumentMapper<T> documentMapper)
+        {
+            RegisterCacheWarmingCallback(callback, _ => factory(), documentMapper);
+        }
+
+        /// <summary>
+        /// <see cref="RegisterCacheWarmingCallback{T}(System.Action{System.Linq.IQueryable{T}}, ObjectLookup{T}, IDocumentMapper{T})"/>
+        /// </summary>
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, ObjectLookup<T> lookup)
+        {
+            RegisterCacheWarmingCallback(callback, lookup, new ReflectionDocumentMapper<T>(version, null));
         }
 
         /// <summary>
@@ -232,17 +297,17 @@ namespace Lucene.Net.Linq
         /// 
         /// If this is the first instance, other threads will block until all callbacks complete.
         /// </summary>
-        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, Func<T> factory, IDocumentMapper<T> documentMapper)
+        public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper)
         {
             context.SearcherLoading += (s, e) =>
             {
-                Log.Trace(m => m("Invoking cache warming callback " + factory));
+                Log.Trace(m => m("Invoking cache warming callback " + lookup));
 
                 var warmupContext = new WarmUpContext(context, e.IndexSearcher);
-                var queryable = CreateQueryable(factory, warmupContext, documentMapper);
+                var queryable = CreateQueryable(lookup, warmupContext, documentMapper);
                 callback(queryable);
 
-                Log.Trace(m => m("Callback {0} completed.", factory));
+                Log.Trace(m => m("Callback {0} completed.", lookup));
             };
         }
 
@@ -313,7 +378,7 @@ namespace Lucene.Net.Linq
             get { return Index.IndexWriter.MaxFieldLength.UNLIMITED; }
         }
 
-        private LuceneQueryable<T> CreateQueryable<T>(Func<T> factory, Context context, IDocumentMapper<T> mapper)
+        private LuceneQueryable<T> CreateQueryable<T>(ObjectLookup<T> factory, Context context, IDocumentMapper<T> mapper)
         {
             var executor = new LuceneQueryExecutor<T>(context, factory, mapper);
             return new LuceneQueryable<T>(queryParser, executor);

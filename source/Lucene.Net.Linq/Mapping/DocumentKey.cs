@@ -22,6 +22,16 @@ namespace Lucene.Net.Linq.Mapping
         /// that no key fields are defined for the document.
         /// </summary>
         bool Empty { get; }
+
+        /// <summary>
+        /// Contains list of properties that are used for the key.
+        /// </summary>
+        IEnumerable<string> Properties { get; }
+
+        /// <summary>
+        /// Retrieves the value for a given property.
+        /// </summary>
+        object this[string property] { get; }
     }
 
     public class DocumentKey : IDocumentKey
@@ -49,6 +59,16 @@ namespace Lucene.Net.Linq.Mapping
             var query = new BooleanQuery();
             values.Apply(kvp => query.Add(ConvertToQueryExpression(kvp), Occur.MUST));
             return query;
+        }
+
+        public IEnumerable<string> Properties
+        {
+            get { return values.Keys; }
+        }
+
+        public object this[string property]
+        {
+            get { return values[property]; }
         }
 
         private Query ConvertToQueryExpression(KeyValuePair<string, object> kvp)
