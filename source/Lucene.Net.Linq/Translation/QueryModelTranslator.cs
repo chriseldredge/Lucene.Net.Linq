@@ -14,19 +14,24 @@ namespace Lucene.Net.Linq.Translation
         private static readonly ResultOperatorRegistry resultOperators = ResultOperatorRegistry.CreateDefault();
 
         private readonly IFieldMappingInfoProvider fieldMappingInfoProvider;
+        private readonly Context context;
         private readonly LuceneQueryModel model;
 
-        internal QueryModelTranslator(IFieldMappingInfoProvider fieldMappingInfoProvider)
+        internal QueryModelTranslator(IFieldMappingInfoProvider fieldMappingInfoProvider, Context context)
         {
             this.fieldMappingInfoProvider = fieldMappingInfoProvider;
+            this.context = context;
             this.model = new LuceneQueryModel(fieldMappingInfoProvider);
         }
 
         public void Build(QueryModel queryModel)
         {
             queryModel.Accept(this);
-
-            CreateQueryFilterForKeyFields();
+            
+            if (context.Settings.EnableMultipleEntities)
+            {
+                CreateQueryFilterForKeyFields();    
+            }
         }
 
         public LuceneQueryModel Model
@@ -90,6 +95,7 @@ namespace Lucene.Net.Linq.Translation
                 (query, property) =>
                     {
                         var fieldMappingInfo = fieldMappingInfoProvider.GetMappingInfo(property);
+                        
                         query.Add(fieldMappingInfo.CreateQuery("*"), Occur.MUST);
                         return query;
                     });

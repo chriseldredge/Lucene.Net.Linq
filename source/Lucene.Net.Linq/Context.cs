@@ -25,6 +25,7 @@ namespace Lucene.Net.Linq
         {
             this.directory = directory;
             this.transactionLock = transactionLock;
+            Settings = new LuceneDataProviderSettings();
         }
 
         public void Dispose()
@@ -45,6 +46,8 @@ namespace Lucene.Net.Linq
                 tracker = null;
             }
         }
+
+        public LuceneDataProviderSettings Settings { get; set; }
 
         public Directory Directory
         {

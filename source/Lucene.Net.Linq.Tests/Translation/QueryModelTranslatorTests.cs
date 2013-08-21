@@ -5,6 +5,7 @@ using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
+using Lucene.Net.Store;
 using NUnit.Framework;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -18,13 +19,14 @@ namespace Lucene.Net.Linq.Tests.Translation
         private IFieldMappingInfoProvider mappingProvider;
         private QueryModelTranslator transformer;
         private readonly QueryModel queryModel = new QueryModel(new MainFromClause("i", typeof(Record), Expression.Constant("r")), new SelectClause(Expression.Constant("a")) );
+        private Context context;
 
         [SetUp]
         public void SetUp()
         {
             mappingProvider = MockRepository.GenerateStub<IFieldMappingInfoProvider>();
-
-            transformer = new QueryModelTranslator(mappingProvider);
+            context = new Context(new RAMDirectory(), new object());
+            transformer = new QueryModelTranslator(mappingProvider, context);
         }
 
         [Test]
@@ -150,6 +152,16 @@ namespace Lucene.Net.Linq.Tests.Translation
 
             Assert.That(filter, Is.Not.Null, "transformer.Model.Filter");
             Assert.That(filter.ToString(), Is.EqualTo("QueryWrapperFilter(+my-key:fixed-value)"));
+        }
+
+        [Test]
+        public void DoesNotSetQueryFilterWhenDisabled()
+        {
+            context.Settings.EnableMultipleEntities = false;
+
+            transformer.Build(queryModel);
+
+            Assert.That(transformer.Model.Filter, Is.Null, "transformer.Model.Filter");
         }
 
         [Test]

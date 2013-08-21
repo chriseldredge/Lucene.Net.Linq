@@ -239,9 +239,9 @@ namespace Lucene.Net.Linq
         {
             QueryModelTransformer.TransformQueryModel(queryModel);
 
-            var builder = new QueryModelTranslator(this);
+            var builder = new QueryModelTranslator(this, context);
             builder.Build(queryModel);
-
+            
             Log.Debug(m => m("Lucene query: {0}", builder.Model));
 
             return builder.Model;

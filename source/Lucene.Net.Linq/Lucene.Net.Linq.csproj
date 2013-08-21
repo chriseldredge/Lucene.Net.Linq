@@ -85,6 +85,7 @@
     <Compile Include="Fluent\TermVectorPart.cs" />
     <Compile Include="IQueryExecutionContext.cs" />
     <Compile Include="IRetrievedDocumentTracker.cs" />
+    <Compile Include="LuceneDataProviderSettings.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
     <Compile Include="Mapping\DocumentMapperBase.cs" />

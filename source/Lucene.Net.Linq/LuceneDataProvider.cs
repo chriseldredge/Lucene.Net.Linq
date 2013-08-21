@@ -111,6 +111,15 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
+        /// Settings that enable or disable optional behavior.
+        /// </summary>
+        public LuceneDataProviderSettings Settings
+        {
+            get { return context.Settings; }
+            set { context.Settings = value; }
+        }
+
+        /// <summary>
         /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public IQueryable<T> AsQueryable<T>() where T : new()
