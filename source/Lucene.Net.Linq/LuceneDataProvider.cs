@@ -14,8 +14,22 @@ using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq
 {
-    public delegate T ObjectFactory<T>();
-    public delegate T ObjectLookup<T>(IDocumentKey key);
+    /// <summary>
+    /// Delegate used by <see cref="LuceneDataProvider"/> to create instances of objects that do not
+    /// have public default constructors.
+    /// </summary>
+    /// <typeparam name="T">The type of object <see cref="Document"/>s will be mapped onto.</typeparam>
+    /// <returns>An instance of <paramref name="T"/></returns>
+    public delegate T ObjectFactory<out T>();
+
+    /// <summary>
+    /// Delegate used by <see cref="LuceneDataProvider"/> to create or reuse instances of objects
+    /// for advanced clients that may wish to provide caching.
+    /// </summary>
+    /// <typeparam name="T">The type of object <see cref="Document"/>s will be mapped onto.</typeparam>
+    /// <param name="key">A key that uniquely identifies the <see cref="Document"/>.</param>
+    /// <returns>An instance of <paramref name="T"/></returns>
+    public delegate T ObjectLookup<out T>(IDocumentKey key);
 
     /// <summary>
     /// Provides IQueryable access to a Lucene.Net index as well as an API
