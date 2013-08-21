@@ -32,14 +32,9 @@ namespace Lucene.Net.Linq.Mapping
 
             var metadata = p.GetCustomAttribute<FieldAttribute>(true);
             var numericFieldAttribute = p.GetCustomAttribute<NumericFieldAttribute>(true);
-            var type = p.PropertyType;
+            Type type;
 
-            var isCollection = IsCollection(p.PropertyType);
-
-            if (isCollection)
-            {
-                type = p.PropertyType.GetGenericArguments()[0];
-            }
+            var isCollection = IsCollection(p.PropertyType, out type);
 
             ReflectionFieldMapper<T> mapper;
 
@@ -55,10 +50,17 @@ namespace Lucene.Net.Linq.Mapping
             return isCollection ? new CollectionReflectionFieldMapper<T>(mapper, type) : mapper;
         }
 
-        private static bool IsCollection(Type type)
+        internal static bool IsCollection(Type type, out Type collectionType)
         {
-            return type.IsGenericType &&
-                   typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition());
+            collectionType = type;
+
+            if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+            {
+                collectionType = type.GetGenericArguments()[0];
+                return true;
+            }
+
+            return false;
         }
 
         private static ReflectionFieldMapper<T> BuildPrimitive<T>(PropertyInfo p, Type type, FieldAttribute metadata, Version version, Analyzer externalAnalyzer)
@@ -102,9 +104,9 @@ namespace Lucene.Net.Linq.Mapping
 
         internal static TypeConverter GetConverter(PropertyInfo p, Type type, FieldAttribute metadata)
         {
-            if (metadata != null && metadata.Converter != null)
+            if (metadata != null && metadata.ConverterInstance != null)
             {
-                return (TypeConverter)Activator.CreateInstance(metadata.Converter);
+                return metadata.ConverterInstance;
             }
 
             var formatSpecified = metadata != null && metadata.Format != null;

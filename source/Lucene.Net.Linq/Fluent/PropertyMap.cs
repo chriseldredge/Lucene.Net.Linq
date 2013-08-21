@@ -21,15 +21,15 @@ namespace Lucene.Net.Linq.Fluent
         protected string fieldName;
         protected bool isKey;
         protected TypeConverter converter;
-        private Analyzer analyzer;
-        private IndexMode indexMode = Mapping.IndexMode.Analyzed;
-        private StoreMode store = StoreMode.Yes;
-        private float boost = 1.0f;
-        private bool caseSensitive;
-        private QueryParser.Operator defaultParseOperator = QueryParser.OR_OPERATOR;
+        protected Analyzer analyzer;
+        protected IndexMode indexMode = Mapping.IndexMode.Analyzed;
+        protected StoreMode store = StoreMode.Yes;
+        protected float boost = 1.0f;
+        protected bool caseSensitive;
+        protected QueryParser.Operator defaultParseOperator = QueryParser.OR_OPERATOR;
 
         internal PropertyMap(ClassMap<T> classMap, PropertyInfo propInfo, bool isKey = false)
-            :this(classMap, propInfo, null)
+            : this(classMap, propInfo, null)
         {
             this.isKey = isKey;
         }
@@ -40,7 +40,7 @@ namespace Lucene.Net.Linq.Fluent
             this.propInfo = propInfo;
             SetDefaults(propInfo, copy);
         }
-        
+
         /// <summary>
         /// Set the field name. Defaults to same as property name being mapped.
         /// </summary>
@@ -56,7 +56,7 @@ namespace Lucene.Net.Linq.Fluent
         /// </summary>
         public NumericPropertyMap<T> AsNumericField()
         {
-            if (this is NumericPropertyMap<T>) return (NumericPropertyMap<T>) this;
+            if (this is NumericPropertyMap<T>) return (NumericPropertyMap<T>)this;
             var numericPart = new NumericPropertyMap<T>(classMap, propInfo, this);
             classMap.AddProperty(numericPart);
             return numericPart;
@@ -221,7 +221,33 @@ namespace Lucene.Net.Linq.Fluent
 
         protected internal TermVectorMode TermVectorMode { get; set; }
 
+        protected virtual Type PropertyType
+        {
+            get
+            {
+                Type type;
+
+                FieldMappingInfoBuilder.IsCollection(propInfo.PropertyType, out type);
+
+                return type;
+            }
+        }
+
         protected internal virtual IFieldMapper<T> ToFieldMapper()
+        {
+            var mapper = ToFieldMapperInternal();
+
+            Type type;
+
+            if (FieldMappingInfoBuilder.IsCollection(propInfo.PropertyType, out type))
+            {
+                return new CollectionReflectionFieldMapper<T>(mapper, type);
+            }
+
+            return mapper;
+        }
+
+        protected internal virtual ReflectionFieldMapper<T> ToFieldMapperInternal()
         {
             return new ReflectionFieldMapper<T>(propInfo, store, indexMode, TermVectorMode,
                                                 converter, fieldName, defaultParseOperator,
@@ -232,7 +258,7 @@ namespace Lucene.Net.Linq.Fluent
         {
             if (analyzer != null) return analyzer;
 
-            var fakeAttr = new FieldAttribute(indexMode) {CaseSensitive = caseSensitive};
+            var fakeAttr = new FieldAttribute(indexMode) { CaseSensitive = caseSensitive };
 
             var flag = FieldMappingInfoBuilder.GetCaseSensitivity(fakeAttr, converter);
 

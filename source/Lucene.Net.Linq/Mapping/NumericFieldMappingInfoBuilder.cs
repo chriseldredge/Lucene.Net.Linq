@@ -29,9 +29,9 @@ namespace Lucene.Net.Linq.Mapping
 
         private static TypeConverter GetComplexTypeToScalarConverter(Type type, NumericFieldAttribute metadata)
         {
-            if (metadata.Converter != null)
+            if (metadata.ConverterInstance != null)
             {
-                return (TypeConverter)Activator.CreateInstance(metadata.Converter);
+                return metadata.ConverterInstance;
             }
 
             type = type.GetUnderlyingType();
@@ -48,7 +48,7 @@ namespace Lucene.Net.Linq.Mapping
             return null;
         }
 
-        private static TypeConverter GetScalarToStringConverter(TypeConverter typeToValueTypeConverter)
+        internal static TypeConverter GetScalarToStringConverter(TypeConverter typeToValueTypeConverter)
         {
             if (typeToValueTypeConverter.CanConvertTo(typeof(long)))
             {

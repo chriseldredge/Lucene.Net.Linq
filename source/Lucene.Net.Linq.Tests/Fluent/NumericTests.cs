@@ -19,6 +19,16 @@ namespace Lucene.Net.Linq.Tests.Fluent
         }
 
         [Test]
+        public void HasScalarConverter()
+        {
+            map.Property(x => x.Id).AsNumericField();
+
+            var info = GetMappingInfo<NumericReflectionFieldMapper<Sample>>("Id");
+
+            Assert.That(info.Converter, Is.Not.Null);
+        }
+
+        [Test]
         public void NumericKey()
         {
             map.Key(x => x.Id).AsNumericField();
@@ -57,6 +67,14 @@ namespace Lucene.Net.Linq.Tests.Fluent
             var info = GetMappingInfo<NumericReflectionFieldMapper<Sample>>("Id");
 
             Assert.That(info.PrecisionStep, Is.EqualTo(6));
+        }
+
+        [Test]
+        public void Enumerable()
+        {
+            map.Property(x => x.Numbers).AsNumericField();
+
+            var info = GetMappingInfo<CollectionReflectionFieldMapper<Sample>>("Numbers");
         }
     }
 }

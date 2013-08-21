@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.QueryParsers;
@@ -43,7 +44,11 @@ namespace Lucene.Net.Linq.Mapping
         /// Provides a custom TypeConverter implementation that can convert the property type
         /// to and from strings so they can be stored and indexed by Lucene.Net.
         /// </summary>
-        public Type Converter { get; set; }
+        public Type Converter
+        {
+            get { return ConverterInstance != null ? ConverterInstance.GetType() : null; }
+            set { ConverterInstance = (TypeConverter) Activator.CreateInstance(value); }
+        }
 
         /// <summary>
         /// Specifies that the property value, combined with any other properties that also
@@ -58,6 +63,8 @@ namespace Lucene.Net.Linq.Mapping
         /// Defaults to <c>1.0f</c>.
         /// </summary>
         public float Boost { get; set; }
+
+        internal TypeConverter ConverterInstance { get; set; }
     }
 
     /// <summary>

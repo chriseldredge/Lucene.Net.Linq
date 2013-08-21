@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Util;
@@ -18,9 +19,17 @@ namespace Lucene.Net.Linq.Fluent
         {
         }
 
-        protected internal override IFieldMapper<T> ToFieldMapper()
+        protected internal override ReflectionFieldMapper<T> ToFieldMapperInternal()
         {
-            return new NumericReflectionFieldMapper<T>(propInfo, StoreMode.Yes, null, null, fieldName, precisionStep, 1.0f);
+            var attrib = new NumericFieldAttribute(fieldName)
+                {
+                    Boost = boost,
+                    ConverterInstance = converter,
+                    PrecisionStep = precisionStep,
+                    Store = store
+                };
+
+            return NumericFieldMappingInfoBuilder.BuildNumeric<T>(propInfo, PropertyType, attrib);
         }
 
         /// <summary>

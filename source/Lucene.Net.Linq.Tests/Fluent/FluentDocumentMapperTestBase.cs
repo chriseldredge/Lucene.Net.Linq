@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Lucene.Net.Linq.Fluent;
 using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
@@ -19,6 +20,8 @@ namespace Lucene.Net.Linq.Tests.Fluent
             public float Score { get; set; }
 
             public DateTimeOffset Date { get; set; }
+
+            public IEnumerable<int> Numbers { get; set; }
         }
 
         public class SampleMap : ClassMap<Sample>
