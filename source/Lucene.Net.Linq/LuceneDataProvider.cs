@@ -340,6 +340,8 @@ namespace Lucene.Net.Linq
 
         public void Dispose()
         {
+            context.Dispose();
+
             if (writerIsExternal) return;
 
             if (writer != null)

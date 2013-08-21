@@ -7,7 +7,7 @@ using Lucene.Net.Store;
 
 namespace Lucene.Net.Linq
 {
-    internal class Context
+    internal class Context : IDisposable
     {
         private static readonly ILog Log = LogManager.GetLogger<Context>();
 
@@ -19,11 +19,31 @@ namespace Lucene.Net.Linq
         private readonly object searcherLock = new object();
         private readonly object reloadLock = new object();
         private SearcherClientTracker tracker;
-        
+        private bool disposed;
+
         public Context(Directory directory, object transactionLock)
         {
             this.directory = directory;
             this.transactionLock = transactionLock;
+        }
+
+        public void Dispose()
+        {
+            lock (searcherLock)
+            {
+                AssertNotDisposed();
+
+                disposed = true;
+
+                if (tracker == null) return;
+
+                if (!tracker.TryDispose())
+                {
+                    Log.Warn(m => m("Context is being disposed before all handles were released."));
+                }
+
+                tracker = null;
+            }
         }
 
         public Directory Directory
@@ -38,15 +58,17 @@ namespace Lucene.Net.Linq
 
         public ISearcherHandle CheckoutSearcher()
         {
+            AssertNotDisposed();
             return new SearcherHandle(CurrentTracker);
         }
 
         public virtual void Reload()
         {
-            Log.Info(m => m("Reloading index."));
-
             lock (reloadLock)
             {
+                AssertNotDisposed();
+                Log.Info(m => m("Reloading index."));
+
                 var newTracker = new SearcherClientTracker(CreateSearcher());
 
                 var tmpHandler = SearcherLoading;
@@ -77,6 +99,8 @@ namespace Lucene.Net.Linq
             {
                 lock (searcherLock)
                 {
+                    AssertNotDisposed();
+
                     if (tracker == null)
                     {
                         tracker = new SearcherClientTracker(CreateSearcher());
@@ -89,6 +113,14 @@ namespace Lucene.Net.Linq
         protected virtual IndexSearcher CreateSearcher()
         {
             return new IndexSearcher(directory, true);
+        }
+
+        private void AssertNotDisposed()
+        {
+            if (disposed)
+            {
+                throw new ObjectDisposedException(GetType().FullName);
+            }
         }
 
         internal class SearcherHandle : ISearcherHandle
@@ -162,6 +194,11 @@ namespace Lucene.Net.Linq
 
             public void Dispose()
             {
+                TryDispose();
+            }
+
+            public bool TryDispose()
+            {
                 lock (sync)
                 {
                     disposePending = false;
@@ -186,6 +223,8 @@ namespace Lucene.Net.Linq
                     {
                         disposePending = true;
                     }
+
+                    return disposed;
                 }
             }
 

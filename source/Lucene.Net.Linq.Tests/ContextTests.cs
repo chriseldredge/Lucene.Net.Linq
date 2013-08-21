@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Linq;
+using System.Runtime.InteropServices;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -49,6 +49,31 @@ namespace Lucene.Net.Linq.Tests
 
             var s2 = handle.Searcher;
             Assert.That(s2, Is.SameAs(s1));
+        }
+
+        [Test]
+        public void DisposeContextDisposesSearcher()
+        {
+            var searcher = context.CurrentTracker.Searcher;
+            
+            context.Dispose();
+
+            searcher.AssertWasCalled(s => s.Dispose());
+        }
+
+        [Test]
+        public void DisposeContextWaitsToDisposeSearcherWhenInUse()
+        {
+            var searcher = context.CurrentTracker.Searcher;
+
+            using (context.CheckoutSearcher())
+            {
+                context.Reload();
+
+                searcher.AssertWasNotCalled(s => s.Dispose());
+            }
+
+            searcher.AssertWasCalled(s => s.Dispose());
         }
 
         [Test]
@@ -105,11 +130,12 @@ namespace Lucene.Net.Linq.Tests
         {
             var searcher = context.CurrentTracker.Searcher;
 
-            context.CheckoutSearcher();
+            using (context.CheckoutSearcher())
+            {
+                context.Reload();
 
-            context.Reload();
-
-            searcher.AssertWasNotCalled(s => s.Dispose());
+                searcher.AssertWasNotCalled(s => s.Dispose());
+            }
         }
 
         [Test]
