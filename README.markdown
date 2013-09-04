@@ -34,7 +34,22 @@ run the following command in the [Package Manager Console](http://docs.nuget.org
 1. Using [attributes](source/Lucene.Net.Linq.Tests/Samples/AttributeConfiguration.cs) to configure mappings
 1. Specifying [document keys](source/Lucene.Net.Linq.Tests/Samples/DocumentKeys.cs)
 
-Upcoming features / ideas / bugs / known issues
--------------------------
+## Note on Performance
+
+Initial versions of the library include a query filter when your entites specify a document key or key field
+in their mappings. The intention of this filter is to ensure that multiple entity types can be stored in a
+single index without unexpected errors.
+
+It has been pointed out that this query filter adds significant overhead to query performance and goes
+against a best practive of using a different index for each type of document being stored.
+
+To maintain backwards compatibility, the feature is left enabled by default, but it can now be disabled
+by doing:
+
+    luceneDataProvider.Settings.EnableMultipleEntities = false;
+
+Future versions of this library may change the default behavior.
+
+## Upcoming features / ideas / bugs / known issues
 
 See Issues on the GitHub project page.
