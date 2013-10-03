@@ -33,7 +33,13 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
                 throw new NotSupportedException("Only MemberExpression of type PropertyInfo may be used on QuerySourceReferenceExpression.");
             }
 
-            queryField = new LuceneQueryFieldExpression(propertyInfo.PropertyType, propertyInfo.Name);
+            var propertyType = propertyInfo.PropertyType;
+            if (propertyType.IsEnum)
+            {
+                propertyType = Enum.GetUnderlyingType(propertyType);
+            }
+
+            queryField = new LuceneQueryFieldExpression(propertyType, propertyInfo.Name);
             return base.VisitQuerySourceReferenceExpression(expression);
         }
     }

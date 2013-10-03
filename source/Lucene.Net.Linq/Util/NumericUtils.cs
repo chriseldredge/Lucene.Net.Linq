@@ -101,6 +101,11 @@ namespace Lucene.Net.Linq.Util
 
         internal static NumericField SetValue(this NumericField field, ValueType value)
         {
+            if (value.GetType().IsEnum)
+            {
+                value = (ValueType) Convert.ChangeType(value, Enum.GetUnderlyingType(value.GetType()));
+            }
+
             if (value is int)
             {
                 return field.SetIntValue((int) value);

@@ -30,6 +30,11 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
             var constant = expression as ConstantExpression;
             if (constant == null || expression.Type == type) return expression;
 
+            if (type.IsEnum)
+            {
+                return Expression.Constant(Enum.ToObject(type, constant.Value));
+            }
+
             return Expression.Constant(Convert.ChangeType(constant.Value, type));
         }
 

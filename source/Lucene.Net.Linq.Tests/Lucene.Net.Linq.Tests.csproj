@@ -80,6 +80,7 @@
     <Compile Include="Fluent\StoreTests.cs" />
     <Compile Include="Fluent\TermVectorModeTests.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
+    <Compile Include="Integration\EnumFieldTests.cs" />
     <Compile Include="Integration\IndexBoostTests.cs" />
     <Compile Include="Integration\OrderByDateTimeTests.cs" />
     <Compile Include="Integration\QueryBoostTests.cs" />
