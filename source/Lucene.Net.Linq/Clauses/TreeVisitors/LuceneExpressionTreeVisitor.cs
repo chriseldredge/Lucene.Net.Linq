@@ -24,6 +24,11 @@ namespace Lucene.Net.Linq.Clauses.TreeVisitors
                 return VisitLuceneQueryFieldExpression((LuceneQueryFieldExpression) expression);
             }
 
+            if (expression is LuceneRangeQueryExpression)
+            {
+                return VisitLuceneRangeQueryExpression((LuceneRangeQueryExpression) expression);
+            }
+
             if (expression is LuceneQueryPredicateExpression)
             {
                 return VisitLuceneQueryPredicateExpression((LuceneQueryPredicateExpression) expression);
@@ -44,6 +49,23 @@ namespace Lucene.Net.Linq.Clauses.TreeVisitors
             if (ReferenceEquals(expression.BinaryExpression, binary)) return expression;
 
             return new BoostBinaryExpression((BinaryExpression) binary, expression.Boost);
+        }
+
+        protected virtual Expression VisitLuceneRangeQueryExpression(LuceneRangeQueryExpression expression)
+        {
+            var lower = VisitExpression(expression.Lower);
+            var upper = VisitExpression(expression.Upper);
+            var field = VisitExpression(expression.QueryField);
+
+            if (ReferenceEquals(lower, expression.Lower) && ReferenceEquals(upper, expression.Upper)
+                && ReferenceEquals(field, expression.QueryField))
+            {
+                return expression;
+            }
+
+            return new LuceneRangeQueryExpression((LuceneQueryFieldExpression) field,
+                (LuceneQueryPredicateExpression)lower, expression.LowerQueryType,
+                (LuceneQueryPredicateExpression)upper, expression.UpperQueryType);
         }
 
         protected virtual Expression VisitLuceneQueryPredicateExpression(LuceneQueryPredicateExpression expression)

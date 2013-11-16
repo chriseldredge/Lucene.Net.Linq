@@ -74,6 +74,7 @@
     <Compile Include="Clauses\Expressions\LuceneQueryExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneQueryFieldExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneQueryPredicateExpression.cs" />
+    <Compile Include="Clauses\Expressions\LuceneRangeQueryExpression.cs" />
     <Compile Include="Clauses\ExtensionClause.cs" />
     <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
@@ -140,6 +141,7 @@
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\MethodInfoMatchingTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConvertExpressionRemovingVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\RangeQueryMergeExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\SubQueryContainsTreeVisitor.cs" />
     <Compile Include="ILuceneQueryModelVisitor.cs" />
     <Compile Include="LuceneQueryModel.cs" />

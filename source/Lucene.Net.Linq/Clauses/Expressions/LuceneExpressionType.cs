@@ -4,6 +4,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
     {
         LuceneQueryFieldExpression = 150001,
         LuceneQueryPredicateExpression,
+        LuceneRangeQueryExpression,
         LuceneCompositeOrderingExpression,
         LuceneOrderByRelevanceExpression,
         LuceneQueryAnyFieldExpression,

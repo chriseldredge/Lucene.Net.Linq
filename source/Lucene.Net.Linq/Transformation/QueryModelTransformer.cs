@@ -36,6 +36,7 @@ namespace Lucene.Net.Linq.Transformation
                            new FlagToBinaryConditionTreeVisitor(),
                            new BooleanBinaryToQueryPredicateExpressionTreeVisitor(),
                            new BinaryToQueryExpressionTreeVisitor(),
+                           new RangeQueryMergeExpressionTreeVisitor(), 
                            new AllowSpecialCharactersMethodExpressionTreeVisitor(),
                            new BoostMethodCallTreeVisitor(1)
                        },

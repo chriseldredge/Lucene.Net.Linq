@@ -94,11 +94,11 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
             if (expression.QueryType == QueryType.GreaterThan || expression.QueryType == QueryType.GreaterThanOrEqual)
             {
-                query = CreateRangeQuery(mapping, expression.QueryType, expression, null);
+                query = CreateRangeQuery(mapping, expression.QueryType, expression.QueryPattern, QueryType.LessThanOrEqual, null);
             }
             else if (expression.QueryType == QueryType.LessThan || expression.QueryType == QueryType.LessThanOrEqual)
             {
-                query = CreateRangeQuery(mapping, expression.QueryType, null, expression);
+                query = CreateRangeQuery(mapping, QueryType.GreaterThanOrEqual, null, expression.QueryType, expression.QueryPattern);
             }
             else
             {
@@ -113,6 +113,17 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             queries.Push(booleanQuery);
 
             return base.VisitLuceneQueryPredicateExpression(expression);
+        }
+
+        protected override Expression VisitLuceneRangeQueryExpression(LuceneRangeQueryExpression expression)
+        {
+            var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
+
+            var query = CreateRangeQuery(mapping, expression.LowerQueryType, expression.Lower, expression.UpperQueryType, expression.Upper);
+
+            queries.Push(query);
+
+            return base.VisitLuceneRangeQueryExpression(expression);
         }
 
         private string GetPattern(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
@@ -141,19 +152,13 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             queries.Push(query);
         }
 
-        private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType queryType, LuceneQueryPredicateExpression lowerBoundExpression, LuceneQueryPredicateExpression upperBoundExpression)
+        private Query CreateRangeQuery(IFieldMappingInfo mapping, QueryType lowerQueryType, Expression lowerBoundExpression, QueryType upperQueryType, Expression upperBoundExpression)
         {
             var lowerBound = lowerBoundExpression == null ? null : EvaluateExpression(lowerBoundExpression);
             var upperBound = upperBoundExpression == null ? null : EvaluateExpression(upperBoundExpression);
 
-            var lowerRange = RangeType.Inclusive;
-            var upperRange = (queryType == QueryType.LessThan || queryType == QueryType.GreaterThan) ? RangeType.Exclusive : RangeType.Inclusive;
-
-            if (upperBoundExpression == null)
-            {
-                lowerRange = upperRange;
-                upperRange = RangeType.Inclusive;
-            }
+            var lowerRange = (lowerQueryType == QueryType.LessThan || lowerQueryType == QueryType.GreaterThan) ? RangeType.Exclusive : RangeType.Inclusive;
+            var upperRange = (upperQueryType == QueryType.LessThan || upperQueryType == QueryType.GreaterThan) ? RangeType.Exclusive : RangeType.Inclusive;
 
             return mapping.CreateRangeQuery(lowerBound, upperBound, lowerRange, upperRange);
         }
@@ -201,7 +206,12 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
 
         private object EvaluateExpression(LuceneQueryPredicateExpression expression)
         {
-            var lambda = Expression.Lambda(expression.QueryPattern).Compile();
+            return EvaluateExpression(expression.QueryPattern);
+        }
+
+        private object EvaluateExpression(Expression expression)
+        {
+            var lambda = Expression.Lambda(expression).Compile();
             return lambda.DynamicInvoke();
         }
 

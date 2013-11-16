@@ -88,6 +88,7 @@
     <Compile Include="Integration\NumericKeyTests.cs" />
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
+    <Compile Include="Integration\RangeTests.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
     <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />
     <Compile Include="Samples\AttributeConfiguration.cs" />
@@ -126,6 +127,7 @@
     <Compile Include="Transformation\TreeVisitors\NoOpConditionRemovingTreeVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpConvertExpressionRemovingVisitorTests.cs" />
     <Compile Include="Transformation\TreeVisitors\NoOpMethodCallRemovingTreeVisitorTests.cs" />
+    <Compile Include="Transformation\TreeVisitors\RangeQueryMergeExpressionTreeVisitorTests.cs" />
     <Compile Include="Translation\TreeVisitors\FieldMappingInfoProviderStub.cs" />
     <Compile Include="VersionConverter.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderCollectionComplexTypeTests.cs" />
