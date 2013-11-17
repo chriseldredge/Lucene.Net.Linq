@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.Search;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
@@ -12,8 +13,14 @@ namespace Lucene.Net.Linq.Clauses.Expressions
         private readonly QueryType lowerQueryType;
         private readonly Expression upper;
         private readonly QueryType upperQueryType;
+        private Occur occur;
 
         public LuceneRangeQueryExpression(LuceneQueryFieldExpression field, Expression lower, QueryType lowerQueryType, Expression upper, QueryType upperQueryType)
+            : this(field, lower, lowerQueryType, upper, upperQueryType, Occur.MUST)
+        {
+        }
+
+        public LuceneRangeQueryExpression(LuceneQueryFieldExpression field, Expression lower, QueryType lowerQueryType, Expression upper, QueryType upperQueryType, Occur occur)
             : base(typeof(bool), (ExpressionType)LuceneExpressionType.LuceneRangeQueryExpression)
         {
             this.field = field;
@@ -21,6 +28,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             this.lowerQueryType = lowerQueryType;
             this.upper = upper;
             this.upperQueryType = upperQueryType;
+            this.occur = occur;
         }
 
         public LuceneQueryFieldExpression QueryField
@@ -48,6 +56,11 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             get { return upperQueryType; }
         }
 
+        public Occur Occur
+        {
+            get { return occur; }
+        }
+
         protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
         {
             var newField = (LuceneQueryFieldExpression)visitor.VisitExpression(field);
@@ -55,12 +68,12 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             var newUpper = visitor.VisitExpression(upper);
 
             return (newField == field && newLower == lower && newUpper == upper) ? this :
-                new LuceneRangeQueryExpression(newField, newLower, lowerQueryType, newUpper, upperQueryType);
+                new LuceneRangeQueryExpression(newField, newLower, lowerQueryType, newUpper, upperQueryType, occur);
         }
 
         public override string ToString()
         {
-            return string.Format("LuceneRangeQuery({0} {1} TO {2} {3}", lowerQueryType, lower, upperQueryType, upper);
+            return string.Format("{0}LuceneRangeQuery({1} {2} TO {3} {4}", occur, lowerQueryType, lower, upperQueryType, upper);
         }
     }
 }

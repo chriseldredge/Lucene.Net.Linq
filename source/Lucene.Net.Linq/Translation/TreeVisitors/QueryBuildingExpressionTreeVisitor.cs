@@ -120,8 +120,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
             var query = CreateRangeQuery(mapping, expression.LowerQueryType, expression.Lower, expression.UpperQueryType, expression.Upper);
-
-            queries.Push(query);
+            
+            queries.Push(new BooleanQuery {{query, expression.Occur}});
 
             return base.VisitLuceneRangeQueryExpression(expression);
         }
@@ -169,7 +169,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                        ? Occur.MUST
                        : Occur.MUST_NOT;
         }
-
+        
         private Expression MakeBooleanQuery(BinaryExpression expression)
         {
             var result = base.VisitBinaryExpression(expression);

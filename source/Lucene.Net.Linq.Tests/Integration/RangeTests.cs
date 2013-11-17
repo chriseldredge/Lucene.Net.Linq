@@ -42,5 +42,22 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.Count(), Is.EqualTo(2));
         }
+
+        [Test]
+        public void ExcludeRange()
+        {
+            var result = from d in documents
+                         where 
+                            d.Scalar < 2
+                         || d.Scalar >= GetThree()
+                         select d.Scalar;
+
+            Assert.That(result.ToList(), Is.EquivalentTo(new[] {1, 3}));
+        }
+
+        private static int GetThree()
+        {
+            return 3;
+        }
     }
 }
