@@ -22,6 +22,8 @@ namespace Lucene.Net.Linq.Tests.Fluent
             public DateTimeOffset Date { get; set; }
 
             public IEnumerable<int> Numbers { get; set; }
+
+            public IEnumerable<Uri> Urls { get; set; } 
         }
 
         public class SampleMap : ClassMap<Sample>

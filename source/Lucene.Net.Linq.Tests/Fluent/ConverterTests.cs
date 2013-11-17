@@ -1,4 +1,5 @@
-﻿using Lucene.Net.Linq.Converters;
+﻿using System;
+using Lucene.Net.Linq.Converters;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Fluent
@@ -14,8 +15,18 @@ namespace Lucene.Net.Linq.Tests.Fluent
             map.Property(x => x.Date).ConvertWith(converter);
 
             var mapper = GetMappingInfo("Date");
-
+            
             Assert.That(mapper.Converter, Is.SameAs(converter));
+        }
+
+        [Test]
+        public void AssignsDefaultConverter()
+        {
+            map.Property(x => x.Urls);
+
+            var mapper = GetMappingInfo("Urls");
+
+            Assert.That(mapper.Converter, Is.InstanceOf<UriTypeConverter>());
         }
     }
 }

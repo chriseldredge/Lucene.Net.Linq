@@ -250,8 +250,17 @@ namespace Lucene.Net.Linq.Fluent
         protected internal virtual ReflectionFieldMapper<T> ToFieldMapperInternal()
         {
             return new ReflectionFieldMapper<T>(propInfo, store, indexMode, TermVectorMode,
-                                                converter, fieldName, defaultParseOperator,
+                                                ResolveConverter(), fieldName, defaultParseOperator,
                                                 caseSensitive, ResolveAnalyzer(), boost);
+        }
+
+        private TypeConverter ResolveConverter()
+        {
+            if (converter != null) return converter;
+            
+            var fakeAttr = new FieldAttribute(indexMode) { CaseSensitive = caseSensitive };
+
+            return FieldMappingInfoBuilder.GetConverter(propInfo, PropertyType, fakeAttr);
         }
 
         private Analyzer ResolveAnalyzer()
