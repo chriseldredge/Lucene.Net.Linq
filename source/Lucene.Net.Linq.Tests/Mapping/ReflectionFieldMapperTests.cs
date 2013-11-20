@@ -117,6 +117,18 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
         }
 
+        [Test]
+        public void NativeSortWithConverterSpecified()
+        {
+            var mapper = CreateMapper("Version", analyzer: new KeywordAnalyzer(), converter: new VersionConverter(), nativeSort:true);
+
+            var sort = mapper.CreateSortField(reverse: false);
+
+            Assert.That(sort.Field, Is.EqualTo(mapper.FieldName));
+            Assert.That(sort.Type, Is.EqualTo(SortField.STRING));
+
+        }
+
         public string Text { get; set; }
 
         public string Version { get; set; }
@@ -133,12 +145,15 @@ namespace Lucene.Net.Linq.Tests.Mapping
             Assert.That(call, Throws.Nothing);
         }
 
-        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, QueryParser.Operator defaultParseOperaor = QueryParser.Operator.OR, bool caseSensitive = false)
+        private ReflectionFieldMapper<ReflectionFieldMapperTests> CreateMapper(string propertyName, TypeConverter converter = null, Analyzer analyzer = null, QueryParser.Operator defaultParseOperaor = QueryParser.Operator.OR, bool caseSensitive = false, bool nativeSort = false)
         {
             return new ReflectionFieldMapper<ReflectionFieldMapperTests>(
                 typeof(ReflectionFieldMapperTests).GetProperty(propertyName),
                 StoreMode.Yes,
-                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName, defaultParseOperaor, caseSensitive, analyzer ?? new KeywordAnalyzer(), 1f);
+                IndexMode.Analyzed, TermVectorMode.No, converter, propertyName,
+                defaultParseOperaor, caseSensitive, analyzer ?? new KeywordAnalyzer(),
+                1f,
+                nativeSort);
 
         }
 

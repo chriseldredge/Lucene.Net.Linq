@@ -146,6 +146,16 @@ namespace Lucene.Net.Linq.Mapping
         /// Maps to <see cref="Field.TermVector"/>
         /// </summary>
         public TermVectorMode TermVector { get; set; }
+
+        /// <summary>
+        /// When <c>true</c> and the property implements <see cref="IComparable"/>
+        /// and/or <see cref="IComparable{T}"/>, instructs the mapping engine to
+        /// use <see cref="SortField.STRING"/> instead of converting each field
+        /// and using <see cref="IComparable{T}.CompareTo"/>. This is a performance
+        /// enhancement in cases where the string representation of a complex type
+        /// is alphanumerically sortable.
+        /// </summary>
+        public bool NativeSort { get; set; }
     }
 
     /// <summary>

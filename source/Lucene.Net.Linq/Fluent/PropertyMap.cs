@@ -27,6 +27,7 @@ namespace Lucene.Net.Linq.Fluent
         protected float boost = 1.0f;
         protected bool caseSensitive;
         protected QueryParser.Operator defaultParseOperator = QueryParser.OR_OPERATOR;
+        protected bool nativeSort;
 
         internal PropertyMap(ClassMap<T> classMap, PropertyInfo propInfo, bool isKey = false)
             : this(classMap, propInfo, null)
@@ -209,6 +210,11 @@ namespace Lucene.Net.Linq.Fluent
             return this;
         }
 
+        public PropertyMap<T> NativeSort()
+        {
+            nativeSort = true;
+            return this;
+        }
         protected internal string PropertyName
         {
             get { return propInfo.Name; }
@@ -251,7 +257,7 @@ namespace Lucene.Net.Linq.Fluent
         {
             return new ReflectionFieldMapper<T>(propInfo, store, indexMode, TermVectorMode,
                                                 ResolveConverter(), fieldName, defaultParseOperator,
-                                                caseSensitive, ResolveAnalyzer(), boost);
+                                                caseSensitive, ResolveAnalyzer(), boost, nativeSort);
         }
 
         private TypeConverter ResolveConverter()

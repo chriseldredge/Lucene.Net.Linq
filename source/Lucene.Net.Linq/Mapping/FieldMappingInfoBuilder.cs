@@ -74,8 +74,9 @@ namespace Lucene.Net.Linq.Mapping
             var defaultParserOperator = metadata != null ? metadata.DefaultParserOperator : QueryParsers.QueryParser.Operator.OR;
             var caseSensitive = GetCaseSensitivity(metadata, converter);
             var analyzer = externalAnalyzer ?? BuildAnalyzer(metadata, converter, version);
+            var nativeSort = metadata != null && metadata.NativeSort;
 
-            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost);
+            return new ReflectionFieldMapper<T>(p, store, index, termVectorMode, converter, fieldName, defaultParserOperator, caseSensitive, analyzer, boost, nativeSort);
         }
 
         internal static Analyzer BuildAnalyzer(FieldAttribute metadata, TypeConverter converter, Version version)

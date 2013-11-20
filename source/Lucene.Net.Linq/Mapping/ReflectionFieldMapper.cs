@@ -25,6 +25,7 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly bool caseSensitive;
         protected readonly Analyzer analyzer;
         protected readonly float boost;
+        protected readonly bool nativeSort;
 
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector,
                                      TypeConverter converter, string fieldName, bool caseSensitive, Analyzer analyzer)
@@ -38,7 +39,8 @@ namespace Lucene.Net.Linq.Mapping
         {
 
         }
-        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost)
+
+        public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost, bool nativeSort = false)
         {
             this.propertyInfo = propertyInfo;
             this.store = store;
@@ -50,6 +52,7 @@ namespace Lucene.Net.Linq.Mapping
             this.caseSensitive = caseSensitive;
             this.analyzer = analyzer;
             this.boost = boost;
+            this.nativeSort = nativeSort;
         }
 
         public virtual Analyzer Analyzer
@@ -138,6 +141,11 @@ namespace Lucene.Net.Linq.Mapping
             {
                 return defaultParserOperator;
             }
+        }
+
+        public virtual bool NativeSort
+        {
+            get { return nativeSort; }
         }
 
         public virtual object GetPropertyValue(T source)
@@ -274,7 +282,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual SortField CreateSortField(bool reverse)
         {
-            if (Converter == null)
+            if (Converter == null || NativeSort)
                 return new SortField(FieldName, SortField.STRING, reverse);
 
             var propertyType = propertyInfo.PropertyType;
@@ -291,8 +299,8 @@ namespace Lucene.Net.Linq.Mapping
             }
             else
             {
-                throw new NotSupportedException("Unsupported sort field type (does not implement IComparable): " +
-                                                propertyType);
+                throw new NotSupportedException(string.Format("The type {0} does not implement IComparable or IComparable<T>. To use alphanumeric sorting, specify NativeSort=true on the mapping.",
+                    propertyType));
             }
 
             return new SortField(FieldName, source, reverse);

@@ -90,6 +90,7 @@
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\RangeTests.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
+    <Compile Include="Mapping\FieldMappingInfoBuilderSortFieldTests.cs" />
     <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />
     <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />

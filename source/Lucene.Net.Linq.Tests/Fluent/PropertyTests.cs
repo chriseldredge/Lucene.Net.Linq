@@ -28,6 +28,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
             Assert.That(info.DefaultParseOperator, Is.EqualTo(QueryParser.OR_OPERATOR));
             Assert.That(info.PropertyName, Is.EqualTo("Name"));
             Assert.That(info.PropertyInfo, Is.Not.Null);
+            Assert.That(info.NativeSort, Is.False, "NativeSort");
         }
 
         [Test]
@@ -75,6 +76,16 @@ namespace Lucene.Net.Linq.Tests.Fluent
             var info = GetMappingInfo("Name");
 
             Assert.That(info.DefaultParseOperator, Is.EqualTo(QueryParser.AND_OPERATOR));
+        }
+
+        [Test]
+        public void NativeSort()
+        {
+            map.Property(x => x.Name).NativeSort();
+
+            var info = GetMappingInfo("Name");
+
+            Assert.That(info.NativeSort, Is.True, "NativeSort");
         }
     }
 }
