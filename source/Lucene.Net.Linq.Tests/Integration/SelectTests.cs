@@ -157,6 +157,20 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
 
+        [Test]
+        public void Where_ContainsAfterNullSafety()
+        {
+            AddDocument(new SampleDocument { Name = "a FOO doc" });
+            AddDocument(new SampleDocument { Name = "doc", Id = "bar"});
+            AddDocument(new SampleDocument { Name = "a BAZ doc", NullableScalar = 12 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = documents.Where(d => (d.Name != null ? d.Name.ToLower() : null).Contains("foo"));
+
+            Assert.That(result.Count(), Is.EqualTo(1));
+        }
+
         public class ConvertedDocument
         {
             public string Name { get; set; }
