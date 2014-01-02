@@ -53,3 +53,19 @@ Future versions of this library may change the default behavior.
 ## Upcoming features / ideas / bugs / known issues
 
 See Issues on the GitHub project page.
+
+### Unsupported Characters in Indexed Properties
+
+Some characters, even when using a KeywordAnalyzer or equivalent, will
+not be handled correctly by Lucene.Net.Linq, such as `\`, `:`, `?` and `*`
+because these characters have special meaning to Lucene's query parser.
+
+This means if you want to index a DOS style path such as `c:\dos` and
+later retrieve documents using the same term, it will not work properly.
+
+These characters are perfectly fine for fields that will be analyzed
+by a tokenizer that would remove them, but exact matching on the entire
+value is not possible.
+
+If exact matching is required, these characters should be substituted
+with suitable substitutes that are not reserved by Lucene.
