@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
+using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 
@@ -19,6 +20,7 @@ namespace Lucene.Net.Linq
         private readonly object searcherLock = new object();
         private readonly object reloadLock = new object();
         private SearcherClientTracker tracker;
+        private IndexReader reader;
         private bool disposed;
 
         public Context(Directory directory, object transactionLock)
@@ -72,7 +74,18 @@ namespace Lucene.Net.Linq
                 AssertNotDisposed();
                 Log.Info(m => m("Reloading index."));
 
-                var newTracker = new SearcherClientTracker(CreateSearcher());
+                IndexSearcher searcher;
+                if (reader == null)
+                {
+                    searcher = CreateSearcher();
+                    reader = searcher.IndexReader;
+                }
+                else if (!ReopenSearcher(out searcher)) 
+                {
+                    return;
+                }
+
+                var newTracker = new SearcherClientTracker(searcher);
 
                 var tmpHandler = SearcherLoading;
 
@@ -106,7 +119,9 @@ namespace Lucene.Net.Linq
 
                     if (tracker == null)
                     {
-                        tracker = new SearcherClientTracker(CreateSearcher());
+                        var searcher = CreateSearcher();
+                        reader = searcher.IndexReader;
+                        tracker = new SearcherClientTracker(searcher);
                     }
                     return tracker;
                 }
@@ -115,7 +130,25 @@ namespace Lucene.Net.Linq
 
         protected virtual IndexSearcher CreateSearcher()
         {
-            return new IndexSearcher(directory, true);
+            return new IndexSearcher(IndexReader.Open(directory, readOnly: true));
+        }
+
+        /// <summary>
+        /// Reopen the <see cref="IndexReader"/>. If the index has not changed,
+        /// return <c>false</c>. If the index has changed, set <paramref name="searcher"/>
+        /// with a new <see cref="IndexSearcher"/> instance and return <c>true</c>.
+        /// </summary>
+        protected virtual bool ReopenSearcher(out IndexSearcher searcher)
+        {
+            searcher = null;
+            var oldReader = reader;
+            reader = reader.Reopen();
+            if (ReferenceEquals(reader, oldReader))
+            {
+                return false;
+            }
+            searcher = new IndexSearcher(reader);
+            return true;
         }
 
         private void AssertNotDisposed()

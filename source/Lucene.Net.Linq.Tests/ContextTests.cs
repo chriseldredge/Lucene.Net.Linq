@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
@@ -16,7 +15,7 @@ namespace Lucene.Net.Linq.Tests
     [TestFixture]
     public class ContextTests
     {
-        private Context context;
+        private TestableContext context;
         private static readonly Directory directory = new RAMDirectory();
 
         [SetUp]
@@ -68,6 +67,7 @@ namespace Lucene.Net.Linq.Tests
 
             using (context.CheckoutSearcher())
             {
+                context.SimulateIndexReaderChanged();
                 context.Reload();
 
                 searcher.AssertWasNotCalled(s => s.Dispose());
@@ -80,12 +80,24 @@ namespace Lucene.Net.Linq.Tests
         public void SearcherInstanceChangesOnReload()
         {
             var s1 = context.CheckoutSearcher().Searcher;
+            context.SimulateIndexReaderChanged();
+
+            context.Reload();
+
+            var s2 = context.CheckoutSearcher().Searcher;
+            Assert.That(s2, Is.Not.SameAs(s1), "Searcher instance after Reload()");
+        }
+
+        [Test]
+        public void SearcherInstanceDoesNotChangeWhenIndexReaderNotReloaded()
+        {
+            var s1 = context.CheckoutSearcher().Searcher;
 
             context.Reload();
 
             var s2 = context.CheckoutSearcher().Searcher;
 
-            Assert.That(s2, Is.Not.SameAs(s1), "Searcher instance after Reload()");
+            Assert.That(s2, Is.SameAs(s1), "Searcher instance after Reload()");
         }
 
         [Test]
@@ -104,6 +116,7 @@ namespace Lucene.Net.Linq.Tests
         public void ReloadDisposesSearcher()
         {
             var searcher = context.CurrentTracker.Searcher;
+            context.SimulateIndexReaderChanged();
 
             context.Reload();
 
@@ -114,6 +127,7 @@ namespace Lucene.Net.Linq.Tests
         public void ReloadFiresLoadingEvent()
         {
             var searcher = context.CurrentTracker.Searcher;
+            context.SimulateIndexReaderChanged();
             IndexSearcher current = null;
             IndexSearcher next = null;
 
@@ -142,11 +156,10 @@ namespace Lucene.Net.Linq.Tests
         public void DisposeHandleAfterReloadDisposesOldSearcher()
         {
             var searcher = context.CurrentTracker.Searcher;
-
             var handle = context.CheckoutSearcher();
 
+            context.SimulateIndexReaderChanged();
             context.Reload();
-
             handle.Dispose();
 
             searcher.AssertWasCalled(s => s.Dispose());
@@ -181,14 +194,34 @@ namespace Lucene.Net.Linq.Tests
 
         class TestableContext : Context
         {
+            public IndexReader FakeReader { get; set; }
+
             public TestableContext(Directory directory, Analyzer analyzer, Version version, IIndexWriter indexWriter, object transactionLock)
                 : base(directory, transactionLock)
             {
             }
 
+            public void SimulateIndexReaderChanged()
+            {
+                FakeReader = MockRepository.GenerateMock<IndexReader>();
+                FakeReader.Expect(r => r.Reopen()).WhenCalled(mi =>
+                {
+                    mi.ReturnValue = FakeReader;
+                });
+            }
             protected override IndexSearcher CreateSearcher()
             {
-                return MockRepository.GenerateMock<IndexSearcher>(directory, true);
+                SimulateIndexReaderChanged();
+                
+                var searcher = MockRepository.GenerateMock<IndexSearcher>(directory, true);
+                searcher.Expect(s => s.IndexReader).Return(FakeReader);
+
+                searcher.Expect(s => s.IndexReader).WhenCalled(mi =>
+                {
+                    mi.ReturnValue = FakeReader;
+                });
+
+                return searcher;
             }
         }
     }
