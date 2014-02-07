@@ -83,6 +83,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(session.Query().Count(d => d.Name == "b"), Is.EqualTo(0), "Should delete document and not re-add it.");
         }
+
         [Test]
         public void ModifiedKeyDeletesByPreviousKey()
         {
@@ -139,5 +140,27 @@ namespace Lucene.Net.Linq.Tests.Integration
                 Assert.That(after, Is.Not.SameAs(item), "Should discard tracked instance after rollback");
             }
         }
+
+	    [Test]
+	    public void AddReplacesModifiedDocument()
+	    {
+            var session = provider.OpenSession<SampleDocument>();
+
+		    using (session)
+		    {
+				var item = (from d in session.Query() where d.Name == "a" select d).Single();
+
+			    item.Name = "a modified name";
+
+			    var newItem = new SampleDocument {Key = item.Key, Name = "a new a"};
+
+				session.Add(newItem);
+
+				session.Commit();
+
+				var result = (from d in session.Query() where d.Key == newItem.Key select d).Single();
+				Assert.That(result.Name, Is.EqualTo("a new a"));
+		    }
+	    }
     }
 }

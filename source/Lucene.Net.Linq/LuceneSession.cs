@@ -49,11 +49,23 @@ namespace Lucene.Net.Linq
 
         public void Add(IEnumerable<T> items)
         {
+			Add(-1, items);
+        }
+
+	    protected internal void Add(int index, IEnumerable<T> items)
+	    {
             lock (sessionLock)
             {
-                additions.AddRange(items);
+	            if (index < 0)
+	            {
+		            additions.AddRange(items);
+	            }
+	            else
+	            {
+		            additions.InsertRange(index, items);
+	            }
             }
-        }
+	    }
 
         public void Delete(params T[] items)
         {
@@ -186,6 +198,7 @@ namespace Lucene.Net.Linq
         internal IList<Document> StageModifiedDocuments()
         {
             var docs = documentTracker.FindModifiedDocuments();
+	        var modifications = new List<T>();
             foreach (var doc in docs)
             {
                 var captured = doc;
@@ -195,15 +208,16 @@ namespace Lucene.Net.Linq
                 {
                     deleteKeys.Add(doc.Key);
                 }
-
-                Add(doc.Item);
+				modifications.Add(doc.Item);
             }
 
-            var additions = ConvertPendingAdditions();
+			Add(0, modifications);
 
-            Delete(additions.Keys.Where(k => !k.Empty).Select(k => k.ToQuery()).ToArray());
+            var addedDocuments = ConvertPendingAdditions();
 
-            return additions.Values.ToList();
+            Delete(addedDocuments.Keys.Where(k => !k.Empty).Select(k => k.ToQuery()).ToArray());
+
+            return addedDocuments.Values.ToList();
         }
 
         internal IDictionary<IDocumentKey, Document> ConvertPendingAdditions()

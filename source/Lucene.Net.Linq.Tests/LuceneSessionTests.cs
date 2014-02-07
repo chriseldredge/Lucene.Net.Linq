@@ -37,7 +37,7 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
-        public void AddWithSameKeyReplaces()
+        public void AddWithSameKeyLastWriteWins()
         {
             var r1 = new Record { Id = "11", Name = "A" };
             var r2 = new Record { Id = "11", Name = "B" };
