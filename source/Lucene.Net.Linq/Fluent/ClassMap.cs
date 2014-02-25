@@ -105,11 +105,6 @@ namespace Lucene.Net.Linq.Fluent
                 else
                 {
                     docMapper.AddField(fieldMapper);
-
-                    if (!string.IsNullOrWhiteSpace(fieldMapper.FieldName) && fieldMapper.Analyzer != null)
-                    {
-                        docMapper.Analyzer.AddAnalyzer(fieldMapper.FieldName, fieldMapper.Analyzer);
-                    }
                 }
             }
 

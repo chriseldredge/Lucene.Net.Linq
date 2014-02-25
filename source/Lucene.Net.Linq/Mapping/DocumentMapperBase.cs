@@ -132,7 +132,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             if (EnableScoreTracking)
             {
-                context.Searcher.SetDefaultFieldSortScoring(true, false);    
+                context.Searcher.SetDefaultFieldSortScoring(true, false);
             }
         }
 
@@ -191,14 +191,18 @@ namespace Lucene.Net.Linq.Mapping
             return Equals(val1, val2);
         }
 
-        public void AddField(IFieldMapper<T> field)
+        public void AddField(IFieldMapper<T> fieldMapper)
         {
-            fieldMap.Add(field.PropertyName, field);
+            fieldMap.Add(fieldMapper.PropertyName, fieldMapper);
+            if (!string.IsNullOrWhiteSpace(fieldMapper.FieldName) && fieldMapper.Analyzer != null)
+            {
+                Analyzer.AddAnalyzer(fieldMapper.FieldName, fieldMapper.Analyzer);
+            }
         }
 
         public void AddKeyField(IFieldMapper<T> fieldMapper)
         {
-            fieldMap.Add(fieldMapper.PropertyName, fieldMapper);
+            AddField(fieldMapper);
             keyFields.Add(fieldMapper);
         }
 

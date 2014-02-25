@@ -21,6 +21,26 @@ namespace Lucene.Net.Linq.Tests.Fluent
         }
 
         [Test]
+        public void ToDocumentMapperAddsAnalyzer()
+        {
+            map.Property(x => x.Date);
+
+            var mapper = map.ToDocumentMapper();
+
+            Assert.That(mapper.Analyzer["Date"], Is.TypeOf<CaseInsensitiveKeywordAnalyzer>());
+        }
+
+        [Test]
+        public void ToDocumentMapperAddsAnalyzer_KeyField()
+        {
+            map.Key(x => x.Date);
+
+            var mapper = map.ToDocumentMapper();
+
+            Assert.That(mapper.Analyzer["Date"], Is.TypeOf<CaseInsensitiveKeywordAnalyzer>());
+        }
+
+        [Test]
         public void SpecifyAnalyzer()
         {
             var analyzer = new SimpleAnalyzer();
@@ -31,7 +51,7 @@ namespace Lucene.Net.Linq.Tests.Fluent
 
             Assert.That(mapper.Analyzer, Is.SameAs(analyzer));
         }
-        
+
         [Test]
         public void SpecifyIndexMode()
         {
