@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Analysis;
@@ -54,7 +54,7 @@ namespace Lucene.Net.Linq.Mapping
         {
             collectionType = type;
 
-            if (type.IsGenericType && typeof(IEnumerable<>).IsAssignableFrom(type.GetGenericTypeDefinition()))
+            if (type.IsGenericType && typeof(IEnumerable).IsAssignableFrom(type.GetGenericTypeDefinition()))
             {
                 collectionType = type.GetGenericArguments()[0];
                 return true;
