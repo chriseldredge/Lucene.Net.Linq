@@ -3,10 +3,10 @@
 *ncrunch*
 *.user
 *.dotCover
+*.cache
 bin
 obj
 build/
-*.cache
-Release/
 packages/
 TestResult.xml
+NuGet.exe

@@ -2,8 +2,6 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
 		<VersionPrefix>3.2.1</VersionPrefix>
-
-		<!-- like alpha, preview, test -->
 		<VersionSuffix></VersionSuffix>
 	</PropertyGroup>
 
@@ -18,10 +16,14 @@
 
 		<AssemblyVersion>$(VersionPrefix).$(BuildNumber)</AssemblyVersion>
 
+		<VersionSuffix Condition=" '$(TRAVIS)' == 'true' ">build$(BuildNumber)</VersionSuffix>
+
 		<PackageVersion>$(VersionPrefix)</PackageVersion>
 		<PackageVersion Condition=" '$(VersionSuffix)' != '' ">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
 
 		<AssemblyInformationalVersion>$(PackageVersion) $(VersionControlInfo)</AssemblyInformationalVersion>
+
+		<TestsEnabled>true</TestsEnabled>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,29 +32,58 @@
 		<VersionInfoContent Include="[assembly: global::System.Reflection.AssemblyInformationalVersionAttribute(&quot;$(AssemblyInformationalVersion)&quot;)]"/>
 	</ItemGroup>
 
-	<Target Name="Build" DependsOnTargets="GenerateVersionInfo;Compile;Test"/>
+	<Target Name="Build" DependsOnTargets="Clean;RestoreSolutionPackages;GenerateVersionInfo;Compile;Test;Package"/>
+
+	<Target Name="Clean">
+		<ItemGroup>
+			<Trash Include="build\**\*" />
+			<Trash Include="source\*\bin\**\*" />
+			<Trash Include="source\*\obj\**\*" />
+		</ItemGroup>
+		<Delete Files="@(Trash)"/>
+	</Target>
+
+    <Target Name="RestoreSolutionPackages" DependsOnTargets="DownloadNuGetCommandLineClient">
+        <Exec Command="$(NuGetCommand) restore source -NonInteractive -Source http://www.nuget.org/api/v2/"/>
+    </Target>
 
 	<Target Name="Compile">
 		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Debug"/>
-		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Release;RestorePackages=false"/>
+		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Release"/>
 	</Target>
 
-	<Target Name="Test">
-		<Exec Command="nunit-console ./source/Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll -noshadow"/>
+	<Target Name="Test" Condition=" '$(TestsEnabled)' == 'true' ">
+		<ItemGroup>
+			<NUnitRunner Include="$(SolutionDir)packages\NUnit.Runners.*\tools\nunit-console.exe"/>
+		</ItemGroup>
+		<CreateProperty Value="%(NUnitRunner.Identity)">
+			<Output TaskParameter="Value" PropertyName="NUnitRunner"/>
+		</CreateProperty>
+		<PropertyGroup>
+			<NUnitCommand Condition=" '$(OS)' == 'Windows_NT' ">&quot;$(NUnitRunner)&quot;</NUnitCommand>
+			<NUnitCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 &quot;$(NUnitRunner)&quot;</NUnitCommand>
+		</PropertyGroup>
+		<ItemGroup>
+			<TestAssembly Include="$(SolutionDir)Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll"/>
+		</ItemGroup>
+		<Exec Command="$(NUnitCommand) @(TestAssembly -> '&quot;%(FullPath)&quot;', ' ') -noshadow"/>
 	</Target>
 
 	<Target Name="Package">
-		<Exec Command="$(NuGetCommand) pack -o $(MSBuildProjectDirectory)/build -Properties Configuration=Release -Version $(PackageVersion) -Symbols"
+		<MakeDir Directories="build/artifacts"/>
+		<Exec Command="$(NuGetCommand) pack -o $(MSBuildProjectDirectory)/build/artifacts -Properties Configuration=Release -Version &quot;$(PackageVersion)&quot; -Symbols"
 			WorkingDirectory="source/Lucene.Net.Linq"/>
 	</Target>
 
 	<Target Name="GenerateVersionInfo">
-		<MakeDir Directories="build"/>
+		<MakeDir Directories="build/artifacts"/>
 		<WriteLinesToFile File="build/VersionInfo.cs" Lines="@(VersionInfoContent)" Overwrite="true"/>
 		<Message Text="PackageVersion: $(PackageVersion)"/>
 		<Message Text="AssemblyVersion: $(AssemblyVersion)"/>
 		<Message Text="AssemblyInformationalVersion: $(AssemblyInformationalVersion)"/>
+		<Copy SourceFiles="build/VersionInfo.cs" DestinationFiles="build/artifacts/VersionInfo-$(BuildNumber).cs"/>
+		<Message Text="To repeat this build: git checkout $(TRAVIS_COMMIT); msbuild /p:TRAVIS=true,TRAVIS_COMMIT=$(TRAVIS_COMMIT),TRAVIS_BRANCH=$(TRAVIS_BRANCH),TRAVIS_BUILD_NUMBER=$(TRAVIS_BUILD_NUMBER)"/>
 	</Target>
 
-	<Import Project="source/.nuget/nuget.targets"/>
+	<Import Project="NuGet.targets"/>
 </Project>
