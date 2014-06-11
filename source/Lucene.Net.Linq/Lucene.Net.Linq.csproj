@@ -134,6 +134,7 @@
     <Compile Include="Search\Function\DelegatingCustomScoreQuery.cs" />
     <Compile Include="Transformation\TreeVisitors\AllowSpecialCharactersMethodExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\BooleanBinaryToQueryPredicateExpressionTreeVisitor.cs" />
+    <Compile Include="Transformation\TreeVisitors\FuzzyMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\BoostMethodCallTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\ExternallyProvidedQueryExpressionTreeVisitor.cs" />
     <Compile Include="Transformation\TreeVisitors\LuceneExtensionMethodCallTreeVisitor.cs" />
