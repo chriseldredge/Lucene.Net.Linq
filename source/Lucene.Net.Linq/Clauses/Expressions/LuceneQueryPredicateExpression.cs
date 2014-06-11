@@ -48,11 +48,11 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             set { field.Boost = value; }
         }
 
-		public float? Fuzzy
-		{
-			get;
-			set;
-		}
+        public float? Fuzzy
+        {
+            get;
+            set;
+        }
 
         public QueryType QueryType
         {
