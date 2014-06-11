@@ -54,21 +54,27 @@
 		<MSBuild Projects="source/Lucene.Net.Linq.sln" Targets="Build" Properties="Configuration=Release"/>
 	</Target>
 
-	<Target Name="Test" Condition=" '$(TestsEnabled)' == 'true' ">
+	<Target Name="Test" Condition=" '$(TestsEnabled)' == 'true' " DependsOnTargets="ResolveNUnitCommand">
 		<ItemGroup>
+			<TestAssembly Include="$(SolutionDir)Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll"/>
+		</ItemGroup>
+		<Exec Command="$(NUnitCommand) @(TestAssembly -> '&quot;%(FullPath)&quot;', ' ') -noshadow"/>
+	</Target>
+
+	<Target Name="ResolveNUnitCommand">
+		<ItemGroup Condition=" '$(APPVEYOR)' == '' ">
 			<NUnitRunner Include="$(SolutionDir)packages\NUnit.Runners.*\tools\nunit-console.exe"/>
 		</ItemGroup>
-		<CreateProperty Value="%(NUnitRunner.Identity)">
+		<CreateProperty Value="%(NUnitRunner.Identity)" Condition=" '$(APPVEYOR)' == '' ">
+			<Output TaskParameter="Value" PropertyName="NUnitRunner"/>
+		</CreateProperty>
+		<CreateProperty Value="nunit-console.exe" Condition=" '$(APPVEYOR)' != '' ">
 			<Output TaskParameter="Value" PropertyName="NUnitRunner"/>
 		</CreateProperty>
 		<PropertyGroup>
 			<NUnitCommand Condition=" '$(OS)' == 'Windows_NT' ">&quot;$(NUnitRunner)&quot;</NUnitCommand>
 			<NUnitCommand Condition=" '$(OS)' != 'Windows_NT' ">mono --runtime=v4.0.30319 &quot;$(NUnitRunner)&quot;</NUnitCommand>
 		</PropertyGroup>
-		<ItemGroup>
-			<TestAssembly Include="$(SolutionDir)Lucene.Net.Linq.Tests/bin/Debug/Lucene.Net.Linq.Tests.dll"/>
-		</ItemGroup>
-		<Exec Command="$(NUnitCommand) @(TestAssembly -> '&quot;%(FullPath)&quot;', ' ') -noshadow"/>
 	</Target>
 
 	<Target Name="Package">
