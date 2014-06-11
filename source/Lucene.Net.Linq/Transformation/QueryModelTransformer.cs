@@ -38,7 +38,8 @@ namespace Lucene.Net.Linq.Transformation
                            new BinaryToQueryExpressionTreeVisitor(),
                            new RangeQueryMergeExpressionTreeVisitor(), 
                            new AllowSpecialCharactersMethodExpressionTreeVisitor(),
-                           new BoostMethodCallTreeVisitor(1)
+                           new BoostMethodCallTreeVisitor(1),
+						   new FuzzyMethodCallTreeVisitor()
                        },
                    new ExpressionTreeVisitor[]
                        {

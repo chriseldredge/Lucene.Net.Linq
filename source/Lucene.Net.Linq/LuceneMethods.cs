@@ -55,6 +55,11 @@ namespace Lucene.Net.Linq
                                 source.Expression, boostFunction));
         }
 
+        public static bool Fuzzy(this bool predicate, float similarity)
+        {
+            throw new InvalidOperationException(UnreachableCode);
+        }
+
         internal static IQueryable<T> TrackRetrievedDocuments<T>(this IQueryable<T> source, IRetrievedDocumentTracker<T> tracker)
         {
             return source.Provider.CreateQuery<T>(
