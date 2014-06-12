@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using Lucene.Net.Linq.Clauses.Expressions;
@@ -142,6 +143,15 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                     pattern = "*" + pattern;
                     break;
             }
+
+            if (expression.Fuzzy.HasValue)
+            {
+                pattern += string.Format(
+                    CultureInfo.InvariantCulture, 
+                    "~{0}", 
+                    expression.Fuzzy.Value);
+            }
+
             return pattern;
         }
 
