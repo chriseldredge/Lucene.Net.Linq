@@ -55,6 +55,10 @@ namespace Lucene.Net.Linq
                                 source.Expression, boostFunction));
         }
 
+        /// <summary>
+        /// Enables fuzzy matching on the preceeding query clause so that similar but not identical
+        /// terms are matched.
+        /// </summary>
         public static bool Fuzzy(this bool predicate, float similarity)
         {
             throw new InvalidOperationException(UnreachableCode);
