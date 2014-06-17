@@ -62,6 +62,7 @@
     <Compile Include="AnalyzerExtensions.cs" />
     <Compile Include="Clauses\ExpressionNodes\BoostExpressionNode.cs" />
     <Compile Include="Clauses\BoostClause.cs" />
+    <Compile Include="Clauses\ExpressionNodes\QueryStatisticsCallbackExpressionNode.cs" />
     <Compile Include="Clauses\ExpressionNodes\TrackRetrievedDocumentsExpressionNode.cs" />
     <Compile Include="Clauses\Expressions\AllowSpecialCharactersExpression.cs" />
     <Compile Include="Clauses\Expressions\BoostBinaryExpression.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="Clauses\Expressions\LuceneQueryPredicateExpression.cs" />
     <Compile Include="Clauses\Expressions\LuceneRangeQueryExpression.cs" />
     <Compile Include="Clauses\ExtensionClause.cs" />
+    <Compile Include="Clauses\QueryStatisticsCallbackClause.cs" />
     <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
     <Compile Include="Fluent\ClassMap.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="IQueryExecutionContext.cs" />
     <Compile Include="IRetrievedDocumentTracker.cs" />
     <Compile Include="LuceneDataProviderSettings.cs" />
+    <Compile Include="LuceneQueryStatistics.cs" />
     <Compile Include="Mapping\DocumentKey.cs" />
     <Compile Include="Mapping\DocumentKeyFieldMapper.cs" />
     <Compile Include="Mapping\DocumentMapperBase.cs" />

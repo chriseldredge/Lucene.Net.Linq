@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using Common.Logging;
@@ -101,6 +102,9 @@ namespace Lucene.Net.Linq
 
         public T ExecuteScalar<T>(QueryModel queryModel)
         {
+            var watch = new Stopwatch();
+            watch.Start();
+
             var luceneQueryModel = PrepareQuery(queryModel);
 
             var searcherHandle = CheckoutSearcher();
@@ -111,23 +115,40 @@ namespace Lucene.Net.Linq
                 var skipResults = luceneQueryModel.SkipResults;
                 var maxResults = Math.Min(luceneQueryModel.MaxResults, searcher.MaxDoc - skipResults);
 
+                var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
                 TopFieldDocs hits;
+
+                TimeSpan elapsedPreparationTime;
+                TimeSpan elapsedSearchTime;
 
                 if (maxResults > 0)
                 {
-                    var executionContext = new QueryExecutionContext(searcher, luceneQueryModel.Query, luceneQueryModel.Filter);
                     PrepareSearchSettings(executionContext);
 
+                    elapsedPreparationTime = watch.Elapsed;
+
                     hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults, luceneQueryModel.Sort);
+
+                    elapsedSearchTime = watch.Elapsed - elapsedPreparationTime;
                 }
                 else
                 {
                     hits = new TopFieldDocs(0, new ScoreDoc[0], new SortField[0], 0);
+                    elapsedPreparationTime = watch.Elapsed;
+                    elapsedSearchTime = TimeSpan.Zero;
                 }
+
+                executionContext.Phase = QueryExecutionPhase.ConvertResults;
+                executionContext.Hits = hits;
 
                 var handler = ScalarResultHandlerRegistry.Instance.GetItem(luceneQueryModel.ResultSetOperator.GetType());
 
-                return handler.Execute<T>(luceneQueryModel, hits);
+                var result = handler.Execute<T>(luceneQueryModel, hits);
+
+                var elapsedRetrievalTime = watch.Elapsed - elapsedPreparationTime - elapsedSearchTime;
+                RaiseStatisticsCallback(luceneQueryModel, executionContext, elapsedPreparationTime, elapsedSearchTime, elapsedRetrievalTime, 0, 0);
+
+                return result;
             }
         }
 
@@ -145,6 +166,9 @@ namespace Lucene.Net.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
+            var watch = new Stopwatch();
+            watch.Start();
+
             var itemHolder = new ItemHolder();
 
             var currentItemExpression = Expression.Property(Expression.Constant(itemHolder), "Current");
@@ -177,7 +201,12 @@ namespace Lucene.Net.Linq
 
                 PrepareSearchSettings(executionContext);
 
+                var elapsedPreparationTime = watch.Elapsed;
                 var hits = searcher.Search(executionContext.Query, executionContext.Filter, maxResults + skipResults, luceneQueryModel.Sort);
+                var elapsedSearchTime = watch.Elapsed - elapsedPreparationTime;
+
+                executionContext.Phase = QueryExecutionPhase.ConvertResults;
+                executionContext.Hits = hits;
 
                 if (luceneQueryModel.Last)
                 {
@@ -186,12 +215,30 @@ namespace Lucene.Net.Linq
                 }
 
                 var tracker = luceneQueryModel.DocumentTracker as IRetrievedDocumentTracker<TDocument>;
+                var retrievedDocuments = 0;
 
-                executionContext.Phase = QueryExecutionPhase.ConvertResults;
-                executionContext.Hits = hits;
+                foreach (var p in EnumerateHits(hits, executionContext, searcher, tracker, itemHolder, skipResults, projector))
+                {
+                    yield return p;
+                    retrievedDocuments++;
+                }
 
-                foreach (var p in EnumerateHits(hits, executionContext, searcher, tracker, itemHolder, skipResults, projector)) yield return p;
+                var elapsedRetrievalTime = watch.Elapsed - elapsedSearchTime - elapsedPreparationTime;
+                RaiseStatisticsCallback(luceneQueryModel, executionContext, elapsedPreparationTime, elapsedSearchTime, elapsedRetrievalTime, skipResults, retrievedDocuments);
             }
+        }
+
+        private void RaiseStatisticsCallback(LuceneQueryModel luceneQueryModel, QueryExecutionContext executionContext, TimeSpan elapsedPreparationTime, TimeSpan elapsedSearchTime, TimeSpan elapsedRetrievalTime, int skipResults, int retrievedDocuments)
+        {
+            var statistics = new LuceneQueryStatistics(executionContext.Query,
+                executionContext.Filter,
+                luceneQueryModel.Sort,
+                elapsedPreparationTime,
+                elapsedSearchTime,
+                elapsedRetrievalTime,
+                executionContext.Hits.TotalHits,
+                skipResults, retrievedDocuments);
+            luceneQueryModel.RaiseCaptureQueryStatistics(statistics);
         }
 
         private IEnumerable<T> EnumerateHits<T>(TopDocs hits, QueryExecutionContext executionContext, Searchable searcher, IRetrievedDocumentTracker<TDocument> tracker, ItemHolder itemHolder, int skipResults, Func<TDocument, T> projector)

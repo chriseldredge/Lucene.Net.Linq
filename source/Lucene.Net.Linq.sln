@@ -1,26 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30324.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucene.Net.Linq", "Lucene.Net.Linq\Lucene.Net.Linq.csproj", "{77AD18CC-93A3-4BC9-9F31-2C16D873F088}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lucene.Net.Linq.Tests", "Lucene.Net.Linq.Tests\Lucene.Net.Linq.Tests.csproj", "{40D157FA-178B-4906-9179-E5D623F5BA03}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{91DBBF52-CD3F-4737-91DC-CDB7564C32B9}"
 	ProjectSection(SolutionItems) = preProject
-		..\default.ps1 = ..\default.ps1
 		..\IntegratedBuild.proj = ..\IntegratedBuild.proj
 		..\LICENSE.txt = ..\LICENSE.txt
-		..\psake.ps1 = ..\psake.ps1
-		..\psake.psm1 = ..\psake.psm1
-		..\psake_ext.ps1 = ..\psake_ext.ps1
 		..\README.markdown = ..\README.markdown
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{95CA6EE1-3FC1-466E-821F-E48BE7DCCA6E}"
 	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
+		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
 EndProject
 Global

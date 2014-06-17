@@ -46,6 +46,8 @@ namespace Lucene.Net.Linq
 
         public object DocumentTracker { get; set; }
 
+        public event Action<LuceneQueryStatistics> OnCaptureQueryStatistics;
+
         public void AddQuery(Query additionalQuery)
         {
             if (query == null)
@@ -152,6 +154,19 @@ namespace Lucene.Net.Linq
             }
 
             customScoreFunction = scoreFunction;
+        }
+
+        public void AddQueryStatisticsCallback(Action<LuceneQueryStatistics> callback)
+        {
+            OnCaptureQueryStatistics += callback;
+        }
+
+        public void RaiseCaptureQueryStatistics(LuceneQueryStatistics statistics)
+        {
+            if (OnCaptureQueryStatistics != null)
+            {
+                OnCaptureQueryStatistics(statistics);
+            }
         }
 
         public Func<TDocument, float> GetCustomScoreFunction<TDocument>()

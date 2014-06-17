@@ -78,16 +78,21 @@ namespace Lucene.Net.Linq.Translation
             }
         }
 
-        public void VisitBoostClause(BoostClause boostClause, QueryModel queryModel, int index)
+        public void VisitBoostClause(BoostClause clause, QueryModel queryModel, int index)
         {
-            model.AddBoostFunction(boostClause.BoostFunction);
+            model.AddBoostFunction(clause.BoostFunction);
         }
 
-        public void VisitTrackRetrievedDocumentsClause(TrackRetrievedDocumentsClause trackRetrievedDocumentsClause, QueryModel queryModel, int index)
+        public void VisitTrackRetrievedDocumentsClause(TrackRetrievedDocumentsClause clause, QueryModel queryModel, int index)
         {
-            model.DocumentTracker = trackRetrievedDocumentsClause.Tracker.Value;
+            model.DocumentTracker = clause.Tracker.Value;
         }
-        
+
+        public void VisitQueryStatisticsCallbackClause(QueryStatisticsCallbackClause clause, QueryModel queryModel, int index)
+        {
+            model.AddQueryStatisticsCallback(clause.Callback);
+        }
+
         private void CreateQueryFilterForKeyFields()
         {
             var filterQuery = fieldMappingInfoProvider.KeyProperties.Aggregate(

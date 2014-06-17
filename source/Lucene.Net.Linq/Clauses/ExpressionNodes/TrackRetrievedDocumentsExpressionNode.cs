@@ -7,10 +7,10 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
 {
     internal class TrackRetrievedDocumentsExpressionNode : MethodCallExpressionNodeBase
     {
-        public static readonly MethodInfo[] SupportedMethods = new[]
-                                                                   {
-                                                                       GetSupportedMethod (() => LuceneMethods.TrackRetrievedDocuments<object>(null, null))
-                                                                   };
+        public static readonly MethodInfo[] SupportedMethods =
+            {
+                GetSupportedMethod (() => LuceneMethods.TrackRetrievedDocuments<object>(null, null))
+            };
 
         private readonly ConstantExpression tracker;
 

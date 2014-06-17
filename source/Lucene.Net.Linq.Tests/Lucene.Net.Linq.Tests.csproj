@@ -118,6 +118,7 @@
     <Compile Include="Integration\OrderByTests.cs" />
     <Compile Include="Integration\PorterStemAnalyzer.cs" />
     <Compile Include="Integration\RangeTests.cs" />
+    <Compile Include="Integration\StatisticTests.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderSortFieldTests.cs" />
     <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />

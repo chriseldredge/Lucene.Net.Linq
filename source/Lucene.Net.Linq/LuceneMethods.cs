@@ -64,6 +64,17 @@ namespace Lucene.Net.Linq
             throw new InvalidOperationException(UnreachableCode);
         }
 
+        /// <summary>
+        /// Registers a callback to be invoked when the query is executed to provide access to
+        /// metadata including total hits and execution time.
+        /// </summary>
+        public static IQueryable<T> CaptureStatistics<T>(this IQueryable<T> source, Action<LuceneQueryStatistics> callback)
+        {
+            return source.Provider.CreateQuery<T>(
+                Expression.Call(((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(T)),
+                                source.Expression, Expression.Constant(callback)));
+        }
+
         internal static IQueryable<T> TrackRetrievedDocuments<T>(this IQueryable<T> source, IRetrievedDocumentTracker<T> tracker)
         {
             return source.Provider.CreateQuery<T>(
