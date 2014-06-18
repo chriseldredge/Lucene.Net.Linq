@@ -22,9 +22,9 @@
 		<VersionControlInfo Condition=" '$(VersionControlInfo)' == '' ">(unknown version control revision)</VersionControlInfo>
 		<BuildNumber Condition=" '$(BuildNumber)' == '' ">0</BuildNumber>
 		<AssemblyVersion>$(VersionPrefix).$(BuildNumber)</AssemblyVersion>
-		<VersionSuffix>build$(BuildNumber)</VersionSuffix>
 		<PackageVersion>$(VersionPrefix)</PackageVersion>
 		<PackageVersion Condition=" '$(VersionSuffix)' != '' ">$(PackageVersion)-$(VersionSuffix)</PackageVersion>
+		<PackageVersionWithBuildNumber>$(PackageVersion)-build$(BuildNumber)</PackageVersionWithBuildNumber>
 		<AssemblyInformationalVersion>$(PackageVersion) $(VersionControlInfo)</AssemblyInformationalVersion>
 	</PropertyGroup>
 
@@ -80,6 +80,8 @@
 	<Target Name="Package">
 		<MakeDir Directories="build/artifacts"/>
 		<Exec Command="$(NuGetCommand) pack -o $(MSBuildProjectDirectory)/build/artifacts -Properties Configuration=Release -Version &quot;$(PackageVersion)&quot; -Symbols"
+			WorkingDirectory="source/Lucene.Net.Linq"/>
+		<Exec Command="$(NuGetCommand) pack -o $(MSBuildProjectDirectory)/build/artifacts -Properties Configuration=Release -Version &quot;$(PackageVersionWithBuildNumber)&quot; -Symbols"
 			WorkingDirectory="source/Lucene.Net.Linq"/>
 	</Target>
 
