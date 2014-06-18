@@ -1,6 +1,6 @@
 ## LINQ to Lucene.Net
 
-[![Build Status](https://travis-ci.org/themotleyfool/Lucene.Net.Linq.png?branch=master)](https://travis-ci.org/themotleyfool/Lucene.Net.Linq)
+[![Build status](https://ci.appveyor.com/api/projects/status/voelauhwvv1l8j2f)](https://ci.appveyor.com/project/chriseldredge/lucene-net-linq)
 
 Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a Lucene.Net index.
 
