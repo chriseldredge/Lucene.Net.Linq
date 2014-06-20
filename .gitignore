@@ -8,5 +8,3 @@ bin
 obj
 build/
 packages/
-TestResult.xml
-NuGet.exe

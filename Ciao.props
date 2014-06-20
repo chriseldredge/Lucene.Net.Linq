@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Bootstrap" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<PropertyGroup Label="Version">
+		<VersionPrefix>3.3.0</VersionPrefix>
+		<VersionSuffix></VersionSuffix>
+	</PropertyGroup>
+
+	<PropertyGroup Label="Settings">
+		<SolutionFile>Lucene.Net.Linq.sln</SolutionFile>
+	</PropertyGroup>
+
+    <ItemGroup>
+        <NuGetPackConfiguration Include="Prerelease">
+            <Version>$(PackageVersionWithBuildNumber)</Version>
+            <Properties>Configuration=Debug;PackageVersion=$(PackageVersionWithBuildNumber)</Properties>
+        </NuGetPackConfiguration>
+        <NuGetPackConfiguration Include="Release">
+            <Version>$(PackageVersion)</Version>
+            <Properties>Configuration=Release;PackageVersion=$(PackageVersion)</Properties>
+        </NuGetPackConfiguration>
+    </ItemGroup>
+
+	<PropertyGroup Label="FeatureFlags">
+		<GenerateVersionInfoEnabled>true</GenerateVersionInfoEnabled>
+		<NUnitEnabled>true</NUnitEnabled>
+		<NuGetPackEnabled>true</NuGetPackEnabled>
+	</PropertyGroup>
+</Project>
