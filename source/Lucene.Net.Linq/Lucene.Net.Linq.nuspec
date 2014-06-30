@@ -20,9 +20,9 @@
       See https://github.com/themotleyfool/Lucene.Net.Linq/releases
     </releaseNotes>
     <dependencies>
-      <dependency id="Remotion.Linq" version="[1.13.183, 2.0)" />
-      <dependency id="Common.Logging" version="[2.1.2, 3.0)" />
-      <dependency id="Lucene.Net" version="[3.0.3, 3.6)" />
+      <dependency id="Common.Logging.Core" version="[2.2, 3.0)"/>
+      <dependency id="Lucene.Net" version="[3.0.3, 3.6)"/>
+      <dependency id="Remotion.Linq" version="[1.13, 1.15.10)"/>
     </dependencies>
   </metadata>
   <files>
