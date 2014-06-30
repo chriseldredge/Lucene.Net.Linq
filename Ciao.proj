@@ -49,7 +49,7 @@
         <CreateProperty Value="%(CiaoPackageEntryProject.Identity)">
             <Output TaskParameter="Value" PropertyName="CiaoPackageEntryProject"/>
         </CreateProperty>
-        <Error Text="Unable to locate Caio package in Solution packages directory $(SolutionPackageDirectory) (is Ciao installed in the Solution?)" Condition="!Exists($(CiaoPackageEntryProject))"/>
+        <Error Text="Unable to locate Caio package in Solution packages directory $(SolutionPackageDirectory) (is Ciao installed in the Solution?)" Condition="!Exists('$(CiaoPackageEntryProject)')"/>
     </Target>
 
     <Target Name="Build">
