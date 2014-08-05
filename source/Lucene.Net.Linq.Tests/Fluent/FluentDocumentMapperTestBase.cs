@@ -24,6 +24,8 @@ namespace Lucene.Net.Linq.Tests.Fluent
             public IEnumerable<int> Numbers { get; set; }
 
             public IEnumerable<Uri> Urls { get; set; } 
+
+            public float Boost { get; set; }
         }
 
         public class SampleMap : ClassMap<Sample>

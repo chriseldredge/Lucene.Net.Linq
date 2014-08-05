@@ -20,7 +20,8 @@ namespace Lucene.Net.Linq.Fluent
         private readonly ISet<PropertyMap<T>> properties = new HashSet<PropertyMap<T>>(new PartComparer<T>());
         private readonly IDictionary<string, string> documentKeys = new Dictionary<string, string>();
         private ReflectionScoreMapper<T> scoreMapper;
- 
+        private ReflectionDocumentBoostMapper<T> docBoostMapper;
+
         public ClassMap(Version version)
         {
             this.version = version;
@@ -62,6 +63,16 @@ namespace Lucene.Net.Linq.Fluent
             properties.Add(part);
 
             return part;
+        }
+
+        /// <summary>
+        /// Defines a property that is used to set the document boost.
+        /// </summary>
+        public void DocumentBoost(Expression<Func<T, float>> expression)
+        {
+            var propInfo = GetMemberInfo<PropertyInfo>(expression.Body);
+
+            docBoostMapper = new ReflectionDocumentBoostMapper<T>(propInfo);
         }
 
         /// <summary>
@@ -120,6 +131,11 @@ namespace Lucene.Net.Linq.Fluent
             if (scoreMapper != null)
             {
                 docMapper.AddField(scoreMapper);
+            }
+
+            if (docBoostMapper != null)
+            {
+                docMapper.AddField(docBoostMapper);
             }
             
             return docMapper;

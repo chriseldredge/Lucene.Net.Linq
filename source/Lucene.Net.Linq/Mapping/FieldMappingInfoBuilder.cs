@@ -23,6 +23,13 @@ namespace Lucene.Net.Linq.Mapping
 
         internal static IFieldMapper<T> Build<T>(PropertyInfo p, Version version, Analyzer externalAnalyzer)
         {
+            var boost = p.GetCustomAttribute<DocumentBoostAttribute>(true);
+
+            if (boost != null)
+            {
+                return new ReflectionDocumentBoostMapper<T>(p);
+            }
+
             var score = p.GetCustomAttribute<QueryScoreAttribute>(true);
 
             if (score != null)

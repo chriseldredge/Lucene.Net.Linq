@@ -101,6 +101,7 @@
     <Compile Include="FakeFieldMappingInfo.cs" />
     <Compile Include="Fluent\AnalyzerTests.cs" />
     <Compile Include="Fluent\ConverterTests.cs" />
+    <Compile Include="Fluent\DocumentBoostTests.cs" />
     <Compile Include="Fluent\DocumentKeyTests.cs" />
     <Compile Include="Fluent\FluentDocumentMapperTestBase.cs" />
     <Compile Include="Fluent\PropertyTests.cs" />
@@ -111,6 +112,7 @@
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
     <Compile Include="Integration\EnumFieldTests.cs" />
     <Compile Include="Integration\FuzzyTests.cs" />
+    <Compile Include="Integration\DocumentBoostTests.cs" />
     <Compile Include="Integration\IndexBoostTests.cs" />
     <Compile Include="Integration\OrderByDateTimeTests.cs" />
     <Compile Include="Integration\QueryBoostTests.cs" />
@@ -122,6 +124,7 @@
     <Compile Include="Integration\StatisticTests.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderSortFieldTests.cs" />
+    <Compile Include="Mapping\ReflectionDocumentBoostMapperTests.cs" />
     <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />
     <Compile Include="Samples\AttributeConfiguration.cs" />
     <Compile Include="Integration\ScalarTests.cs" />
@@ -187,6 +190,9 @@
       <Project>{77AD18CC-93A3-4BC9-9F31-2C16D873F088}</Project>
       <Name>Lucene.Net.Linq</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

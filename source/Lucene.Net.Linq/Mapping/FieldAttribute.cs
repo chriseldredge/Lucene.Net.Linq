@@ -207,6 +207,15 @@ namespace Lucene.Net.Linq.Mapping
     }
 
     /// <summary>
+    /// When set on a property, the document boost will be set with the property
+    /// value
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    public class DocumentBoostAttribute : Attribute
+    {
+    }
+
+    /// <summary>
     /// When set on a class, defines a fixed-value key that will always
     /// be used when querying for objects of this type or deleting and
     /// replacing documents with matching keys.

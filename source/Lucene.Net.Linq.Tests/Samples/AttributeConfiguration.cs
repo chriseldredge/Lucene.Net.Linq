@@ -46,6 +46,9 @@ namespace Sample
         // Add IgnoreFieldAttribute to properties that should not be mapped to/from Document
         [IgnoreField]
         public string IgnoreMe { get; set; }
+
+        [DocumentBoost]
+        public float Boost { get; set; }
     }
 
     [TestFixture]
@@ -60,7 +63,7 @@ namespace Sample
             // add some documents
             using (var session = provider.OpenSession<Article>())
             {
-                session.Add(new Article {Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow});
+                session.Add(new Article {Author = "John Doe", BodyText = "some body text", PublishDate = DateTimeOffset.UtcNow, Boost = 2f});
             }
 
             var articles = provider.AsQueryable<Article>();

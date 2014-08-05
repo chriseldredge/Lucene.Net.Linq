@@ -100,6 +100,7 @@
     <Compile Include="Mapping\IFieldMapper.cs" />
     <Compile Include="Mapping\IFieldMappingInfo.cs" />
     <Compile Include="Mapping\IFieldMappingInfoProvider.cs" />
+    <Compile Include="Mapping\ReflectionDocumentBoostMapper.cs" />
     <Compile Include="Mapping\ReflectionScoreMapper.cs" />
     <Compile Include="Mapping\TermFreqVectorDocumentMapper.cs" />
     <Compile Include="Mapping\TermVectorMode.cs" />
