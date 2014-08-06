@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Mapping;
