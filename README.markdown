@@ -13,7 +13,7 @@ Lucene.Net.Linq is a .net library that enables LINQ queries to run natively on a
 * Range queries and numeric range queries
 * Complex boolean queries
 * Native pagination using Skip and Take
-* Support storing and querying NumericField 
+* Support storing and querying NumericField
 * Automatically convert complex types for storing, querying and sorting
 * Custom boost functions using IQueryable<T>.Boost() extension method
 * Sort by standard string, NumericField or any type that implements IComparable
@@ -50,6 +50,42 @@ by doing:
 
 Future versions of this library may change the default behavior.
 
+## Integration with OData
+
+Lucene.Net.Linq supports both [WCF Data Services](http://msdn.microsoft.com/en-us/library/cc668792.aspx)
+and [WebApi OData](http://www.asp.net/web-api/overview/odata-support-in-aspnet-web-api). These libraries
+by default support a feature known as Null Propagation that adds null safety to LINQ Expressions to
+avoid NullReferenceException from being thrown when operating on a property that may be null.
+
+A simple expression like:
+
+```c#
+from doc in Documents where doc.Name.StartsWith("Sample") select doc;
+```
+
+Is translated into:
+
+```c#
+from doc in Documents where (doc != null && doc.Name != null
+    && doc.Name.StartsWith("Sample")) select doc;
+```
+
+Null Propagation is designed to work with [LINQ To Objects](http://msdn.microsoft.com/en-ca/library/bb397919.aspx)
+but is not required for LINQ providers such as Lucene.Net.Linq. Lucene.Net.Linq does its best to remove
+these null-safety checks when translating a LINQ expression tree into a Lucene Query, but for best
+performance it is recommended to simply turn the feature off, as in this example:
+
+```c#
+public class PackagesODataController : ODataController
+{
+    [EnableQuery(HandleNullPropagation = HandleNullPropagationOption.False)]
+    public IQueryable<Package> Get()
+    {
+        return provider.AsQueryable<Package>();
+    }
+}
+```
+
 ## Upcoming features / ideas / bugs / known issues
 
 See Issues on the GitHub project page.
@@ -67,5 +103,5 @@ These characters are perfectly fine for fields that will be analyzed
 by a tokenizer that would remove them, but exact matching on the entire
 value is not possible.
 
-If exact matching is required, these characters should be substituted
+If exact matching is required, these characters should be replaced
 with suitable substitutes that are not reserved by Lucene.
