@@ -124,6 +124,26 @@ namespace Lucene.Net.Linq.Tests
         }
 
         [Test]
+        public void DisposeDisposesSearcher()
+        {
+            var searcher = context.CurrentTracker.Searcher;
+
+            context.Dispose();
+
+            searcher.AssertWasCalled(s => s.Dispose());
+        }
+
+        [Test]
+        public void DisposeDisposesSearcherReader()
+        {
+            context.CurrentTracker.Searcher.Dispose();
+            
+            context.Dispose();
+
+            context.FakeReader.AssertWasCalled(r => r.Dispose());
+        }
+
+        [Test]
         public void ReloadFiresLoadingEvent()
         {
             var searcher = context.CurrentTracker.Searcher;

@@ -80,7 +80,7 @@ namespace Lucene.Net.Linq
                     searcher = CreateSearcher();
                     reader = searcher.IndexReader;
                 }
-                else if (!ReopenSearcher(out searcher)) 
+                else if (!ReopenSearcher(out searcher))
                 {
                     return;
                 }
@@ -252,7 +252,11 @@ namespace Lucene.Net.Linq
                             undisposedTrackers.Remove(this);
                         }
 
+                        var reader = searcher.IndexReader;
                         searcher.Dispose();
+                        // NB IndexSearcher.Dispose() does not Dispose externally provided IndexReader:
+                        reader.Dispose();
+
                         disposed = true;
                     }
                     else
