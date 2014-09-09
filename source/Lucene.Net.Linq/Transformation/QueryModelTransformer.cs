@@ -64,7 +64,14 @@ namespace Lucene.Net.Linq.Transformation
             var instance = new QueryModelTransformer();
 
             queryModel.Accept(instance);
+        }
 
+        public override void VisitMainFromClause(MainFromClause fromClause, QueryModel queryModel)
+        {
+            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
+            new AggressiveSubQueryFromClauseFlattener().VisitMainFromClause(fromClause, queryModel);
+            Log.Trace(m => m("Transformed QueryModel after AggressiveSubQueryFromClauseFlattener: {0}", queryModel));
+            base.VisitMainFromClause(fromClause, queryModel);
         }
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
