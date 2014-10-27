@@ -14,7 +14,12 @@ namespace Lucene.Net.Linq.Tests.Translation.TreeVisitors
 
         public IEnumerable<string> AllProperties
         {
-            get { return new[] { "Id" }; }
+            get { return KeyProperties; }
+        }
+
+        public IEnumerable<string> IndexedProperties
+        {
+            get { return KeyProperties; }
         }
 
         public IEnumerable<string> KeyProperties

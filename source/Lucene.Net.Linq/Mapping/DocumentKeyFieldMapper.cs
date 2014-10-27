@@ -77,5 +77,10 @@ namespace Lucene.Net.Linq.Mapping
         {
             get { return new KeywordAnalyzer(); }
         }
+
+        public IndexMode IndexMode
+        { 
+            get { return IndexMode.NotAnalyzed; }
+        }
     }
 }

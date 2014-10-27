@@ -52,6 +52,11 @@ namespace Lucene.Net.Linq.Mapping
             get { return fieldMap.Values.Select(m => m.PropertyName); }
         }
 
+        public IEnumerable<string> IndexedProperties
+        {
+            get { return fieldMap.Values.Where(m => m.IndexMode != IndexMode.NotIndexed).Select(m => m.PropertyName); }
+        }
+
         public virtual IEnumerable<string> KeyProperties
         {
             get { return keyFields.Select(k => k.PropertyName); }

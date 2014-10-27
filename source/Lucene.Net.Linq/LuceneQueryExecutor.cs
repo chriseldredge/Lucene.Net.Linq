@@ -73,6 +73,11 @@ namespace Lucene.Net.Linq
             get { return mapper.AllProperties; }
         }
 
+        public override IEnumerable<string> IndexedProperties
+        {
+            get { return mapper.IndexedProperties; }
+        }
+
         public override IEnumerable<string> KeyProperties
         {
             get { return mapper.KeyProperties; }
@@ -301,6 +306,7 @@ namespace Lucene.Net.Linq
 
         public abstract IFieldMappingInfo GetMappingInfo(string propertyName);
         public abstract IEnumerable<string> AllProperties { get; }
+        public abstract IEnumerable<string> IndexedProperties { get; }
         public abstract IEnumerable<string> KeyProperties { get; }
         public abstract Query CreateMultiFieldQuery(string pattern);
 

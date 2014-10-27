@@ -22,8 +22,15 @@ namespace Lucene.Net.Linq.Mapping
         IEnumerable<string> KeyProperties { get; }
 
         /// <summary>
-        /// Returns detailed mapping info for a given property name.
+        /// Returns the set of fields defined for the given document.
         /// </summary>
+        IEnumerable<string> IndexedProperties { get; }
+
+        /// <summary>
+        /// Returns detailed mapping info for a given property name.
+        /// DefaultSearchProperty names are case sensitive.
+        /// </summary>
+        /// <exception cref="KeyNotFoundException">if the property name is not found.</exception>
         IFieldMappingInfo GetMappingInfo(string propertyName);
 
         /// <summary>

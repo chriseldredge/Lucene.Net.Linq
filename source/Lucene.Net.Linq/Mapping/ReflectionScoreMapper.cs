@@ -72,5 +72,6 @@ namespace Lucene.Net.Linq.Mapping
         public string PropertyName { get { return propertyInfo.Name; } }
         public string FieldName { get { return null; } }
         public Analyzer Analyzer { get { return null; } }
+        public IndexMode IndexMode { get { return IndexMode.NotIndexed; } }
     }
 }

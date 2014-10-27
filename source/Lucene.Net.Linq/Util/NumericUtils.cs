@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Reflection;
 using Lucene.Net.Documents;
-using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
@@ -54,7 +53,7 @@ namespace Lucene.Net.Linq.Util
                 return NumericRangeQuery.NewDoubleRange(fieldName, (double)lowerBound, (double)upperBound, minInclusive, maxInclusive);
             }
 
-            throw new NotSupportedException("Unsupported numeric range type " + lowerBound.GetType()); 
+            throw new NotSupportedException("Unsupported numeric range type " + lowerBound.GetType());
         }
 
         /// <summary>

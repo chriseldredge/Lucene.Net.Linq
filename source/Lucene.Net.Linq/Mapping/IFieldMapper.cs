@@ -17,7 +17,7 @@ namespace Lucene.Net.Linq.Mapping
         void CopyFromDocument(Document source, IQueryExecutionContext context, T target);
 
         /// <summary>
-        /// Convert a Property or other data on an instance
+        /// Convert a DefaultSearchProperty or other data on an instance
         /// of <paramref name="source"/> into a <see cref="Field"/>
         /// on the <paramref name="target"/>.
         /// </summary>
@@ -36,5 +36,10 @@ namespace Lucene.Net.Linq.Mapping
         /// or parsing queries on this field.
         /// </summary>
         Analyzer Analyzer { get; }
+
+        /// <summary>
+        /// Gets the index mode for the field.
+        /// </summary>
+        IndexMode IndexMode { get; }
     }
 }

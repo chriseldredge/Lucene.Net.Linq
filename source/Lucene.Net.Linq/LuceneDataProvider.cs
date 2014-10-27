@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Common.Logging;
 using Lucene.Net.Analysis;
@@ -120,6 +121,14 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
+        /// Gets the index format version provided by constructor.
+        /// </summary>
+        public Version LuceneVersion
+        {
+            get { return version; }
+        }
+
+        /// <summary>
         /// <see cref="AsQueryable{T}(ObjectLookup{T}, IDocumentMapper{T})"/>
         /// </summary>
         public IQueryable<T> AsQueryable<T>() where T : new()
@@ -169,6 +178,16 @@ namespace Lucene.Net.Linq
         public IQueryable<T> AsQueryable<T>(ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper)
         {
             return CreateQueryable(lookup, context, documentMapper);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of fields names that are indexed for a given object.
+        /// This may be useful in conjunction with <see cref="CreateQueryParser{T}"/> to
+        /// allow users to specify advanced custom queries.
+        /// </summary>
+        public IEnumerable<string> GetIndexedPropertyNames<T>()
+        {
+            return new ReflectionDocumentMapper<T>(version, externalAnalyzer).IndexedProperties;
         }
 
         /// <summary>
@@ -314,10 +333,10 @@ namespace Lucene.Net.Linq
         /// Registers a callback to be invoked when a new IndexSearcher is being initialized.
         /// This method allows an IndexSearcher to be "warmed up" by executing one or more
         /// queries before the instance becomes visible on other threads.
-        /// 
+        ///
         /// While callbacks are being executed, other threads will continue to use the previous
         /// instance of IndexSearcher if this is not the first instance being initialized.
-        /// 
+        ///
         /// If this is the first instance, other threads will block until all callbacks complete.
         /// </summary>
         public void RegisterCacheWarmingCallback<T>(Action<IQueryable<T>> callback, ObjectLookup<T> lookup, IDocumentMapper<T> documentMapper)
@@ -369,7 +388,7 @@ namespace Lucene.Net.Linq
 
             if (writer != null)
             {
-                writer.Dispose(); 
+                writer.Dispose();
             }
         }
 
