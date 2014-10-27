@@ -66,7 +66,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
-                return sourceType == typeof (double);
+                return sourceType == typeof(SampleValueType);
             }
 
             public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)

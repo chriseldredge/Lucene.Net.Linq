@@ -80,6 +80,7 @@
     <Compile Include="Clauses\QueryStatisticsCallbackClause.cs" />
     <Compile Include="Clauses\TrackRetrievedDocumentsClause.cs" />
     <Compile Include="Clauses\TreeVisitors\LuceneExpressionTreeVisitor.cs" />
+    <Compile Include="FieldMappingQueryParser.cs" />
     <Compile Include="Fluent\ClassMap.cs" />
     <Compile Include="Fluent\DocumentKeyPart.cs" />
     <Compile Include="Fluent\FluentDocumentMapper.cs" />

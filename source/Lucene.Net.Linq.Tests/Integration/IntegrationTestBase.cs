@@ -63,6 +63,9 @@ namespace Lucene.Net.Linq.Tests.Integration
             [Field("backing_field")]
             public string Alias { get; set; }
 
+            [NumericField(Converter = typeof(BoolToIntConverter))]
+            public bool NumericBool { get; set; }
+
             public SampleGenericOnlyComparable GenericComparable { get; set; }
         }
 
@@ -97,12 +100,12 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
             {
-                return sourceType == typeof (string);
+                return sourceType == typeof(string);
             }
 
             public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
             {
-                return destinationType == typeof(string);
+                return destinationType == typeof(SampleGenericOnlyComparable);
             }
 
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
@@ -114,6 +117,29 @@ namespace Lucene.Net.Linq.Tests.Integration
             {
                 var comp = (SampleGenericOnlyComparable) value;
                 return comp != null ? comp.Value.ToString() : null;
+            }
+        }
+
+        public class BoolToIntConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
+                return sourceType == typeof(bool);
+            }
+
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                return destinationType == typeof(int);
+            }
+
+            public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+            {
+                return ((int)value) == 1;
+            }
+
+            public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                return ((bool)value) ? 1 : 0;
             }
         }
 

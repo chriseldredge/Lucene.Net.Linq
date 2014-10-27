@@ -87,7 +87,7 @@ namespace Lucene.Net.Linq.Mapping
         public override string ConvertToQueryExpression(object value)
         {
             value = ConvertToSupportedValueType(value);
-            
+
             return ((ValueType) value).ToPrefixCoded();
         }
 
@@ -109,14 +109,32 @@ namespace Lucene.Net.Linq.Mapping
 
         public override Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
         {
+            if (lowerBound != null && !propertyInfo.PropertyType.IsInstanceOfType(lowerBound))
+            {
+                lowerBound = ConvertToSupportedValueType(lowerBound);
+            }
+            if (upperBound != null && !propertyInfo.PropertyType.IsInstanceOfType(upperBound))
+            {
+                upperBound = ConvertToSupportedValueType(upperBound);
+            }
             return NumericRangeUtils.CreateNumericRangeQuery(fieldName, (ValueType)lowerBound, (ValueType)upperBound, lowerRange, upperRange);
         }
 
         private object ConvertToSupportedValueType(object value)
         {
-            if (typeToValueTypeConverter == null) return value;
+            if (value is string && (string) value == "*") return null;
+
+            if (typeToValueTypeConverter == null)
+            {
+                return Convert.ChangeType(value, propertyInfo.PropertyType);
+            }
 
             var type = GetUnderlyingValueType();
+
+            if (!typeToValueTypeConverter.CanConvertFrom(null, value.GetType()))
+            {
+                value = Convert.ChangeType(value, propertyInfo.PropertyType);
+            }
 
             return type != null ? typeToValueTypeConverter.ConvertTo(value, type) : value;
         }

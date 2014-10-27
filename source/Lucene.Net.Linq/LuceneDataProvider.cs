@@ -8,6 +8,7 @@ using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq.Parsing.Structure;
@@ -118,6 +119,20 @@ namespace Lucene.Net.Linq
         {
             get { return context.Settings; }
             set { context.Settings = value; }
+        }
+
+        /// <summary>
+        /// Create a <see cref="QueryParsers.QueryParser"/> suitable for parsing advanced queries
+        /// that cannot not expressed as LINQ (e.g. queries submitted by a user).
+        /// 
+        /// After the instance is returned, options such as <see cref="QueryParsers.QueryParser.AllowLeadingWildcard"/>
+        /// and <see cref="QueryParsers.QueryParser.Field"/> can be customized to the clients needs.
+        /// </summary>
+        /// <typeparam name="T">The type of document that queries will be built against.</typeparam>
+        public FieldMappingQueryParser<T> CreateQueryParser<T>()
+        {
+            var mapper = new ReflectionDocumentMapper<T>(version, externalAnalyzer);
+            return new FieldMappingQueryParser<T>(version, mapper) { DefaultSearchProperty = mapper.KeyProperties.FirstOrDefault() ?? mapper.IndexedProperties.FirstOrDefault()};
         }
 
         /// <summary>
