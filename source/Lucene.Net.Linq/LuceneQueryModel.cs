@@ -128,15 +128,25 @@ namespace Lucene.Net.Linq
             var reverse = direction == OrderingDirection.Desc;
             string propertyName;
 
+            if (expression is UnaryExpression)
+            {
+                var selector = (UnaryExpression)expression;
+                expression = selector.Operand;
+            }
+
             if (expression is LuceneQueryFieldExpression)
             {
                 var field = (LuceneQueryFieldExpression) expression;
                 propertyName = field.FieldName;
             }
-            else
+            else if (expression is MemberExpression)
             {
                 var selector = (MemberExpression)expression;
                 propertyName = selector.Member.Name;
+            }
+            else
+            {
+                throw new ArgumentException("Unsupported sort expression type " + expression.GetType());
             }
 
             var mapping = fieldMappingInfoProvider.GetMappingInfo(propertyName);
