@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
+using Lucene.Net.Linq.Util;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using NUnit.Framework;
@@ -18,6 +19,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
         {
             public Int32 Int { get; set; }
             public long Long { get; set; }
+            public long? NullableLong { get; set; }
             public Complex Complex { get; set; }
         }
 
@@ -120,6 +122,16 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             Assert.That(result, Is.InstanceOf<NumericRangeQuery<long>>());
             Assert.That(result.ToString(), Is.EqualTo(string.Format("Long:{{100 TO {0}]", long.MaxValue)));
+        }
+
+        [Test]
+        public void ConvertsNullable()
+        {
+            mapper = new NumericReflectionFieldMapper<Sample>(typeof(Sample).GetProperty("NullableLong"), StoreMode.Yes, null, TypeDescriptor.GetConverter(typeof(int)), "NullableLong", 128, 1.0f);
+
+            var result = mapper.ConvertToQueryExpression(123L);
+
+            Assert.That(result, Is.EqualTo(123L.ToPrefixCoded()));
         }
 
         public class SampleConverter : TypeConverter

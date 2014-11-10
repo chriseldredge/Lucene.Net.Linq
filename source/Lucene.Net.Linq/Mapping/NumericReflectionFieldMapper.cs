@@ -124,16 +124,18 @@ namespace Lucene.Net.Linq.Mapping
         {
             if (value is string && (string) value == "*") return null;
 
+            var propertyType = propertyInfo.PropertyType.GetUnderlyingType();
+
             if (typeToValueTypeConverter == null)
             {
-                return Convert.ChangeType(value, propertyInfo.PropertyType);
+                return Convert.ChangeType(value, propertyType);
             }
 
             var type = GetUnderlyingValueType();
 
             if (!typeToValueTypeConverter.CanConvertFrom(null, value.GetType()))
             {
-                value = Convert.ChangeType(value, propertyInfo.PropertyType);
+                value = Convert.ChangeType(value, propertyType);
             }
 
             return type != null ? typeToValueTypeConverter.ConvertTo(value, type) : value;
