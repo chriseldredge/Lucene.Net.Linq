@@ -8,6 +8,7 @@ namespace Lucene.Net.Linq
     {
         IQueryable<T> Query();
         void Add(params T[] items);
+        void AddWithoutDelete(params T[] items);
         void Delete(params T[] items);
         void Delete(params Query[] items);
         void DeleteAll();
