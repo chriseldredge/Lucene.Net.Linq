@@ -10,6 +10,20 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq
 {
+    public enum KeyConstraint 
+    {
+        /// <summary>
+        /// This constraint will ignore unique key constraints when using 
+        /// this value and <see cref="ISession{T}.Add(KeyConstraint, T[])"/> operation on the session
+        /// </summary>
+        None,
+        /// <summary>
+        /// The default add behavior of the session <see cref="ISession{T}.Add(T[])"/>. Using this value
+        /// on <see cref="ISession{T}.Add(KeyConstraint, T[])"/> has the same result of <see cref="ISession{T}.Add(T[])"/>.
+        /// </summary>
+        Unique
+    }
+
     internal class LuceneSession<T> : ISession<T>
     {
         private readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -22,6 +36,7 @@ namespace Lucene.Net.Linq
         private readonly IQueryable<T> queryable;
 
         private readonly List<T> additions = new List<T>();
+        private readonly List<T> additionsWithoutDeletes = new List<T>();
         private readonly List<Query> deleteQueries = new List<Query>();
         private readonly ISet<IDocumentKey> deleteKeys = new HashSet<IDocumentKey>();
 
@@ -49,23 +64,30 @@ namespace Lucene.Net.Linq
 
         public void Add(IEnumerable<T> items)
         {
-			Add(-1, items);
+            Add(-1, items);
         }
 
-	    protected internal void Add(int index, IEnumerable<T> items)
-	    {
+        protected internal void Add(int index, IEnumerable<T> items, KeyConstraint constraint = KeyConstraint.Unique)
+        {
             lock (sessionLock)
             {
-	            if (index < 0)
-	            {
-		            additions.AddRange(items);
-	            }
-	            else
-	            {
-		            additions.InsertRange(index, items);
-	            }
+                if (constraint == KeyConstraint.Unique) {
+                    if (index < 0) {
+                        additions.AddRange(items);
+                    } else {
+                        additions.InsertRange(index, items);
+                    }
+                } else if(constraint == KeyConstraint.None) {
+                    additionsWithoutDeletes.AddRange(items);
+                }
             }
-	    }
+        }
+
+
+        public void Add(KeyConstraint constraint, params T[] items) 
+        {
+            Add(-1, items, constraint);
+        }
 
         public void Delete(params T[] items)
         {
@@ -74,6 +96,8 @@ namespace Lucene.Net.Linq
                 foreach (var item in items)
                 {
                     additions.Remove(item);
+                    additionsWithoutDeletes.Remove(item);
+
                     var key = mapper.ToKey(item);
                     if (key.Empty)
                     {
@@ -97,6 +121,7 @@ namespace Lucene.Net.Linq
             {
                 DeleteAllFlag = true;
                 additions.Clear();
+                additionsWithoutDeletes.Clear();
             }
         }
 
@@ -215,27 +240,51 @@ namespace Lucene.Net.Linq
 
             var addedDocuments = ConvertPendingAdditions();
 
-            Delete(addedDocuments.Keys.Where(k => !k.Empty).Select(k => k.ToQuery()).ToArray());
+            Delete(addedDocuments.Keys.Where(k => k.ShouldDelete && !k.Key.Empty).Select(k => k.Key.ToQuery()).ToArray());
 
             return addedDocuments.Values.ToList();
         }
 
-        internal IDictionary<IDocumentKey, Document> ConvertPendingAdditions()
+        internal IDictionary<SessionOperationIntent, Document> ConvertPendingAdditions()
         {
-            var map = new Dictionary<IDocumentKey, Document>();
-            var reverse = new List<T>(additions);
-            reverse.Reverse();
-            
-            foreach (var item in reverse)
-            {
-                var key = mapper.ToKey(item);
-                if (!map.ContainsKey(key))
-                {
-                    map[key] = ToDocument(item);
-                }
-            }
-            
+            var map = new Dictionary<SessionOperationIntent, Document>();
+            AddToMapWithIntent(map, additionsWithoutDeletes, false);
+            AddToMapWithIntent(map, additions, true);
             return map;
+        }
+
+        private void AddToMapWithIntent(Dictionary<SessionOperationIntent, Document> map, List<T> items, bool intentToDelete) 
+        {
+            var reverse = new List<T>(items);
+            reverse.Reverse();
+
+            foreach (var item in reverse) {
+                var key = mapper.ToKey(item);
+                var intent = new SessionOperationIntent(key, intentToDelete);
+                if (!map.ContainsKey(intent)) {
+                    map[intent] = ToDocument(item);
+                } 
+            }
+        }
+
+        internal class SessionOperationIntent : IEquatable<SessionOperationIntent>
+        {
+            public IDocumentKey Key { get; private set; }
+            public bool ShouldDelete { get; set; }
+
+            public SessionOperationIntent(IDocumentKey key, bool shouldDelete = true) 
+            {
+                Key = key;
+                ShouldDelete = shouldDelete;
+            }
+
+            public bool Equals(SessionOperationIntent other) {
+                return other.Key.Equals(Key);
+            }
+
+            public override int GetHashCode() {
+                return Key.GetHashCode();
+            }
         }
 
         private void ClearPendingChanges()
@@ -244,12 +293,13 @@ namespace Lucene.Net.Linq
             deleteKeys.Clear();
             deleteQueries.Clear();
             additions.Clear();
+            additionsWithoutDeletes.Clear();
             documentTracker.Clear();
         }
 
         internal bool PendingChanges
         {
-            get { return DeleteAllFlag || additions.Count > 0 || deleteQueries.Count > 0 || deleteKeys.Count > 0; }
+            get { return DeleteAllFlag || additions.Count > 0 || deleteQueries.Count > 0 || deleteKeys.Count > 0 || additionsWithoutDeletes.Count > 0; }
         }
 
         internal SessionDocumentTracker DocumentTracker { get { return documentTracker; } }
@@ -350,5 +400,6 @@ namespace Lucene.Net.Linq
                 deletedKeys.Clear();
             }
         }
+
     }
 }
