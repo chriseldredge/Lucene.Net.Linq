@@ -162,5 +162,57 @@ namespace Lucene.Net.Linq.Tests.Integration
 				Assert.That(result.Name, Is.EqualTo("a new a"));
 		    }
 	    }
+
+
+        [Test]
+        public void AddKeyConstraintNoneCanAllowDuplicates() 
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session) {
+                
+                var newItem = new SampleDocument { Key = "a1", Name = "a new a" };
+
+                session.Add(KeyConstraint.None, newItem);
+
+                session.Commit();
+
+                session.Add(KeyConstraint.None, newItem);
+
+                session.Commit();
+
+                var results = (from d in session.Query() where d.Key == newItem.Key select d).ToList();
+                Assert.That(results.Count(), Is.EqualTo(2));
+            }
+        }
+
+
+        [Test]
+        public void AddKeyConstraintNoneMixedWithAddTracksDocumentsProperly() 
+        {
+            var session = provider.OpenSession<SampleDocument>();
+
+            using (session) {
+
+                var item = (from d in session.Query() where d.Name == "a" select d).Single();
+
+                item.Name = "a modified name";
+
+                var newItem = new SampleDocument { Key = item.Key, Name = "a new a" };
+                var newItemNoDelete = new SampleDocument { Name = "d" };
+
+                session.Add(newItem);
+                session.Add(KeyConstraint.None, newItemNoDelete);
+
+                session.Commit();
+
+                var result = (from d in session.Query() where d.Key == newItem.Key select d).Single();
+                var resultOfNewItem = (from d in session.Query() where d.Key == newItemNoDelete.Key select d).Single();
+                Assert.That(result.Name, Is.EqualTo("a new a"));
+                Assert.That(resultOfNewItem.Name, Is.EqualTo("d"));
+            }
+        }
+				
+				
     }
 }

@@ -112,6 +112,49 @@ namespace Lucene.Net.Linq.Tests
             Assert.That(session.ConvertPendingAdditions, Is.Empty, "Commit should clear pending deletions.");
         }
 
+
+        [Test]
+        public void Commit_Add_DeletesAllKeys() 
+        {
+            var key1 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, 1 } });
+            var key2 = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, 2 } });
+
+            var records = new[] { 
+                new Record { Id = "1" }, 
+                new Record { Id = "2" } 
+            };
+
+            session.Add(records);
+
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.NotNull, Arg<Document>.Is.NotNull));
+            writer.Expect(w => w.DeleteDocuments(new[] { key2.ToQuery(), key1.ToQuery() }));
+            writer.Expect(w => w.AddDocument(Arg<Document>.Is.NotNull));
+            writer.Expect(w => w.Commit());
+            session.Commit();
+            Verify();
+
+            Assert.That(session.ConvertPendingAdditions, Is.Empty, "Commit should clear pending changes.");
+        }
+
+
+        [Test]
+        public void Commit_Add_KeyConstraint_None_DoesNotDelete() 
+        {
+            var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, 1 } });
+            var record = new Record { Id = "1" };
+            session.Add(KeyConstraint.None, record);
+
+            mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
+            writer.Expect(w => w.AddDocument(Arg<Document>.Is.NotNull));
+            writer.Expect(w => w.Commit());
+
+            session.Commit();
+            writer.AssertWasNotCalled(a => a.DeleteDocuments(Arg<Query[]>.Is.Anything));
+            Verify();
+
+            Assert.That(session.ConvertPendingAdditions, Is.Empty, "Commit should clear pending changes.");
+        }
+		
         [Test]
         public void Commit_Add_ConvertsDocumentAndKeyLate()
         {
