@@ -10,20 +10,6 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq
 {
-    public enum KeyConstraint 
-    {
-        /// <summary>
-        /// This constraint will ignore unique key constraints when using 
-        /// this value and <see cref="ISession{T}.Add(KeyConstraint, T[])"/> operation on the session
-        /// </summary>
-        None,
-        /// <summary>
-        /// The default add behavior of the session <see cref="ISession{T}.Add(T[])"/>. Using this value
-        /// on <see cref="ISession{T}.Add(KeyConstraint, T[])"/> has the same result of <see cref="ISession{T}.Add(T[])"/>.
-        /// </summary>
-        Unique
-    }
-
     internal class LuceneSession<T> : ISession<T>
     {
         private readonly ILog Log = LogManager.GetCurrentClassLogger();
