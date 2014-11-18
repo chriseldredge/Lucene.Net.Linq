@@ -10,11 +10,13 @@ namespace Lucene.Net.Linq
 {
     public class FieldMappingQueryParser<T> : QueryParser
     {
+        private readonly Version matchVersion;
         private readonly IDocumentMapper<T> mapper;
-        
+
         public FieldMappingQueryParser(Version matchVersion, IDocumentMapper<T> mapper)
             : base(matchVersion, typeof(FieldMappingQueryParser<T>).FullName + ".DEFAULT_FIELD", mapper.Analyzer)
         {
+            this.matchVersion = matchVersion;
             this.mapper = mapper;
         }
 
@@ -24,6 +26,16 @@ namespace Lucene.Net.Linq
         /// it will produce a query like <c>SearchText:Lucene OR SearchText:NuGet</c>.
         /// </summary>
         public string DefaultSearchProperty { get; set; }
+
+        public Version MatchVersion
+        {
+            get { return matchVersion; }
+        }
+
+        public IDocumentMapper<T> DocumentMapper
+        {
+            get { return mapper; }
+        }
 
         public override string Field
         {
