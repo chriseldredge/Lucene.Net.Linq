@@ -1,4 +1,6 @@
-﻿using Lucene.Net.Linq.Fluent;
+﻿using System;
+using Lucene.Net.Index;
+using Lucene.Net.Linq.Fluent;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Search;
 
@@ -12,6 +14,10 @@ namespace Lucene.Net.Linq
         public LuceneDataProviderSettings()
         {
             EnableMultipleEntities = true;
+            DeletionPolicy = new KeepOnlyLastCommitDeletionPolicy();
+            MaxFieldLength = IndexWriter.MaxFieldLength.UNLIMITED;
+            MergeFactor = LogMergePolicy.DEFAULT_MERGE_FACTOR;
+            RAMBufferSizeMB = IndexWriter.DEFAULT_RAM_BUFFER_SIZE_MB;
         }
 
         /// <summary>
@@ -34,5 +40,36 @@ namespace Lucene.Net.Linq
         /// </para>
         /// </summary>
         public bool EnableMultipleEntities { get; set; }
+
+        /// <summary>
+        /// Specifies the <see cref="IndexDeletionPolicy"/> of the <see cref="IndexWriter"/>.
+        /// Default: <see cref="KeepOnlyLastCommitDeletionPolicy"/>.
+        /// </summary>
+        public IndexDeletionPolicy DeletionPolicy { get; set; }
+
+        /// <summary>
+        /// Specifies the <see cref="IndexWriter.MaxFieldLength"/> of the <see cref="IndexWriter"/>.
+        /// Default: <see cref="IndexWriter.MaxFieldLength.UNLIMITED"/>.
+        /// </summary>
+        public IndexWriter.MaxFieldLength MaxFieldLength { get; set; }
+
+        /// <summary>
+        /// Specifies the merge factor when using <see cref="LogMergePolicy"/> or subclass.
+        /// Default: 10 (from <see cref="LogMergePolicy.DEFAULT_MERGE_FACTOR"/>.
+        /// </summary>
+        /// <seealso cref="IndexWriter.MergeFactor"/>
+        public int MergeFactor { get; set; }
+
+        /// <summary>
+        /// Specifies the RAM buffer size of the <see cref="IndexWriter"/> in megabytes.
+        /// Default: 16.0 (from <see cref="IndexWriter.DEFAULT_RAM_BUFFER_SIZE_MB"/>.
+        /// </summary>
+        public double RAMBufferSizeMB { get; set; }
+
+        /// <summary>
+        /// A function that creates a <see cref="MergePolicy"/> for use with a <see cref="IndexWriter"/>.
+        /// Default: <c>null</c>, which causes <see cref="IndexWriter"/> to use <see cref="LogByteSizeMergePolicy"/>.
+        /// </summary>
+        public Func<IndexWriter, MergePolicy> MergePolicyBuilder { get; set; }
     }
 }

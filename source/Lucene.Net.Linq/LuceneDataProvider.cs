@@ -8,7 +8,6 @@ using Lucene.Net.Index;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Remotion.Linq.Parsing.Structure;
@@ -105,11 +104,12 @@ namespace Lucene.Net.Linq
             this.externalAnalyzer = externalAnalyzer;
             this.perFieldAnalyzer = new PerFieldAnalyzer(new KeywordAnalyzer());
             this.version = version;
-            this.writerIsExternal = externalWriter != null;
-            this.writer = externalWriter ?? IndexWriter;
 
             queryParser = RelinqQueryParserFactory.CreateQueryParser();
             context = new Context(this.directory, transactionLock);
+
+            writerIsExternal = externalWriter != null;
+            writer = externalWriter ?? IndexWriter;
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace Lucene.Net.Linq
         /// <summary>
         /// Create a <see cref="QueryParsers.QueryParser"/> suitable for parsing advanced queries
         /// that cannot not expressed as LINQ (e.g. queries submitted by a user).
-        /// 
+        ///
         /// After the instance is returned, options such as <see cref="QueryParsers.QueryParser.AllowLeadingWildcard"/>
         /// and <see cref="QueryParsers.QueryParser.Field"/> can be customized to the clients needs.
         /// </summary>
@@ -409,7 +409,16 @@ namespace Lucene.Net.Linq
 
         protected virtual IIndexWriter GetIndexWriter(Analyzer analyzer)
         {
-            return new IndexWriterAdapter(new IndexWriter(directory, analyzer, ShouldCreateIndex, DeletionPolicy, MaxFieldLength));
+            var indexWriter = new IndexWriter(directory, analyzer, ShouldCreateIndex, DeletionPolicy, MaxFieldLength)
+            {
+                MergeFactor = Settings.MergeFactor
+            };
+            indexWriter.SetRAMBufferSizeMB(Settings.RAMBufferSizeMB);
+            if (Settings.MergePolicyBuilder != null)
+            {
+                indexWriter.SetMergePolicy(Settings.MergePolicyBuilder(indexWriter));
+            }
+            return new IndexWriterAdapter(indexWriter);
         }
 
         protected virtual bool ShouldCreateIndex
@@ -429,12 +438,12 @@ namespace Lucene.Net.Linq
 
         protected virtual IndexDeletionPolicy DeletionPolicy
         {
-            get { return new KeepOnlyLastCommitDeletionPolicy(); }
+            get { return Settings.DeletionPolicy; }
         }
 
         protected virtual IndexWriter.MaxFieldLength MaxFieldLength
         {
-            get { return Index.IndexWriter.MaxFieldLength.UNLIMITED; }
+            get { return Settings.MaxFieldLength; }
         }
 
         private LuceneQueryable<T> CreateQueryable<T>(ObjectLookup<T> factory, Context context, IDocumentMapper<T> mapper)
