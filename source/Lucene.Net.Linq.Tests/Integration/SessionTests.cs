@@ -165,7 +165,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
 
         [Test]
-        public void AddWithoutDeleteCanAllowDuplicates() 
+        public void AddKeyConstraintNoneCanAllowDuplicates() 
         {
             var session = provider.OpenSession<SampleDocument>();
 
@@ -173,11 +173,11 @@ namespace Lucene.Net.Linq.Tests.Integration
                 
                 var newItem = new SampleDocument { Key = "a1", Name = "a new a" };
 
-                session.AddWithoutDelete(newItem);
+                session.Add(KeyConstraint.None, newItem);
 
                 session.Commit();
 
-                session.AddWithoutDelete(newItem);
+                session.Add(KeyConstraint.None, newItem);
 
                 session.Commit();
 
@@ -188,7 +188,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
 
         [Test]
-        public void AddWithoutDeleteMixedWithAddTracksDocumentsProperly() 
+        public void AddKeyConstraintNoneMixedWithAddTracksDocumentsProperly() 
         {
             var session = provider.OpenSession<SampleDocument>();
 
@@ -202,7 +202,7 @@ namespace Lucene.Net.Linq.Tests.Integration
                 var newItemNoDelete = new SampleDocument { Name = "d" };
 
                 session.Add(newItem);
-                session.AddWithoutDelete(newItemNoDelete);
+                session.Add(KeyConstraint.None, newItemNoDelete);
 
                 session.Commit();
 

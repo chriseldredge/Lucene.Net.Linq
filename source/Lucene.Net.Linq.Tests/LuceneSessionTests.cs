@@ -138,11 +138,11 @@ namespace Lucene.Net.Linq.Tests
 
 
         [Test]
-        public void Commit_Add_Without_Delete_DoesNotDelete() 
+        public void Commit_Add_KeyConstraint_None_DoesNotDelete() 
         {
             var key = new DocumentKey(new Dictionary<IFieldMappingInfo, object> { { new FakeFieldMappingInfo { FieldName = "Id" }, 1 } });
             var record = new Record { Id = "1" };
-            session.AddWithoutDelete(record);
+            session.Add(KeyConstraint.None, record);
 
             mapper.Expect(m => m.ToDocument(Arg<Record>.Is.Same(record), Arg<Document>.Is.NotNull));
             writer.Expect(w => w.AddDocument(Arg<Document>.Is.NotNull));

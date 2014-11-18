@@ -10,6 +10,20 @@ using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq
 {
+    public enum KeyConstraint 
+    {
+        /// <summary>
+        /// This constraint will ignore unique key constraints when using 
+        /// this value and <see cref="ISession{T}.Add(KeyConstraint, T[])"/> operation on the session
+        /// </summary>
+        None,
+        /// <summary>
+        /// The default add behavior of the session <see cref="ISession{T}.Add(T[])"/>. Using this value
+        /// on <see cref="ISession{T}.Add(KeyConstraint, T[])"/> has the same result of <see cref="ISession{T}.Add(T[])"/>.
+        /// </summary>
+        Unique
+    }
+
     internal class LuceneSession<T> : ISession<T>
     {
         private readonly ILog Log = LogManager.GetCurrentClassLogger();
@@ -53,27 +67,27 @@ namespace Lucene.Net.Linq
 			Add(-1, items);
         }
 
-	    protected internal void Add(int index, IEnumerable<T> items)
+	    protected internal void Add(int index, IEnumerable<T> items, KeyConstraint constraint = KeyConstraint.Unique)
 	    {
             lock (sessionLock)
             {
-	            if (index < 0)
-	            {
-		            additions.AddRange(items);
-	            }
-	            else
-	            {
-		            additions.InsertRange(index, items);
-	            }
+                if (constraint == KeyConstraint.Unique) {
+                    if (index < 0) {
+                        additions.AddRange(items);
+                    } else {
+                        additions.InsertRange(index, items);
+                    }
+                } else if(constraint == KeyConstraint.None) {
+                    additionsWithoutDeletes.AddRange(items);
+                }
+	            
             }
 	    }
 
 
-        public void AddWithoutDelete(params T[] items) 
+        public void Add(KeyConstraint constraint, params T[] items) 
         {
-            lock (sessionLock) {
-                additionsWithoutDeletes.AddRange(items);
-            }
+            Add(-1, items, constraint);
         }
 
         public void Delete(params T[] items)
