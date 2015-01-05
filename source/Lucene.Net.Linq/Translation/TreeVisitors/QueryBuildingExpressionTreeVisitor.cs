@@ -84,7 +84,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             var pattern = GetPattern(expression, mapping);
 
             var occur = expression.Occur;
-            
+
             if (string.IsNullOrEmpty(pattern))
             {
                 pattern = "*";
@@ -121,7 +121,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             var mapping = fieldMappingInfoProvider.GetMappingInfo(expression.QueryField.FieldName);
 
             var query = CreateRangeQuery(mapping, expression.LowerQueryType, expression.Lower, expression.UpperQueryType, expression.Upper);
-            
+
             queries.Push(new BooleanQuery {{query, expression.Occur}});
 
             return base.VisitLuceneRangeQueryExpression(expression);
@@ -147,8 +147,8 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
             if (expression.Fuzzy.HasValue)
             {
                 pattern += string.Format(
-                    CultureInfo.InvariantCulture, 
-                    "~{0}", 
+                    CultureInfo.InvariantCulture,
+                    "~{0}",
                     expression.Fuzzy.Value);
             }
 
@@ -179,7 +179,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
                        ? Occur.MUST
                        : Occur.MUST_NOT;
         }
-        
+
         private Expression MakeBooleanQuery(BinaryExpression expression)
         {
             var result = base.VisitBinaryExpression(expression);
@@ -201,7 +201,15 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
         {
             if (source.GetClauses().Length == 1)
             {
-                var clause = source.GetClauses()[0];
+                var clause = source.GetClauses().Single();
+                if (clause.IsProhibited && occur == Occur.SHOULD)
+                {
+                    source = (BooleanQuery)source.Clone();
+                    source.Add(new MatchAllDocsQuery(), Occur.SHOULD);
+                    target.Add(source, occur);
+                    return;
+                }
+
                 if (clause.Occur == Occur.MUST)
                 {
                     clause.Occur = occur;
@@ -228,7 +236,7 @@ namespace Lucene.Net.Linq.Translation.TreeVisitors
         private string EvaluateExpressionToString(LuceneQueryPredicateExpression expression, IFieldMappingInfo mapping)
         {
             var result = EvaluateExpression(expression);
-            
+
             var str = mapping == null ? result.ToString() : mapping.ConvertToQueryExpression(result);
 
             if (expression.AllowSpecialCharacters)

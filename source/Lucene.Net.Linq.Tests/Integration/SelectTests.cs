@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
@@ -86,6 +87,18 @@ namespace Lucene.Net.Linq.Tests.Integration
             var result = from doc in documents where doc.Name == "My" select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
+        }
+
+        [Test]
+        public void BinaryOrWithNegation()
+        {
+            AddDocument(new SampleDocument { Name = "Interstellar", Scalar = 2010});
+            AddDocument(new SampleDocument { Name = "Gladiator", Scalar = 2000 });
+
+            var documents = provider.AsQueryable<SampleDocument>();
+            var result = documents.Where(d => d.Scalar == 2010 || d.Name != "Interstellar").ToList();
+
+            Assert.That(result.Select(d => d.Name), Is.EquivalentTo(new[] {"Interstellar", "Gladiator"}));
         }
 
         [Test]
@@ -260,7 +273,7 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
         }
-        
+
         [Test]
         public void Where_Keyword_StartsWith()
         {
@@ -347,7 +360,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             AddDocument(new SampleDocument { Name = "My Document", NullableScalar = 12 });
 
             var documents = provider.AsQueryable<SampleDocument>();
-            
+
             var result = from doc in documents where (bool)(!((bool?)doc.Name.StartsWith("other"))) select doc;
 
             Assert.That(result.Single().Name, Is.EqualTo("My Document"));
@@ -515,5 +528,5 @@ namespace Lucene.Net.Linq.Tests.Integration
         }
 
     }
- 
+
 }
