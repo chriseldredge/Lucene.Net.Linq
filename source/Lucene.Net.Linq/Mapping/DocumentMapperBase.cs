@@ -17,7 +17,7 @@ namespace Lucene.Net.Linq.Mapping
         protected PerFieldAnalyzer analyzer;
         protected readonly Version version;
         protected readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
-        protected readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
+		protected readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
 
         /// <summary>
         /// Constructs an instance that will create an <see cref="Analyzer"/>
@@ -153,7 +153,7 @@ namespace Lucene.Net.Linq.Mapping
             foreach (var field in fieldMap.Values)
             {
                 // IFieldMapper should tell us if the field is transient/non-comparable
-                if (field is ReflectionScoreMapper<T>)
+				if (field is ReflectionScoreMapper<T> || field is ComputedFieldMapper<T>)
                 {
                     continue;
                 }
@@ -210,6 +210,5 @@ namespace Lucene.Net.Linq.Mapping
             AddField(fieldMapper);
             keyFields.Add(fieldMapper);
         }
-
     }
 }

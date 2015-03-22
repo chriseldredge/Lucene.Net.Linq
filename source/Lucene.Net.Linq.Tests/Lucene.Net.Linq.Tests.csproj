@@ -122,6 +122,7 @@
     <Compile Include="Integration\StatisticTests.cs" />
     <Compile Include="Integration\SubQueryTests.cs" />
     <Compile Include="LuceneQueryExecutorTests.cs" />
+    <Compile Include="Mapping\ComputedReflectionFieldTests.cs" />
     <Compile Include="Mapping\FieldMappingInfoBuilderSortFieldTests.cs" />
     <Compile Include="Mapping\ReflectionDocumentBoostMapperTests.cs" />
     <Compile Include="ReadOnlyLuceneDataProviderTests.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Mapping\ReflectionFieldMapperTests.cs" />
     <Compile Include="Mapping\ReflectionScoreMapperTests.cs" />
     <Compile Include="Record.cs" />
+    <Compile Include="Samples\ComputedFieldSample.cs" />
     <Compile Include="Samples\DocumentKeys.cs" />
     <Compile Include="Samples\FluentConfiguration.cs" />
     <Compile Include="Samples\MoreLikeThisSample.cs" />

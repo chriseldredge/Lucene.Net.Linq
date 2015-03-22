@@ -59,14 +59,15 @@ namespace Lucene.Net.Linq.Mapping
                 {
                     continue;
                 }
-                var mappingContext = FieldMappingInfoBuilder.Build<T>(p, version, externalAnalyzer);
-                
-                fieldMap.Add(mappingContext.PropertyName, mappingContext);
+				
+				var computedField = p.GetCustomAttribute<ComputedFieldAttribute>(true);
+				if (computedField != null)
+				{
+					AddField(new ComputedFieldMapper<T>(p, computedField.FieldComputerInstance));
+					continue;
+				}
 
-                if (!string.IsNullOrWhiteSpace(mappingContext.FieldName) && mappingContext.Analyzer != null)
-                {
-                    analyzer.AddAnalyzer(mappingContext.FieldName, mappingContext.Analyzer);
-                }
+				AddField(FieldMappingInfoBuilder.Build<T>(p, version, externalAnalyzer));
             }
         }
 
