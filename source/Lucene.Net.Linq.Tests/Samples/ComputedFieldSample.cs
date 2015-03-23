@@ -65,11 +65,6 @@ namespace Lucene.Net.Linq.Tests.Samples
 				throw new NotImplementedException();
 			}
 
-			public SortField CreateSortField(bool reverse)
-			{
-				throw new NotImplementedException();
-			}
-
 			public string ConvertToQueryExpression(object value)
 			{
 				return (string)value;
