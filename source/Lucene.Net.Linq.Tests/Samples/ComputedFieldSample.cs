@@ -137,6 +137,17 @@ namespace Lucene.Net.Linq.Tests.Samples
 				Assert.That(results.Count() != 0);
 				Assert.That(results.All(x => x.Username.StartsWith("Inactive")));
 			}
+
+			[Test]
+			public void NoRecordsShouldBeReturned()
+			{
+				var results = provider
+					.AsQueryable<User>()
+					.Where(x => x.Status == "NotAStatus")
+					.ToList();
+
+				Assert.That(!results.Any());
+			}
 		}
 	}
 }
