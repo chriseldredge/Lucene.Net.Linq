@@ -84,7 +84,7 @@ namespace Lucene.Net.Linq.Mapping
 		/// <param name="reverse"></param>
 		public SortField CreateSortField(bool reverse)
 		{
-			throw new NotSupportedException(String.Format("Sorting is not supported on computed field '{0}'.", PropertyName));
+			return this.field.CreateSortField(reverse);
 		}
 
 		/// <summary>

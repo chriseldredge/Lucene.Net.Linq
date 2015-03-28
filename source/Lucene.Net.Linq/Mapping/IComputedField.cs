@@ -32,6 +32,12 @@ namespace Lucene.Net.Linq.Mapping
 		Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange);
 
 		/// <summary>
+		/// Creates an appropriate SortField instance for the underlying Lucene fields.
+		/// </summary>
+		/// <param name="reverse"></param>
+		SortField CreateSortField(bool reverse);
+
+		/// <summary>
 		/// In cases of complex types or numeric fields,
 		/// converts a value into a query expression.
 		/// For string fields, simply returns a string

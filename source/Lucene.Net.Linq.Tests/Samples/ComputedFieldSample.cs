@@ -7,6 +7,7 @@ using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Search;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
 using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
@@ -63,6 +64,11 @@ namespace Lucene.Net.Linq.Tests.Samples
 			public Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
 			{
 				throw new NotImplementedException();
+			}
+
+			public SortField CreateSortField(bool reverse)
+			{
+				return new SortField(String.Empty, new StatusComparatorSource("ActiveFrom", "ActiveUntil"), reverse);
 			}
 
 			public string ConvertToQueryExpression(object value)
@@ -142,6 +148,184 @@ namespace Lucene.Net.Linq.Tests.Samples
 					.ToList();
 
 				Assert.That(!results.Any());
+			}
+
+			[Test]
+			public void OrderByStatusAscending()
+			{
+				var results = provider
+					.AsQueryable<User>()
+					.OrderBy(x => x.Status)
+					.ToList();
+
+				var changes = 0;
+				for (var i = 1; i < results.Count; i++)
+				{
+					if (results[i].Status != results[i - 1].Status)
+					{
+						changes++;
+					}
+				}
+
+				Assert.IsTrue(changes == 1);
+				Assert.IsTrue(results.First().Status == "Active");
+				Assert.IsTrue(results.Last().Status == "Inactive");
+			}
+
+			[Test]
+			public void OrderByStatusDescending()
+			{
+				var results = provider
+					.AsQueryable<User>()
+					.OrderByDescending(x => x.Status)
+					.ToList();
+
+				var changes = 0;
+				for (var i = 1; i < results.Count; i++)
+				{
+					if (results[i].Status != results[i - 1].Status)
+					{
+						changes++;
+					}
+				}
+
+				Assert.IsTrue(changes == 1);
+				Assert.IsTrue(results.First().Status == "Inactive");
+				Assert.IsTrue(results.Last().Status == "Active");
+			}
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		public class StatusComparatorSource : FieldComparatorSource
+		{
+			private readonly string activeFromField;
+			private readonly string activeUntilField;
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="activeFromField"></param>
+			/// <param name="activeUntilField"></param>
+			public StatusComparatorSource(string activeFromField, string activeUntilField)
+			{
+				this.activeFromField = activeFromField;
+				this.activeUntilField = activeUntilField;
+			}
+
+			/// <inheritDoc />
+			public override FieldComparator NewComparator(string fieldname, int numHits, int sortPos, bool reversed)
+			{
+				return new StatusComparator(numHits, this.activeFromField, this.activeUntilField);
+			}
+		}
+
+		public class StatusComparator : FieldComparator
+		{
+			internal struct Status
+			{
+				public Int64 ActiveFrom { get; set; }
+				public Int64 ActiveUntil { get; set; }
+			}
+
+			private readonly String activeFromField;
+			private readonly String activeUntilField;
+			private readonly Status[] values;
+			private Status[] currentReaderValues;
+			private Status bottom;
+
+			/// <summary>
+			/// 
+			/// </summary>
+			/// <param name="numHits"></param>
+			/// <param name="activeFromField"></param>
+			/// <param name="activeUntilField"></param>
+			public StatusComparator(Int32 numHits, String activeFromField, String activeUntilField)
+			{
+				this.activeFromField = activeFromField;
+				this.activeUntilField = activeUntilField;
+				this.values = new Status[numHits];
+				this.bottom = new Status();
+			}
+
+			/// <inheritDoc />
+			public override Int32 Compare(Int32 slot1, Int32 slot2)
+			{
+				return Compare(
+					this.values[slot1],
+					this.values[slot2]
+				);
+			}
+
+			private static Int32 Compare(Status record1, Status record2)
+			{
+				var now = DateTime.UtcNow.Ticks;
+
+				var record1Active = IsActive(now, record1);
+				var record2Active = IsActive(now, record2);
+
+				if (!record1Active && record2Active)
+				{
+					return 1;
+				}
+
+				if (record1Active && !record2Active)
+				{
+					return -1;
+				}
+
+				return 0;
+			}
+
+			private static Boolean IsActive(Int64 now, Status record)
+			{
+				return record.ActiveFrom <= now && record.ActiveUntil >= now;
+			}
+
+			/// <inheritDoc />
+			public override void SetBottom(Int32 slot)
+			{
+				this.bottom = this.values[slot];
+			}
+
+			/// <inheritDoc />
+			public override Int32 CompareBottom(Int32 doc)
+			{
+				return Compare(
+					this.bottom,
+					this.currentReaderValues[doc]
+				);
+			}
+
+			/// <inheritDoc />
+			public override void Copy(Int32 slot, Int32 doc)
+			{
+				this.values[slot] = this.currentReaderValues[doc];
+			}
+
+			/// <inheritDoc />
+			public override void SetNextReader(IndexReader reader, Int32 docBase)
+			{
+				var activeFroms = FieldCache_Fields.DEFAULT.GetLongs(reader, this.activeFromField);
+				var activeUntils = FieldCache_Fields.DEFAULT.GetLongs(reader, this.activeUntilField);
+
+				this.currentReaderValues = new Status[activeFroms.Length];
+
+				for (var i = 0; i < activeFroms.Length; i++)
+				{
+					this.currentReaderValues[i].ActiveFrom = activeFroms[i];
+					this.currentReaderValues[i].ActiveUntil = activeUntils[i];
+				}
+			}
+
+			/// <inheritDoc />
+			public override IComparable this[Int32 slot]
+			{
+				get
+				{
+					return IsActive(DateTime.UtcNow.Ticks, this.values[slot]);
+				}
 			}
 		}
 	}

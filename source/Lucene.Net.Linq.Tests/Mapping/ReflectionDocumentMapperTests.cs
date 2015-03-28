@@ -245,6 +245,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
 				throw new NotImplementedException();
 			}
 
+			public SortField CreateSortField(bool reverse)
+			{
+				throw new NotImplementedException();
+			}
+
 			public string ConvertToQueryExpression(object value)
 			{
 				throw new NotImplementedException();
