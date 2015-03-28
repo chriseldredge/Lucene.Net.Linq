@@ -123,7 +123,7 @@ namespace Lucene.Net.Linq.Tests.Samples
 					.Where(x => x.Status == "Active")
 					.ToList();
 
-				Assert.That(results.Count() != 0);
+				Assert.AreNotEqual(0, results.Count);
 				Assert.That(results.All(x => x.Username.StartsWith("Active")));
 			}
 
@@ -135,7 +135,7 @@ namespace Lucene.Net.Linq.Tests.Samples
 					.Where(x => x.Status == "Inactive")
 					.ToList();
 
-				Assert.That(results.Count() != 0);
+				Assert.AreNotEqual(0, results.Count);
 				Assert.That(results.All(x => x.Username.StartsWith("Inactive")));
 			}
 
@@ -147,7 +147,7 @@ namespace Lucene.Net.Linq.Tests.Samples
 					.Where(x => x.Status == "NotAStatus")
 					.ToList();
 
-				Assert.That(!results.Any());
+				Assert.IsFalse(results.Any());
 			}
 
 			[Test]
@@ -167,9 +167,9 @@ namespace Lucene.Net.Linq.Tests.Samples
 					}
 				}
 
-				Assert.IsTrue(changes == 1);
-				Assert.IsTrue(results.First().Status == "Active");
-				Assert.IsTrue(results.Last().Status == "Inactive");
+				Assert.AreEqual(1, changes);
+				Assert.AreEqual("Active", results.First().Status);
+				Assert.AreEqual("Inactive", results.Last().Status);
 			}
 
 			[Test]
@@ -189,9 +189,9 @@ namespace Lucene.Net.Linq.Tests.Samples
 					}
 				}
 
-				Assert.IsTrue(changes == 1);
-				Assert.IsTrue(results.First().Status == "Inactive");
-				Assert.IsTrue(results.Last().Status == "Active");
+				Assert.AreEqual(1, changes);
+				Assert.AreEqual("Inactive", results.First().Status);
+				Assert.AreEqual("Active", results.Last().Status);
 			}
 		}
 
