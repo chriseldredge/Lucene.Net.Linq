@@ -107,6 +107,7 @@
     <Compile Include="Fluent\StoreTests.cs" />
     <Compile Include="Fluent\TermVectorModeTests.cs" />
     <Compile Include="Integration\AllowSpecialCharactersTests.cs" />
+    <Compile Include="Integration\EnumerableContainsTests.cs" />
     <Compile Include="Integration\EnumFieldTests.cs" />
     <Compile Include="Integration\FuzzyTests.cs" />
     <Compile Include="Integration\DocumentBoostTests.cs" />

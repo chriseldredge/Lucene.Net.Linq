@@ -20,10 +20,14 @@ namespace Lucene.Net.Linq.Transformation.TreeVisitors
 
                 var field = expression.QueryModel.MainFromClause.FromExpression;
                 var pattern = op.Item;
+                if (pattern.Type.IsPrimitive)
+                {
+                    pattern = Expression.Constant(((ConstantExpression)pattern).Value, typeof(object));
+                }
 
                 return Expression.MakeBinary(ExpressionType.Equal, field, pattern);
             }
-            
+
             return base.VisitSubQueryExpression(expression);
         }
     }
