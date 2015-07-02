@@ -136,6 +136,24 @@ namespace Lucene.Net.Linq
         }
 
         /// <summary>
+        /// Create a <see cref="QueryParsers.QueryParser"/> suitable for parsing advanced queries
+        /// that cannot not expressed as LINQ (e.g. queries submitted by a user).
+        ///
+        /// After the instance is returned, options such as <see cref="QueryParsers.QueryParser.AllowLeadingWildcard"/>
+        /// and <see cref="QueryParsers.QueryParser.Field"/> can be customized to the clients needs.
+        /// </summary>
+        /// <typeparam name="T">The type of document that queries will be built against.</typeparam>
+        /// <param name="defaultSearchField">The default field for queries that don't specify which field to search.
+        /// For an example query like <c>Lucene OR NuGet</c>, if this argument is set to <c>SearchText</c>,
+        /// it will produce a query like <c>SearchText:Lucene OR SearchText:NuGet</c>.</param>
+        /// <returns></returns>
+        public FieldMappingQueryParser<T> CreateQueryParser<T>(string defaultSearchField)
+        {
+            var mapper = new ReflectionDocumentMapper<T>(version, externalAnalyzer);
+            return new FieldMappingQueryParser<T>(version, defaultSearchField, mapper);
+        }
+
+        /// <summary>
         /// Gets the index format version provided by constructor.
         /// </summary>
         public Version LuceneVersion

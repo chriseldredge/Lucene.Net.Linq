@@ -12,10 +12,23 @@ namespace Lucene.Net.Linq
     {
         private readonly Version matchVersion;
         private readonly IDocumentMapper<T> mapper;
+        private readonly string initialDefaultField;
+        private static readonly string DefaultField = typeof(FieldMappingQueryParser<T>).FullName + ".DEFAULT_FIELD";
 
+        [Obsolete("Use constructor with default search field")]
         public FieldMappingQueryParser(Version matchVersion, IDocumentMapper<T> mapper)
-            : base(matchVersion, typeof(FieldMappingQueryParser<T>).FullName + ".DEFAULT_FIELD", mapper.Analyzer)
+            : base(matchVersion, DefaultField, mapper.Analyzer)
         {
+            this.initialDefaultField = DefaultField;
+            this.matchVersion = matchVersion;
+            this.mapper = mapper;
+        }
+
+        public FieldMappingQueryParser(Version matchVersion, string defaultSearchField, IDocumentMapper<T> mapper)
+            : base(matchVersion, defaultSearchField, mapper.Analyzer)
+        {
+            this.initialDefaultField = defaultSearchField;
+            this.DefaultSearchProperty = defaultSearchField;
             this.matchVersion = matchVersion;
             this.mapper = mapper;
         }
@@ -25,6 +38,7 @@ namespace Lucene.Net.Linq
         /// For an example query like <c>Lucene OR NuGet</c>, if this property is set to <c>SearchText</c>,
         /// it will produce a query like <c>SearchText:Lucene OR SearchText:NuGet</c>.
         /// </summary>
+        [Obsolete("Set the default search field in the constructor instead")]
         public string DefaultSearchProperty { get; set; }
 
         public Version MatchVersion
@@ -71,12 +85,39 @@ namespace Lucene.Net.Linq
             }
         }
 
-        protected virtual IFieldMappingInfo GetMapping(string field)
+        protected override Query GetFieldQuery(string field, string queryText, int slop)
         {
-            if (field == typeof (FieldMappingQueryParser<T>).FullName + ".DEFAULT_FIELD")
+            return base.GetFieldQuery(OverrideField(field), queryText, slop);
+        }
+
+        protected override Query GetWildcardQuery(string field, string termStr)
+        {
+            return base.GetWildcardQuery(OverrideField(field), termStr);
+        }
+
+        protected override Query GetPrefixQuery(string field, string termStr)
+        {
+            return base.GetPrefixQuery(OverrideField(field), termStr);
+        }
+
+        protected override Query GetFuzzyQuery(string field, string termStr, float minSimilarity)
+        {
+            return base.GetFuzzyQuery(OverrideField(field), termStr, minSimilarity);
+        }
+
+        private string OverrideField(string field)
+        {
+            if (field == initialDefaultField)
             {
                 field = DefaultSearchProperty;
             }
+
+            return field;
+        }
+
+        protected virtual IFieldMappingInfo GetMapping(string field)
+        {
+            field = OverrideField(field);
 
             try
             {
