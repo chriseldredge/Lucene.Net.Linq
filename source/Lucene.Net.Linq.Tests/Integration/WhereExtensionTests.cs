@@ -98,11 +98,134 @@ namespace Lucene.Net.Linq.Tests.Integration
         public void WhereParseQuery_OverrideDefaultField()
         {
             var parser = provider.CreateQueryParser<SampleDocument>();
-            parser.DefaultSearchProperty = "Id";
+            parser.DefaultSearchProperty = "Name";
+            var parsed = parser.Parse("\"Bills Document\"");
+            var result = documents.Where(parsed);
 
-            var result = documents.Where(parser.Parse("X.Z.1.3"));
-
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:Bills Document"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
             Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Param()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("Name");
+            var parsed = parser.Parse("\"Bills Document\"");
+            var result = documents.Where(parsed);
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:Bills Document"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
+            Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
+        }
+
+        [Test(Description = "Test that default search field can be set in the constructor and changed in the property")]
+        public void WhereParseQuery_OverrideDefaultField_Changed()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("Id");
+            parser.DefaultSearchProperty = "Name";
+            var parsed = parser.Parse("\"Bills Document\"");
+            var result = documents.Where(parsed);
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:Bills Document"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
+            Assert.That(result.Single().Name, Is.EqualTo("Bills Document"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Numeric_Wildcard()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>();
+            parser.AllowLeadingWildcard = true;
+            parser.DefaultSearchProperty = "NullableScalar";
+
+            var parsed = parser.Parse("*");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("NullableScalar:*"));
+            Assert.That(parser.Field, Is.EqualTo("NullableScalar"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Numeric_Wildcard_Param()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("NullableScalar");
+            parser.AllowLeadingWildcard = true;
+
+            var parsed = parser.Parse("*");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("NullableScalar:*"));
+            Assert.That(parser.Field, Is.EqualTo("NullableScalar"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_WildcardPrefix()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>();
+            parser.AllowLeadingWildcard = true;
+            parser.DefaultSearchProperty = "Name";
+
+            var parsed = parser.Parse("*ills");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:*ills"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_WildcardPrefix_Param()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("Name");
+            parser.AllowLeadingWildcard = true;
+
+            var parsed = parser.Parse("*ills");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:*ills"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Numeric_Range()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>();
+            parser.DefaultSearchProperty = "NullableScalar";
+
+            var parsed = parser.Parse("[* TO 2]");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("NullableScalar:[* TO 2]"));
+            Assert.That(parser.Field, Is.EqualTo("NullableScalar"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Numeric_Range_Param()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("NullableScalar");
+
+            var parsed = parser.Parse("[* TO 2]");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("NullableScalar:[* TO 2]"));
+            Assert.That(parser.Field, Is.EqualTo("NullableScalar"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Fuzzy()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>();
+            parser.DefaultSearchProperty = "Name";
+
+            var parsed = parser.Parse("bills~0.8");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:bills~0.8"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
+        }
+
+        [Test]
+        public void WhereParseQuery_OverrideDefaultField_Fuzzy_Param()
+        {
+            var parser = provider.CreateQueryParser<SampleDocument>("Name");
+
+            var parsed = parser.Parse("bills~0.8");
+
+            Assert.That(parsed.ToString(), Is.EqualTo("Name:bills~0.8"));
+            Assert.That(parser.Field, Is.EqualTo("Name"));
         }
     }
 }
