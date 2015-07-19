@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Search;
+using Lucene.Net.Search;
 using NUnit.Framework;
 using LuceneVersion = Lucene.Net.Util.Version;
 
@@ -206,6 +208,9 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             [QueryScore]
             public decimal Score { get; set; }
+
+			[ComputedField(typeof(FieldComputer))]
+			public string ComputedField { get; set; }
         }
 
         [DocumentKey(FieldName = "Type", Value = "ReflectedDocumentWithKey")]
@@ -223,6 +228,33 @@ namespace Lucene.Net.Linq.Tests.Mapping
             public string Type { get { return "ReflectedDocumentWithReadOnlyKey"; } }
         }
 
+		public class FieldComputer : IComputedField
+		{
+			public object GetFieldValue(Document document)
+			{
+				return document.GetField("Name") + " " + document.GetField("Location");
+			}
+
+			public Query CreateQuery(string pattern)
+			{
+				throw new NotImplementedException();
+			}
+
+			public Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
+			{
+				throw new NotImplementedException();
+			}
+
+			public SortField CreateSortField(bool reverse)
+			{
+				throw new NotImplementedException();
+			}
+
+			public string ConvertToQueryExpression(object value)
+			{
+				throw new NotImplementedException();
+			}
+		}
     }
 
     

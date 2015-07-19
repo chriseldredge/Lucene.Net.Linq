@@ -3,7 +3,6 @@ using System.Collections;
 using System.ComponentModel;
 using System.Reflection;
 using Lucene.Net.Analysis;
-using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Converters;
 using Lucene.Net.Linq.Util;
@@ -38,7 +37,7 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             var metadata = p.GetCustomAttribute<FieldAttribute>(true);
-            var numericFieldAttribute = p.GetCustomAttribute<NumericFieldAttribute>(true);
+			var numericFieldAttribute = p.GetCustomAttribute<NumericFieldAttribute>(true);
             Type type;
 
             var isCollection = IsCollection(p.PropertyType, out type);
@@ -49,10 +48,10 @@ namespace Lucene.Net.Linq.Mapping
             {
                 mapper = NumericFieldMappingInfoBuilder.BuildNumeric<T>(p, type, numericFieldAttribute);
             }
-            else
-            {
-                mapper = BuildPrimitive<T>(p, type, metadata, version, externalAnalyzer);
-            }
+			else
+			{
+				mapper = BuildPrimitive<T>(p, type, metadata, version, externalAnalyzer);
+			}
 
             return isCollection ? new CollectionReflectionFieldMapper<T>(mapper, type) : mapper;
         }
