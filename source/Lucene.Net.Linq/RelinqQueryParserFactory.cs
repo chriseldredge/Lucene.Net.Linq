@@ -1,5 +1,6 @@
+using Lucene.Net.Linq.Clauses.ExpressionNodes;
 using Lucene.Net.Linq.Transformation;
-using Remotion.Linq.Parsing.ExpressionTreeVisitors.Transformation;
+using Remotion.Linq.Parsing.ExpressionVisitors.Transformation;
 using Remotion.Linq.Parsing.Structure;
 using Remotion.Linq.Parsing.Structure.ExpressionTreeProcessors;
 using Remotion.Linq.Parsing.Structure.NodeTypeProviders;
@@ -17,10 +18,13 @@ namespace Lucene.Net.Linq
             return new QueryParser(expressionTreeParser);
         }
 
-        private static CompoundNodeTypeProvider CreateNodeTypeProvider()
+        private static INodeTypeProvider CreateNodeTypeProvider()
         {
-            var registry = MethodInfoBasedNodeTypeRegistry.CreateFromTypes(typeof (RelinqQueryParserFactory).Assembly.GetTypes());
-            
+            var registry = new MethodInfoBasedNodeTypeRegistry();
+            registry.Register(BoostExpressionNode.SupportedMethods, typeof(BoostExpressionNode));
+            registry.Register(QueryStatisticsCallbackExpressionNode.SupportedMethods, typeof(QueryStatisticsCallbackExpressionNode));
+            registry.Register(TrackRetrievedDocumentsExpressionNode.SupportedMethods, typeof(TrackRetrievedDocumentsExpressionNode));
+
             var nodeTypeProvider = ExpressionTreeParser.CreateDefaultNodeTypeProvider();
             nodeTypeProvider.InnerProviders.Add(registry);
 
@@ -31,7 +35,7 @@ namespace Lucene.Net.Linq
         /// Creates an <c cref="IExpressionTreeProcessor"/> that will execute
         /// <c cref="AllowSpecialCharactersExpressionTransformer"/>
         /// before executing <c cref="PartialEvaluatingExpressionTreeProcessor"/>
-        /// and other default processors. 
+        /// and other default processors.
         /// </summary>
         internal static IExpressionTreeProcessor CreateExpressionTreeProcessor()
         {
