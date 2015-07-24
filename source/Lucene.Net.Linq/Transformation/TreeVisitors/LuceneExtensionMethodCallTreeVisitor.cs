@@ -1,14 +1,15 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Lucene.Net.Linq.Clauses.Expressions;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 
 namespace Lucene.Net.Linq.Transformation.TreeVisitors
 {
     internal class LuceneExtensionMethodCallTreeVisitor : MethodInfoMatchingTreeVisitor
     {
-        private static readonly MethodInfo AnyFieldMethod = ReflectionUtility.GetMethod(() => LuceneMethods.AnyField<object>(null));
-        private static readonly MethodInfo ScoreMethod = ReflectionUtility.GetMethod(() => LuceneMethods.Score<object>(null));
+        private static readonly MethodInfo AnyFieldMethod = MemberInfoUtils.GetGenericMethod(() => LuceneMethods.AnyField<object>(null));
+        private static readonly MethodInfo ScoreMethod = MemberInfoUtils.GetGenericMethod(() => LuceneMethods.Score<object>(null));
 
         public LuceneExtensionMethodCallTreeVisitor()
         {

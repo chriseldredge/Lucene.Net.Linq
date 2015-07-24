@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
@@ -9,7 +10,7 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
     {
         public static readonly MethodInfo[] SupportedMethods =
             {
-                GetSupportedMethod (() => LuceneMethods.TrackRetrievedDocuments<object>(null, null))
+                MemberInfoUtils.GetGenericMethod(() => LuceneMethods.TrackRetrievedDocuments<object>(null, null))
             };
 
         private readonly ConstantExpression tracker;
