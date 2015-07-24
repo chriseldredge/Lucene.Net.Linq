@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
@@ -44,11 +43,11 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             Assert.That(result.Type, Is.EqualTo(SortField.STRING));
         }
-        
+
         private IFieldMapper<FieldMappingInfoBuilderSortFieldTests> CreateMapper(PropertyInfo propertyInfo)
         {
             return FieldMappingInfoBuilder.Build<FieldMappingInfoBuilderSortFieldTests>(propertyInfo);
         }
-        
+
     }
 }

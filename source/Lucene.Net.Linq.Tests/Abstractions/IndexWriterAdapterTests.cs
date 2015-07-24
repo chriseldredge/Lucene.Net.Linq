@@ -1,10 +1,8 @@
-using System;
-using NUnit.Framework;
-using Lucene.Net.Index;
-using Lucene.Net.Store;
-using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Analysis;
+using Lucene.Net.Index;
+using Lucene.Net.Linq.Abstractions;
+using Lucene.Net.Store;
+using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -27,11 +25,11 @@ namespace Lucene.Net.Linq.Tests
         public void SetsFlagOnRollback()
         {
             var target = new IndexWriter(new RAMDirectory(), new KeywordAnalyzer(), IndexWriter.MaxFieldLength.UNLIMITED);
-            
+
             var adapter = new IndexWriterAdapter(target);
-            
+
             adapter.Rollback();
-            
+
             Assert.That(adapter.IsClosed, Is.True, "Should set flag on Dispose");
         }
     }

@@ -6,7 +6,6 @@ using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
 using NUnit.Framework;
-using Directory = Lucene.Net.Store.Directory;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -23,7 +22,7 @@ namespace Lucene.Net.Linq.Tests.Integration
         {
             directory = new RAMDirectory();
             writer = new IndexWriter(directory, GetAnalyzer(version), IndexWriter.MaxFieldLength.UNLIMITED);
-            
+
             provider = new LuceneDataProvider(directory, writer.Analyzer, version, writer);
         }
 

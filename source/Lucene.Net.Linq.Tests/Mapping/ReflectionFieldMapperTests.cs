@@ -6,9 +6,9 @@ using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Tests.Integration;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using NUnit.Framework;
-using Lucene.Net.QueryParsers;
 
 namespace Lucene.Net.Linq.Tests.Mapping
 {

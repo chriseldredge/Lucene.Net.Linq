@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {

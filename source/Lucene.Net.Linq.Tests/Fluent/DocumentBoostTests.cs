@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Lucene.Net.Linq.Mapping;
+﻿using Lucene.Net.Linq.Mapping;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Fluent

@@ -14,7 +14,6 @@ using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
 using Remotion.Linq.Clauses.ExpressionVisitors;
-using Remotion.Linq.Parsing.Structure.NodeTypeProviders;
 
 namespace Lucene.Net.Linq
 {

@@ -1,7 +1,6 @@
-﻿using System.Linq;
-using Lucene.Net.Analysis;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
-using Version = System.Version;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {

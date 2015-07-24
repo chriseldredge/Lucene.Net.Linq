@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Lucene.Net.Analysis;
 using Lucene.Net.Index;
@@ -6,9 +5,9 @@ using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Analysis;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
+using Lucene.Net.Util;
 using NUnit.Framework;
 using Rhino.Mocks;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -68,7 +67,7 @@ namespace Lucene.Net.Linq.Tests
         public void DisposesInternallyCreatedWriter()
         {
             var provider = new TestableLuceneDataProvider(new RAMDirectory(), Version.LUCENE_30);
-            
+
             provider.Dispose();
 
             provider.IndexWriter.AssertWasCalled(w => w.Dispose());
@@ -95,17 +94,17 @@ namespace Lucene.Net.Linq.Tests
 
             Assert.That(next, Is.Not.SameAs(first), "Should create new writer when current is closed.");
         }
-        
+
         [Test]
         public void ThrowsWhenExternallyCreatedWriterIsClosed()
         {
             var writer = MockRepository.GenerateStrictMock<IIndexWriter>();
             var provider = new LuceneDataProvider(new RAMDirectory(), Version.LUCENE_30, writer, new object());
-            
+
             writer.Expect(iw => iw.IsClosed).Return(true);
-            
+
             TestDelegate call = () => provider.IndexWriter.ToString();
-            
+
             Assert.That(call, Throws.InvalidOperationException);
         }
 
@@ -149,7 +148,7 @@ namespace Lucene.Net.Linq.Tests
             [Field(Analyzer=typeof(SimpleAnalyzer))]
             public string Prop1 { get; set; }
         }
-        
+
         public class B
         {
             [Field(Analyzer = typeof(WhitespaceAnalyzer))]

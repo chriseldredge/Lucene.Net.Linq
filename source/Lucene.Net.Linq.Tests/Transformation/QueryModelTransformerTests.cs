@@ -3,7 +3,6 @@ using Lucene.Net.Linq.Transformation;
 using NUnit.Framework;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Parsing;
 using Rhino.Mocks;
 
 namespace Lucene.Net.Linq.Tests.Transformation

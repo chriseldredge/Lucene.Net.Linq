@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using NUnit.Framework;
 using Lucene.Net.Linq.Fluent;
 using Lucene.Net.Util;
+using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
 {

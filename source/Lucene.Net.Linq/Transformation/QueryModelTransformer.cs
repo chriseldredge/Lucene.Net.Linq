@@ -6,7 +6,6 @@ using Lucene.Net.Linq.Transformation.ExpressionVisitors;
 using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Transformation
 {

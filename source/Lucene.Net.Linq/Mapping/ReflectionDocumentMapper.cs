@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
-using Lucene.Net.Linq.Util;
 using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Mapping
@@ -60,7 +59,7 @@ namespace Lucene.Net.Linq.Mapping
                     continue;
                 }
                 var mappingContext = FieldMappingInfoBuilder.Build<T>(p, version, externalAnalyzer);
-                
+
                 fieldMap.Add(mappingContext.PropertyName, mappingContext);
 
                 if (!string.IsNullOrWhiteSpace(mappingContext.FieldName) && mappingContext.Analyzer != null)

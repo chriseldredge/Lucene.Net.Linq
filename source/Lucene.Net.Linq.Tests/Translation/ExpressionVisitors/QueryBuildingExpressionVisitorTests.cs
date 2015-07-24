@@ -5,7 +5,6 @@ using Lucene.Net.Linq.Search;
 using Lucene.Net.Linq.Translation.ExpressionVisitors;
 using Lucene.Net.Search;
 using NUnit.Framework;
-using Version = Lucene.Net.Util.Version;
 
 namespace Lucene.Net.Linq.Tests.Translation.ExpressionVisitors
 {
