@@ -7,7 +7,7 @@ namespace Lucene.Net.Linq.ScalarResultHandlers
 {
     internal class ScalarResultHandlerRegistry : RegistryBase<ScalarResultHandlerRegistry, Type, ScalarResultHandler>
     {
-        private static readonly ScalarResultHandlerRegistry instance = ScalarResultHandlerRegistry.CreateDefault();
+        private static readonly ScalarResultHandlerRegistry instance = CreateDefault();
 
         public static ScalarResultHandlerRegistry Instance
         {

@@ -184,6 +184,7 @@
     <Compile Include="Util\Log.cs" />
     <Compile Include="Util\MemberInfoUtils.cs" />
     <Compile Include="Util\NumericUtils.cs" />
+    <Compile Include="Util\RegistryBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Lucene.Net.Linq.nuspec">
