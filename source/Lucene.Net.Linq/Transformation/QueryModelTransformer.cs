@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq.Expressions;
 using Common.Logging;
 using Lucene.Net.Linq.Clauses.Expressions;
-using Lucene.Net.Linq.Transformation.TreeVisitors;
+using Lucene.Net.Linq.Transformation.ExpressionVisitors;
 using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -16,44 +17,44 @@ namespace Lucene.Net.Linq.Transformation
     {
         private static readonly ILog Log = LogManager.GetLogger<QueryModelTransformer>();
 
-        private readonly IEnumerable<ExpressionTreeVisitor> whereSelectClauseVisitors;
-        private readonly IEnumerable<ExpressionTreeVisitor> orderingVisitors;
+        private readonly IEnumerable<ExpressionVisitor> whereSelectClauseVisitors;
+        private readonly IEnumerable<ExpressionVisitor> orderingVisitors;
 
         internal QueryModelTransformer()
-            : this(new ExpressionTreeVisitor[]
+            : this(new ExpressionVisitor[]
                        {
-                           new SubQueryContainsTreeVisitor(),
-                           new LuceneExtensionMethodCallTreeVisitor(),
-                           new ExternallyProvidedQueryExpressionTreeVisitor(),
-                           new QuerySourceReferencePropertyTransformingTreeVisitor(),
-                           new BoostMethodCallTreeVisitor(0),
-                           new NoOpMethodCallRemovingTreeVisitor(),
-                           new NoOpConditionRemovingTreeVisitor(),
-                           new NullSafetyConditionRemovingTreeVisitor(),
+                           new SubQueryContainsVisitor(),
+                           new LuceneExtensionMethodCallVisitor(),
+                           new ExternallyProvidedQueryExpressionVisitor(),
+                           new QuerySourceReferencePropertyTransformingVisitor(),
+                           new BoostMethodCallVisitor(0),
+                           new NoOpMethodCallRemovingVisitor(),
+                           new NoOpConditionRemovingVisitor(),
+                           new NullSafetyConditionRemovingVisitor(),
                            new NoOpConvertExpressionRemovingVisitor(),
-                           new MethodCallToLuceneQueryPredicateExpressionTreeVisitor(),
-                           new CompareCallToLuceneQueryPredicateExpressionTreeVisitor(),
-                           new FlagToBinaryConditionTreeVisitor(),
-                           new BooleanBinaryToQueryPredicateExpressionTreeVisitor(),
-                           new BinaryToQueryExpressionTreeVisitor(),
-                           new RangeQueryMergeExpressionTreeVisitor(), 
-                           new AllowSpecialCharactersMethodExpressionTreeVisitor(),
-                           new BoostMethodCallTreeVisitor(1),
-                           new FuzzyMethodCallTreeVisitor()
+                           new MethodCallToLuceneQueryPredicateExpressionVisitor(),
+                           new CompareCallToLuceneQueryPredicateExpressionVisitor(),
+                           new FlagToBinaryConditionVisitor(),
+                           new BooleanBinaryToQueryPredicateExpressionVisitor(),
+                           new BinaryToQueryExpressionVisitor(),
+                           new RangeQueryMergeExpressionVisitor(),
+                           new AllowSpecialCharactersMethodExpressionVisitor(),
+                           new BoostMethodCallVisitor(1),
+                           new FuzzyMethodCallVisitor()
                        },
-                   new ExpressionTreeVisitor[]
+                   new ExpressionVisitor[]
                        {
-                           new LuceneExtensionMethodCallTreeVisitor(),
-                           new BoostMethodCallTreeVisitor(1),
-                           new QuerySourceReferencePropertyTransformingTreeVisitor(),
-                           new NoOpMethodCallRemovingTreeVisitor(),
-                           new NullSafetyConditionRemovingTreeVisitor(),
-                           new ConcatToCompositeOrderingExpressionTreeVisitor()
+                           new LuceneExtensionMethodCallVisitor(),
+                           new BoostMethodCallVisitor(1),
+                           new QuerySourceReferencePropertyTransformingVisitor(),
+                           new NoOpMethodCallRemovingVisitor(),
+                           new NullSafetyConditionRemovingVisitor(),
+                           new ConcatToCompositeOrderingExpressionVisitor()
                        })
         {
         }
 
-        internal QueryModelTransformer(IEnumerable<ExpressionTreeVisitor> whereSelectClauseVisitors, IEnumerable<ExpressionTreeVisitor> orderingVisitors)
+        internal QueryModelTransformer(IEnumerable<ExpressionVisitor> whereSelectClauseVisitors, IEnumerable<ExpressionVisitor> orderingVisitors)
         {
             this.whereSelectClauseVisitors = whereSelectClauseVisitors;
             this.orderingVisitors = orderingVisitors;
@@ -80,7 +81,7 @@ namespace Lucene.Net.Linq.Transformation
 
             foreach (var visitor in whereSelectClauseVisitors)
             {
-                whereClause.TransformExpressions(visitor.VisitExpression);
+                whereClause.TransformExpressions(visitor.Visit);
                 Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
 
@@ -93,10 +94,10 @@ namespace Lucene.Net.Linq.Transformation
 
             foreach (var visitor in orderingVisitors)
             {
-                orderByClause.TransformExpressions(visitor.VisitExpression);
+                orderByClause.TransformExpressions(visitor.Visit);
                 Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
-            
+
             ExpandCompositeOrderings(orderByClause);
 
             base.VisitOrderByClause(orderByClause, queryModel, index);

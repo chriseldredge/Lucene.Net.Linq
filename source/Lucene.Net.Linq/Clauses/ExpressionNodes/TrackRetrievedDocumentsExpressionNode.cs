@@ -26,10 +26,9 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
             return Source.Resolve(inputParameter, expressionToBeResolved, clauseGenerationContext);
         }
 
-        protected override QueryModel ApplyNodeSpecificSemantics(QueryModel queryModel, ClauseGenerationContext clauseGenerationContext)
+        protected override void ApplyNodeSpecificSemantics(QueryModel queryModel, ClauseGenerationContext clauseGenerationContext)
         {
             queryModel.BodyClauses.Add(new TrackRetrievedDocumentsClause(tracker));
-            return queryModel;
         }
     }
 }

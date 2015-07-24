@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Lucene.Net.Linq.Clauses;
 using Lucene.Net.Linq.Mapping;
+using Lucene.Net.Linq.Translation.ExpressionVisitors;
 using Lucene.Net.Linq.Translation.ResultOperatorHandlers;
-using Lucene.Net.Linq.Translation.TreeVisitors;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
@@ -27,10 +27,10 @@ namespace Lucene.Net.Linq.Translation
         public void Build(QueryModel queryModel)
         {
             queryModel.Accept(this);
-            
+
             if (context.Settings.EnableMultipleEntities)
             {
-                CreateQueryFilterForKeyFields();    
+                CreateQueryFilterForKeyFields();
             }
         }
 
@@ -41,9 +41,9 @@ namespace Lucene.Net.Linq.Translation
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            var visitor = new QueryBuildingExpressionTreeVisitor(fieldMappingInfoProvider);
-            visitor.VisitExpression(whereClause.Predicate);
-            
+            var visitor = new QueryBuildingExpressionVisitor(fieldMappingInfoProvider);
+            visitor.Visit(whereClause.Predicate);
+
             model.AddQuery(visitor.Query);
         }
 
@@ -100,7 +100,7 @@ namespace Lucene.Net.Linq.Translation
                 (query, property) =>
                     {
                         var fieldMappingInfo = fieldMappingInfoProvider.GetMappingInfo(property);
-                        
+
                         query.Add(fieldMappingInfo.CreateQuery("*"), Occur.MUST);
                         return query;
                     });

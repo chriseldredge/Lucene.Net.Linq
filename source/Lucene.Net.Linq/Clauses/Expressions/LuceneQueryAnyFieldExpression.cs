@@ -17,7 +17,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             get { return instance; }
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
         {
             return this;
         }

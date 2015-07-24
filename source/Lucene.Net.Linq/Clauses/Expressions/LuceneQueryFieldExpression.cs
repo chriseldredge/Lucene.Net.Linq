@@ -5,24 +5,36 @@ using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {
-    internal class LuceneQueryFieldExpression : ExtensionExpression
+    internal class LuceneQueryFieldExpression : Expression
     {
         private readonly string fieldName;
+        private readonly Type type;
+        private readonly ExpressionType nodeType;
 
         internal LuceneQueryFieldExpression(Type type, string fieldName)
-            : base(type, (ExpressionType)LuceneExpressionType.LuceneQueryFieldExpression)
+            : this(type, (ExpressionType) LuceneExpressionType.LuceneQueryFieldExpression, fieldName)
         {
-            this.fieldName = fieldName;
             Boost = 1;
         }
 
-        internal LuceneQueryFieldExpression(Type type, ExpressionType expressionType, string fieldName)
-            : base(type, expressionType)
+        internal LuceneQueryFieldExpression(Type type, ExpressionType nodeType, string fieldName)
         {
+            this.type = type;
+            this.nodeType = nodeType;
             this.fieldName = fieldName;
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        public override ExpressionType NodeType
+        {
+            get { return nodeType; }
+        }
+
+        public override Type Type
+        {
+            get { return type; }
+        }
+
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
         {
             // no children.
             return this;

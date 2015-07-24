@@ -1,19 +1,29 @@
+using System;
 using System.Linq.Expressions;
 using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {
-    internal class BoostBinaryExpression : ExtensionExpression
+    internal class BoostBinaryExpression : Expression
     {
         private readonly BinaryExpression expression;
         private readonly float boost;
-        
+
         public BoostBinaryExpression(BinaryExpression expression, float boost)
-            : base(expression.Type, (ExpressionType)LuceneExpressionType.BoostBinaryExpression)
         {
             this.expression = expression;
             this.boost = boost;
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)LuceneExpressionType.BoostBinaryExpression; }
+        }
+
+        public override Type Type
+        {
+            get { return expression.Type; }
         }
 
         public BinaryExpression BinaryExpression
@@ -31,9 +41,9 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             return string.Format("{0}^{1}", BinaryExpression, Boost);
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
         {
-            var newExpression = visitor.VisitExpression(BinaryExpression);
+            var newExpression = visitor.Visit(BinaryExpression);
 
             if (ReferenceEquals(BinaryExpression, newExpression)) return this;
 

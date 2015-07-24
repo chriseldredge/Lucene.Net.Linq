@@ -1,16 +1,24 @@
+using System;
 using System.Linq.Expressions;
-using Remotion.Linq.Clauses.Expressions;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {
-    internal class LuceneOrderByRelevanceExpression : ExtensionExpression
+    internal class LuceneOrderByRelevanceExpression : Expression
     {
         private static readonly LuceneOrderByRelevanceExpression instance = new LuceneOrderByRelevanceExpression();
 
         private LuceneOrderByRelevanceExpression()
-            : base(typeof(object), (ExpressionType)LuceneExpressionType.LuceneOrderByRelevanceExpression)
         {
+        }
+
+        public override ExpressionType NodeType
+        {
+            get { return (ExpressionType)LuceneExpressionType.LuceneOrderByRelevanceExpression; }
+        }
+
+        public override Type Type
+        {
+            get { return typeof (object); }
         }
 
         public static Expression Instance
@@ -18,7 +26,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             get { return instance; }
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
         {
             return this;
         }
