@@ -10,12 +10,15 @@ using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Version = Lucene.Net.Util.Version;
+using System.Linq.Expressions;
 
 namespace Lucene.Net.Linq.Mapping
 {
     public class ReflectionFieldMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
         protected readonly PropertyInfo propertyInfo;
+        protected readonly Func<T, object> propertyGetter;
+        protected readonly Action<T, object> propertySetter;
         protected readonly StoreMode store;
         protected readonly IndexMode index;
         protected readonly TermVectorMode termVector;
@@ -43,6 +46,9 @@ namespace Lucene.Net.Linq.Mapping
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost, bool nativeSort = false)
         {
             this.propertyInfo = propertyInfo;
+            this.propertyGetter = CreatePropertyGetter(propertyInfo, fieldName);
+            if (propertyInfo.CanWrite)
+                this.propertySetter = CreatePropertySetter(propertyInfo, fieldName);
             this.store = store;
             this.index = index;
             this.termVector = termVector;
@@ -150,7 +156,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual object GetPropertyValue(T source)
         {
-            return propertyInfo.GetValue(source, null);
+            return propertyGetter(source);
         }
 
         public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
@@ -159,7 +165,7 @@ namespace Lucene.Net.Linq.Mapping
 
             var fieldValue = GetFieldValue(source);
 
-            propertyInfo.SetValue(target, fieldValue, null);
+            propertySetter(target, fieldValue);
         }
 
         public object GetFieldValue(Document document)
@@ -177,7 +183,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual void CopyToDocument(T source, Document target)
         {
-            var value = propertyInfo.GetValue(source, null);
+            var value = propertyGetter(source);
 
             target.RemoveFields(fieldName);
 
@@ -268,6 +274,37 @@ namespace Lucene.Net.Linq.Mapping
         protected virtual string Unescape(string pattern)
         {
             return pattern.Replace(@"\", "");
+        }
+
+        /// <summary>
+        /// Creates a property getter method with Lambda Expressions.
+        /// </summary>
+        /// <param name="propertyInfo">The property info.</param>
+        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
+        {
+            if (String.IsNullOrEmpty(propertyName))
+                propertyName = propertyInfo.Name;
+            var source = Expression.Parameter(typeof(T));
+            return Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, propertyName), typeof (object)), source).Compile();
+        }
+
+        /// <summary>
+        /// Creates a property setter method with Lambda Expressions.
+        /// </summary>
+        /// <param name="propertyInfo">The property info.</param>
+        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
+        {
+            if (String.IsNullOrEmpty(propertyName))
+                propertyName = propertyInfo.Name;
+            var propType = propertyInfo.PropertyType;
+
+            var sourceType = Expression.Parameter(typeof(T));
+            var argument = Expression.Parameter(typeof(object), propertyName);
+            var propExp = Expression.Property(sourceType, propertyName);
+
+            var castToObject = Expression.Convert(argument, propType);
+
+            return Expression.Lambda<Action<T, object>>(Expression.Assign(propExp, castToObject), sourceType, argument).Compile();
         }
 
         public virtual Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)

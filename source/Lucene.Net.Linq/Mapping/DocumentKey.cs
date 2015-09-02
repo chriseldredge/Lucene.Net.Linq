@@ -45,8 +45,8 @@ namespace Lucene.Net.Linq.Mapping
 
         public DocumentKey(IDictionary<IFieldMappingInfo, object> values)
         {
-            this.values = new SortedDictionary<string, object>(values.ToDictionary(kv => kv.Key.FieldName, kv => kv.Value));
-            this.mappings = new Dictionary<string, IFieldMappingInfo>(values.ToDictionary(kv => kv.Key.FieldName, kv => kv.Key));
+            this.values = new SortedDictionary<string, object>(values.ToDictionary(kv => kv.Key.FieldName, kv => kv.Value, StringComparer.Ordinal), StringComparer.Ordinal);
+            this.mappings = values.ToDictionary(kv => kv.Key.FieldName, kv => kv.Key, StringComparer.Ordinal);
         }
 
         public Query ToQuery()
