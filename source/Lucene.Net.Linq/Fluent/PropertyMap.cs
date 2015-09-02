@@ -245,7 +245,7 @@ namespace Lucene.Net.Linq.Fluent
 
             Type type;
 
-            if (FieldMappingInfoBuilder.IsCollection(propInfo.PropertyType, out type))
+            if (converter == null && FieldMappingInfoBuilder.IsCollection(propInfo.PropertyType, out type))
             {
                 return new CollectionReflectionFieldMapper<T>(mapper, type);
             }
