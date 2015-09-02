@@ -46,8 +46,9 @@ namespace Lucene.Net.Linq.Mapping
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost, bool nativeSort = false)
         {
             this.propertyInfo = propertyInfo;
-            this.propertyGetter = CreatePropertyGetter(propertyInfo);
-            this.propertySetter = CreatePropertySetter(propertyInfo);
+            this.propertyGetter = CreatePropertyGetter(propertyInfo, fieldName);
+            if (propertyInfo.CanWrite)
+                this.propertySetter = CreatePropertySetter(propertyInfo, fieldName);
             this.store = store;
             this.index = index;
             this.termVector = termVector;
@@ -279,25 +280,27 @@ namespace Lucene.Net.Linq.Mapping
         /// Creates a property getter method with Lambda Expressions.
         /// </summary>
         /// <param name="propertyInfo">The property info.</param>
-        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo)
+        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
         {
-            var name = propertyInfo.Name;
+            if (String.IsNullOrEmpty(propertyName))
+                propertyName = propertyInfo.Name;
             var source = Expression.Parameter(typeof(T));
-            return Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, name), typeof (object)), source).Compile();
+            return Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, propertyName), typeof (object)), source).Compile();
         }
 
         /// <summary>
         /// Creates a property setter method with Lambda Expressions.
         /// </summary>
         /// <param name="propertyInfo">The property info.</param>
-        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo)
+        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
         {
-            var name = propertyInfo.Name;
+            if (String.IsNullOrEmpty(propertyName))
+                propertyName = propertyInfo.Name;
             var propType = propertyInfo.PropertyType;
 
             var sourceType = Expression.Parameter(typeof(T));
-            var argument = Expression.Parameter(typeof(object), name);
-            var propExp = Expression.Property(sourceType, name);
+            var argument = Expression.Parameter(typeof(object), propertyName);
+            var propExp = Expression.Property(sourceType, propertyName);
 
             var castToObject = Expression.Convert(argument, propType);
 
