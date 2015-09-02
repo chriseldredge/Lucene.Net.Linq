@@ -16,7 +16,7 @@ namespace Lucene.Net.Linq.Mapping
         protected readonly Analyzer externalAnalyzer;
         protected PerFieldAnalyzer analyzer;
         protected readonly Version version;
-        protected readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>();
+        protected readonly IDictionary<string, IFieldMapper<T>> fieldMap = new Dictionary<string, IFieldMapper<T>>(StringComparer.Ordinal);
         protected readonly List<IFieldMapper<T>> keyFields = new List<IFieldMapper<T>>();
 
         /// <summary>

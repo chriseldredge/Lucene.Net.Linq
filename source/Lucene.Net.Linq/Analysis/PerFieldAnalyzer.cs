@@ -13,7 +13,7 @@ namespace Lucene.Net.Linq.Analysis
     public class PerFieldAnalyzer : Analyzer
     {
         private readonly Analyzer defaultAnalyzer;
-        private readonly IDictionary<string, Analyzer> analyzerMap = new Dictionary<string, Analyzer>();
+        private readonly IDictionary<string, Analyzer> analyzerMap = new Dictionary<string, Analyzer>(StringComparer.Ordinal);
         
         /// <summary> Constructs with default analyzer.
         /// 
