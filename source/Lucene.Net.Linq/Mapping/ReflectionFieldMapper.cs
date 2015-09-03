@@ -46,9 +46,9 @@ namespace Lucene.Net.Linq.Mapping
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost, bool nativeSort = false)
         {
             this.propertyInfo = propertyInfo;
-            this.propertyGetter = CreatePropertyGetter(propertyInfo, fieldName);
+            this.propertyGetter = CreatePropertyGetter(propertyInfo);
             if (propertyInfo.CanWrite)
-                this.propertySetter = CreatePropertySetter(propertyInfo, fieldName);
+                this.propertySetter = CreatePropertySetter(propertyInfo);
             this.store = store;
             this.index = index;
             this.termVector = termVector;
@@ -165,7 +165,8 @@ namespace Lucene.Net.Linq.Mapping
 
             var fieldValue = GetFieldValue(source);
 
-            propertySetter(target, fieldValue);
+            if (fieldValue != null)
+                propertySetter(target, fieldValue);
         }
 
         public object GetFieldValue(Document document)
