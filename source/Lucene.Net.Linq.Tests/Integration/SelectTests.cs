@@ -527,6 +527,61 @@ namespace Lucene.Net.Linq.Tests.Integration
             Assert.That(result.Single().Name, Is.EqualTo("Other Document"));
         }
 
+        public class SampleWithCollection
+        {
+            [Field (Key = true)]
+            public string Key { get; set; }
+
+            [Field (Converter = typeof (HashSetConverter))]
+            public System.Collections.Generic.HashSet<string> HashSetCollection { get; set; }
+        }
+
+        class HashSetConverter : JsonTypeConverter<System.Collections.Generic.HashSet<string>>
+        {            
+        }
+
+        [Test]
+        public void StoresAndRetrieves_CollectionWithConverter_HashSet ()
+        {
+            var d = new SampleWithCollection { Key = "0", HashSetCollection = new System.Collections.Generic.HashSet<string> { "item 1", "item 2", "item 3" } };
+            using (var session = provider.OpenSession<SampleWithCollection> ())
+            {
+                session.Add (d);
+                session.Commit ();
+            }
+
+            var documents = provider.AsQueryable<SampleWithCollection> ();
+
+            var result = from doc in documents select doc;
+
+            var field = result.FirstOrDefault ().HashSetCollection;
+
+            Assert.IsTrue (field.Contains ("item 1"));            
+        }
+
+        [Test]
+        public void StoresAndRetrieves_CollectionWithConverter_HashSet_Fluent ()
+        {
+            var converter = new JsonTypeConverter<System.Collections.Generic.HashSet<string>> ();
+            var map = new Lucene.Net.Linq.Fluent.ClassMap<SampleWithCollection> (Lucene.Net.Util.Version.LUCENE_30);
+            map.Key (x => x.Key);
+            map.Property (x => x.HashSetCollection).NotIndexed ().ConvertWith (converter);
+
+            var d = new SampleWithCollection { Key = "0", HashSetCollection = new System.Collections.Generic.HashSet<string> { "item 1", "item 2", "item 3" } };
+            using (var session = provider.OpenSession<SampleWithCollection> (map.ToDocumentMapper ()))
+            {
+                session.Add (d);
+                session.Commit ();
+            }
+
+            using (var session = provider.OpenSession<SampleWithCollection> (map.ToDocumentMapper ()))
+            {
+                var field = session.Query ().First ().HashSetCollection;
+
+                Assert.IsTrue (field.Contains ("item 1"));
+            }
+        }
+
     }
 
 }
