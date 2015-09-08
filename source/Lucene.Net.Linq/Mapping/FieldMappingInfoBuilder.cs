@@ -43,6 +43,13 @@ namespace Lucene.Net.Linq.Mapping
 
             var isCollection = IsCollection(p.PropertyType, out type);
 
+            // if a converter is provided, disable collection treatment
+            if (metadata != null && metadata.Converter != null)
+            {
+                type = p.PropertyType;
+                isCollection = false;
+            }
+
             ReflectionFieldMapper<T> mapper;
 
             if (numericFieldAttribute != null)
