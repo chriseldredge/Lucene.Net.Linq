@@ -20,6 +20,8 @@ namespace Lucene.Net.Linq.Mapping
     /// </summary>
     public class ReflectionDocumentMapper<T> : DocumentMapperBase<T>
     {
+        protected static PropertyInfo[] properties = null;
+
         /// <summary>
         /// Constructs an instance that will create an <see cref="Analyzer"/>
         /// using metadata on public properties on the type <typeparamref name="T"/>.
@@ -44,11 +46,12 @@ namespace Lucene.Net.Linq.Mapping
         private ReflectionDocumentMapper(Version version, Analyzer externalAnalyzer, Type type)
             : base(version, externalAnalyzer)
         {
-            var props = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            if (properties == null)
+                properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-            BuildFieldMap(props);
+            BuildFieldMap(properties);
 
-            BuildKeyFieldMap(type, props);
+            BuildKeyFieldMap(type, properties);
         }
 
         private void BuildFieldMap(IEnumerable<PropertyInfo> props)
