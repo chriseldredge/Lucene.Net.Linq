@@ -18,7 +18,7 @@ namespace Lucene.Net.Linq.Fluent
     {
         private readonly Version version;
         private readonly ISet<PropertyMap<T>> properties = new HashSet<PropertyMap<T>>(new PartComparer<T>());
-        private readonly IDictionary<string, string> documentKeys = new Dictionary<string, string>();
+        private readonly IDictionary<string, string> documentKeys = new Dictionary<string, string>(StringComparer.Ordinal);
         private ReflectionScoreMapper<T> scoreMapper;
         private ReflectionDocumentBoostMapper<T> docBoostMapper;
 
