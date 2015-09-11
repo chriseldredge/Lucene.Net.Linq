@@ -11,11 +11,13 @@ using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Version = Lucene.Net.Util.Version;
 using System.Linq.Expressions;
+using System.Collections.Concurrent;
 
 namespace Lucene.Net.Linq.Mapping
 {
     public class ReflectionFieldMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
+        protected static ConcurrentDictionary<string, object> internalCache = new ConcurrentDictionary<string, object> (StringComparer.Ordinal);
         protected readonly PropertyInfo propertyInfo;
         protected readonly Func<T, object> propertyGetter;
         protected readonly Action<T, object> propertySetter;
@@ -281,31 +283,51 @@ namespace Lucene.Net.Linq.Mapping
         /// Creates a property getter method with Lambda Expressions.
         /// </summary>
         /// <param name="propertyInfo">The property info.</param>
-        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
+        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo)
         {
-            if (String.IsNullOrEmpty(propertyName))
-                propertyName = propertyInfo.Name;
+            // check cache to avoid creating another method
+            string cacheKey = "getter." + propertyInfo.GetHashCode ();
+            object cache;
+            if (internalCache.TryGetValue (cacheKey, out cache))
+                return (Func<T, object>)cache;
+            
+            // create method
+            var name = propertyInfo.Name;
             var source = Expression.Parameter(typeof(T));
-            return Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, propertyName), typeof (object)), source).Compile();
+            var method = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, name), typeof (object)), source).Compile();
+
+            // add to cache and return
+            internalCache.TryAdd (cacheKey, method);
+            return method;
         }
 
         /// <summary>
         /// Creates a property setter method with Lambda Expressions.
         /// </summary>
         /// <param name="propertyInfo">The property info.</param>
-        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo, string propertyName = null)
+        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo)
         {
-            if (String.IsNullOrEmpty(propertyName))
-                propertyName = propertyInfo.Name;
+            // check cache to avoid creating another method
+            string cacheKey = "setter." + propertyInfo.GetHashCode ();
+            object cache;
+            if (internalCache.TryGetValue (cacheKey, out cache))
+                return (Action<T, object>)cache;
+            
+            // create method
+            var name = propertyInfo.Name;
             var propType = propertyInfo.PropertyType;
 
             var sourceType = Expression.Parameter(typeof(T));
-            var argument = Expression.Parameter(typeof(object), propertyName);
-            var propExp = Expression.Property(sourceType, propertyName);
+            var argument = Expression.Parameter(typeof(object), name);
+            var propExp = Expression.Property(sourceType, name);
 
             var castToObject = Expression.Convert(argument, propType);
 
-            return Expression.Lambda<Action<T, object>>(Expression.Assign(propExp, castToObject), sourceType, argument).Compile();
+            var method = Expression.Lambda<Action<T, object>> (Expression.Assign (propExp, castToObject), sourceType, argument).Compile ();
+
+            // add to cache and return
+            internalCache.TryAdd (cacheKey, method);
+            return method;
         }
 
         public virtual Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)
