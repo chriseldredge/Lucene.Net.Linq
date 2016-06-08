@@ -97,7 +97,7 @@ namespace Lucene.Net.Linq.Mapping
             return new DocumentKey(keyValues);
         }
 
-        public IDocumentKey ToKey(Document document)
+        public virtual IDocumentKey ToKey(Document document)
         {
             var keyValues = keyFields.ToDictionary(f => (IFieldMappingInfo)f, f => GetFieldValue(f, document));
 
