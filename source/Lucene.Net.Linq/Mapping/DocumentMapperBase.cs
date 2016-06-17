@@ -120,7 +120,7 @@ namespace Lucene.Net.Linq.Mapping
             return fieldConverter.GetFieldValue(document);
         }
 
-        private void ValidateKey(Dictionary<IFieldMappingInfo, object> keyValues)
+        protected virtual void ValidateKey(Dictionary<IFieldMappingInfo, object> keyValues)
         {
             var nulls = keyValues.Where(kv => kv.Value == null).ToArray();
 
