@@ -1,6 +1,4 @@
 using System;
-using System.IO;
-using System.Linq;
 using Lucene.Net.Store;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;

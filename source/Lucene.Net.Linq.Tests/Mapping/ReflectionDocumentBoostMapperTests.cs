@@ -1,6 +1,5 @@
 ﻿using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
-using Lucene.Net.Search;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Mapping

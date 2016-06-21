@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;

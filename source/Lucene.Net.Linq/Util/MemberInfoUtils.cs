@@ -1,18 +1,45 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace Lucene.Net.Linq.Util
 {
     public static class MemberInfoUtils
     {
-        public static T GetCustomAttribute<T>(this MemberInfo member, bool inherit)
+        public static MethodInfo GetMethod<T>(Expression<Func<T>> wrappedCall)
         {
-            return member.GetCustomAttributes<T>(inherit).SingleOrDefault();
+            MethodInfo method = null;
+
+            switch (wrappedCall.Body.NodeType)
+            {
+                case ExpressionType.Call:
+                    method = ((MethodCallExpression)wrappedCall.Body).Method;
+                    break;
+                case ExpressionType.MemberAccess:
+                    var memberExpression = (MemberExpression)wrappedCall.Body;
+                    var property = memberExpression.Member as PropertyInfo;
+                    method = property != null ? property.GetGetMethod() : null;
+                    break;
+            }
+
+            if (method == null)
+            {
+                throw new ArgumentException(string.Format("Cannot extract a method from the given expression '{0}'.", wrappedCall.Body), "wrappedCall");
+            }
+
+            return method;
         }
 
-        public static T[] GetCustomAttributes<T>(this MemberInfo member, bool inherit)
+        public static MethodInfo GetGenericMethod<T>(Expression<Func<T>> wrappedCall)
         {
-            return member.GetCustomAttributes(typeof (T), inherit).Cast<T>().ToArray();
+            var method = GetMethod(wrappedCall);
+
+            if (method.IsGenericMethod)
+            {
+                method = method.GetGenericMethodDefinition();
+            }
+
+            return method;
         }
     }
 }

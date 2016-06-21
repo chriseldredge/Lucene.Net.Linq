@@ -1,4 +1,3 @@
-using System;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Store;
@@ -52,12 +51,12 @@ namespace Lucene.Net.Linq.Tests
         public void GetDocumentKey_ConvertToObjectThenToKey()
         {
             var key = new DocumentKey();
-            
+
             mapper.Expect(m => m.ToObject(document, context, record));
             mapper.Expect(m => m.ToKey(record)).Return(key);
 
             mapper.Replay();
-            
+
             var result = executor.GetDocumentKey(document, context);
 
             Assert.That(result, Is.SameAs(key));
@@ -71,7 +70,7 @@ namespace Lucene.Net.Linq.Tests
             executor = new TestableLuceneQueryExecutor<Record>(new Context(new RAMDirectory(), new object()), _ => record, enhancedMapper);
 
             var key = new DocumentKey();
-            
+
             enhancedMapper.Expect(m => m.ToKey(document)).Return(key);
 
             enhancedMapper.Replay();

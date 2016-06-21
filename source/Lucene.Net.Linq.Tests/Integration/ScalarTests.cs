@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Threading;
-using Lucene.Net.Linq.Util;
 using NUnit.Framework;
 
 namespace Lucene.Net.Linq.Tests.Integration
@@ -100,7 +98,7 @@ namespace Lucene.Net.Linq.Tests.Integration
             {
                 session.DeleteAll();
             }
-            
+
             Assert.That(() => documents.Min(d => d.Scalar), Throws.InvalidOperationException);
         }
 

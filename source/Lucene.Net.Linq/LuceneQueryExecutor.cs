@@ -13,7 +13,7 @@ using Lucene.Net.Linq.Translation;
 using Lucene.Net.Search;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.ExpressionTreeVisitors;
+using Remotion.Linq.Clauses.ExpressionVisitors;
 
 namespace Lucene.Net.Linq
 {
@@ -40,12 +40,12 @@ namespace Lucene.Net.Linq
             }
 
             var item = newItem(key);
-            
+
             mapper.ToObject(doc, context, item);
-            
+
             return item;
         }
-        
+
         protected override TDocument ConvertDocumentForCustomBoost(Document doc)
         {
             return ConvertDocument(doc, new QueryExecutionContext());
@@ -99,7 +99,7 @@ namespace Lucene.Net.Linq
         private readonly ILog Log = LogManager.GetLogger(typeof(LuceneQueryExecutorBase<>));
 
         private readonly Context context;
-        
+
         protected LuceneQueryExecutorBase(Context context)
         {
             this.context = context;
@@ -182,7 +182,7 @@ namespace Lucene.Net.Linq
 
             var mapping = new QuerySourceMapping();
             mapping.AddMapping(queryModel.MainFromClause, currentItemExpression);
-            queryModel.TransformExpressions(e => ReferenceReplacingExpressionTreeVisitor.ReplaceClauseReferences(e, mapping, throwOnUnmappedReferences: true));
+            queryModel.TransformExpressions(e => ReferenceReplacingExpressionVisitor.ReplaceClauseReferences(e, mapping, throwOnUnmappedReferences: true));
 
             var projection = GetProjector<T>(queryModel);
             var projector = projection.Compile();
@@ -293,7 +293,7 @@ namespace Lucene.Net.Linq
 
             var builder = new QueryModelTranslator(this, context);
             builder.Build(queryModel);
-            
+
             Log.Debug(m => m("Lucene query: {0}", builder.Model));
 
             return builder.Model;

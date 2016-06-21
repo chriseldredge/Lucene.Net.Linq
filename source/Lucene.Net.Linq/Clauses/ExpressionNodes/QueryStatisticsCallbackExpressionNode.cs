@@ -1,6 +1,6 @@
-using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Lucene.Net.Linq.Util;
 using Remotion.Linq;
 using Remotion.Linq.Parsing.Structure.IntermediateModel;
 
@@ -9,9 +9,9 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
     internal class QueryStatisticsCallbackExpressionNode : MethodCallExpressionNodeBase
     {
         public static readonly MethodInfo[] SupportedMethods =
-        {
-            GetSupportedMethod (() => LuceneMethods.CaptureStatistics<object>(null, null))
-        };
+            {
+                MemberInfoUtils.GetGenericMethod(() => LuceneMethods.CaptureStatistics<object>(null, null))
+            };
 
         private readonly ConstantExpression callback;
 
@@ -26,10 +26,9 @@ namespace Lucene.Net.Linq.Clauses.ExpressionNodes
             return Source.Resolve(inputParameter, expressionToBeResolved, clauseGenerationContext);
         }
 
-        protected override QueryModel ApplyNodeSpecificSemantics(QueryModel queryModel, ClauseGenerationContext clauseGenerationContext)
+        protected override void ApplyNodeSpecificSemantics(QueryModel queryModel, ClauseGenerationContext clauseGenerationContext)
         {
             queryModel.BodyClauses.Add(new QueryStatisticsCallbackClause(callback));
-            return queryModel;
         }
     }
 }

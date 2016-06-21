@@ -1,5 +1,4 @@
 using System;
-using System.Linq.Expressions;
 using System.Reflection;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
@@ -40,7 +39,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             mapper.CopyFromDocument(doc, new QueryExecutionContext(), this);
 
-            Assert.That(prop.GetValue(this, null), Is.EqualTo(ts));    
+            Assert.That(prop.GetValue(this, null), Is.EqualTo(ts));
         }
 
         [Test]
@@ -56,7 +55,7 @@ namespace Lucene.Net.Linq.Tests.Mapping
 
             Assert.That(doc.Get("Elapsed"), Is.EqualTo(ts.ToString(TimeSpanFormat)));
         }
-        
+
         private IFieldMapper<FieldMappingInfoBuilderTimeSpanTests> CreateMapper(string propertyName, out PropertyInfo info)
         {
             info = GetType().GetProperty(propertyName);

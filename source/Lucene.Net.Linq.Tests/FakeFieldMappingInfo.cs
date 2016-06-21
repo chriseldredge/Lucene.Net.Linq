@@ -3,9 +3,8 @@ using System.ComponentModel;
 using Lucene.Net.Index;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.Search;
-using Lucene.Net.Linq.Util;
-using Lucene.Net.Search;
 using Lucene.Net.QueryParsers;
+using Lucene.Net.Search;
 
 namespace Lucene.Net.Linq.Tests
 {
@@ -27,7 +26,7 @@ namespace Lucene.Net.Linq.Tests
         {
             return value.ToString();
         }
-        
+
         public string EscapeSpecialCharacters(string value)
         {
             return QueryParser.Escape(value ?? string.Empty);

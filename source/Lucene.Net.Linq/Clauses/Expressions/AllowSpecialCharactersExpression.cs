@@ -1,22 +1,30 @@
+using System;
 using System.Linq.Expressions;
-using Remotion.Linq.Clauses.Expressions;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {
-    internal class AllowSpecialCharactersExpression : ExtensionExpression
+    internal class AllowSpecialCharactersExpression : Expression
     {
         private readonly Expression pattern;
 
         internal AllowSpecialCharactersExpression(Expression pattern)
-            : base(pattern.Type, (ExpressionType)LuceneExpressionType.AllowSpecialCharactersExpression)
         {
             this.pattern = pattern;
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        public override ExpressionType NodeType
         {
-            var newPattern = visitor.VisitExpression(pattern);
+            get { return (ExpressionType)LuceneExpressionType.AllowSpecialCharactersExpression; }
+        }
+
+        public override Type Type
+        {
+            get { return pattern.Type; }
+        }
+
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
+        {
+            var newPattern = visitor.Visit(pattern);
 
             if (Equals(pattern, newPattern)) return this;
 

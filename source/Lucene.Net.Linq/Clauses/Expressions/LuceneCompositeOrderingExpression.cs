@@ -1,16 +1,14 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Remotion.Linq.Clauses.Expressions;
-using Remotion.Linq.Parsing;
 
 namespace Lucene.Net.Linq.Clauses.Expressions
 {
-    internal class LuceneCompositeOrderingExpression : ExtensionExpression
+    internal class LuceneCompositeOrderingExpression : Expression
     {
         private readonly IEnumerable<LuceneQueryFieldExpression> fields;
 
         public LuceneCompositeOrderingExpression(IEnumerable<LuceneQueryFieldExpression> fields)
-            : base(typeof(object), (ExpressionType)LuceneExpressionType.LuceneCompositeOrderingExpression)
+            : base((ExpressionType)LuceneExpressionType.LuceneCompositeOrderingExpression, typeof(object))
         {
             this.fields = fields;
         }
@@ -20,7 +18,7 @@ namespace Lucene.Net.Linq.Clauses.Expressions
             get { return fields; }
         }
 
-        protected override Expression VisitChildren(ExpressionTreeVisitor visitor)
+        protected override Expression VisitChildren(ExpressionVisitor visitor)
         {
             return this;
         }
