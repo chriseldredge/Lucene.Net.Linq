@@ -24,14 +24,14 @@ namespace Lucene.Net.Linq.Mapping
             }
 
             // TODO: support collections of IList, ISet, etc.
-            propertyInfo.SetValue(target, values.ToArray(elementType), null);
+            propertySetter(target, values.ToArray (elementType));
         }
 
         public override void CopyToDocument(T source, Document target)
         {
             target.RemoveFields(fieldName);
 
-            var value = (IEnumerable)PropertyInfo.GetValue(source, null);
+            var value = (IEnumerable)propertyGetter(source);
 
             if (value == null)
             {

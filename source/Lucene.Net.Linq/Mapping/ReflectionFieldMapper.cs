@@ -10,12 +10,17 @@ using Lucene.Net.Linq.Util;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Version = Lucene.Net.Util.Version;
+using System.Linq.Expressions;
+using System.Collections.Concurrent;
 
 namespace Lucene.Net.Linq.Mapping
 {
     public class ReflectionFieldMapper<T> : IFieldMapper<T>, IDocumentFieldConverter
     {
+        protected static ConcurrentDictionary<string, object> internalCache = new ConcurrentDictionary<string, object> (StringComparer.Ordinal);
         protected readonly PropertyInfo propertyInfo;
+        protected readonly Func<T, object> propertyGetter;
+        protected readonly Action<T, object> propertySetter;
         protected readonly StoreMode store;
         protected readonly IndexMode index;
         protected readonly TermVectorMode termVector;
@@ -43,6 +48,9 @@ namespace Lucene.Net.Linq.Mapping
         public ReflectionFieldMapper(PropertyInfo propertyInfo, StoreMode store, IndexMode index, TermVectorMode termVector, TypeConverter converter, string fieldName, QueryParser.Operator defaultParserOperator, bool caseSensitive, Analyzer analyzer, float boost, bool nativeSort = false)
         {
             this.propertyInfo = propertyInfo;
+            this.propertyGetter = CreatePropertyGetter(propertyInfo);
+            if (propertyInfo.CanWrite)
+                this.propertySetter = CreatePropertySetter(propertyInfo);
             this.store = store;
             this.index = index;
             this.termVector = termVector;
@@ -150,7 +158,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual object GetPropertyValue(T source)
         {
-            return propertyInfo.GetValue(source, null);
+            return propertyGetter(source);
         }
 
         public virtual void CopyFromDocument(Document source, IQueryExecutionContext context, T target)
@@ -159,7 +167,8 @@ namespace Lucene.Net.Linq.Mapping
 
             var fieldValue = GetFieldValue(source);
 
-            propertyInfo.SetValue(target, fieldValue, null);
+            if (fieldValue != null)
+                propertySetter(target, fieldValue);
         }
 
         public object GetFieldValue(Document document)
@@ -177,7 +186,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public virtual void CopyToDocument(T source, Document target)
         {
-            var value = propertyInfo.GetValue(source, null);
+            var value = propertyGetter(source);
 
             target.RemoveFields(fieldName);
 
@@ -268,6 +277,57 @@ namespace Lucene.Net.Linq.Mapping
         protected virtual string Unescape(string pattern)
         {
             return pattern.Replace(@"\", "");
+        }
+
+        /// <summary>
+        /// Creates a property getter method with Lambda Expressions.
+        /// </summary>
+        /// <param name="propertyInfo">The property info.</param>
+        private static Func<T, object> CreatePropertyGetter(System.Reflection.PropertyInfo propertyInfo)
+        {
+            // check cache to avoid creating another method
+            string cacheKey = "getter." + propertyInfo.GetHashCode ();
+            object cache;
+            if (internalCache.TryGetValue (cacheKey, out cache))
+                return (Func<T, object>)cache;
+            
+            // create method
+            var name = propertyInfo.Name;
+            var source = Expression.Parameter(typeof(T));
+            var method = Expression.Lambda<Func<T, object>>(Expression.Convert(Expression.Property(source, name), typeof (object)), source).Compile();
+
+            // add to cache and return
+            internalCache.TryAdd (cacheKey, method);
+            return method;
+        }
+
+        /// <summary>
+        /// Creates a property setter method with Lambda Expressions.
+        /// </summary>
+        /// <param name="propertyInfo">The property info.</param>
+        private static Action<T, object> CreatePropertySetter(System.Reflection.PropertyInfo propertyInfo)
+        {
+            // check cache to avoid creating another method
+            string cacheKey = "setter." + propertyInfo.GetHashCode ();
+            object cache;
+            if (internalCache.TryGetValue (cacheKey, out cache))
+                return (Action<T, object>)cache;
+            
+            // create method
+            var name = propertyInfo.Name;
+            var propType = propertyInfo.PropertyType;
+
+            var sourceType = Expression.Parameter(typeof(T));
+            var argument = Expression.Parameter(typeof(object), name);
+            var propExp = Expression.Property(sourceType, name);
+
+            var castToObject = Expression.Convert(argument, propType);
+
+            var method = Expression.Lambda<Action<T, object>> (Expression.Assign (propExp, castToObject), sourceType, argument).Compile ();
+
+            // add to cache and return
+            internalCache.TryAdd (cacheKey, method);
+            return method;
         }
 
         public virtual Query CreateRangeQuery(object lowerBound, object upperBound, RangeType lowerRange, RangeType upperRange)

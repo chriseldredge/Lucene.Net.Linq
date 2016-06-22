@@ -57,7 +57,7 @@ namespace Lucene.Net.Linq.Mapping
 
         public override void CopyToDocument(T source, Document target)
         {
-            var value = propertyInfo.GetValue(source, null);
+            var value = propertyGetter(source);
 
             target.RemoveFields(fieldName);
 
