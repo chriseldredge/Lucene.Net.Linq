@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Common.Logging;
+using Lucene.Net.Linq.Logging;
 using Lucene.Net.Linq.Clauses.Expressions;
 using Lucene.Net.Linq.Transformation.TreeVisitors;
 using Lucene.Net.Linq.Util;
@@ -68,20 +68,20 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitMainFromClause(MainFromClause fromClause, QueryModel queryModel)
         {
-            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
+            Log.Trace(() => string.Format("Original QueryModel:     {0}", queryModel));
             new AggressiveSubQueryFromClauseFlattener().VisitMainFromClause(fromClause, queryModel);
-            Log.Trace(m => m("Transformed QueryModel after AggressiveSubQueryFromClauseFlattener: {0}", queryModel));
+            Log.Trace(() => string.Format("Transformed QueryModel after AggressiveSubQueryFromClauseFlattener: {0}", queryModel));
             base.VisitMainFromClause(fromClause, queryModel);
         }
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
+            Log.Trace(() => string.Format("Original QueryModel:     {0}", queryModel));
 
             foreach (var visitor in whereSelectClauseVisitors)
             {
                 whereClause.TransformExpressions(visitor.VisitExpression);
-                Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
+                Log.Trace(() => string.Format("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
 
             base.VisitWhereClause(whereClause, queryModel, index);
@@ -89,12 +89,12 @@ namespace Lucene.Net.Linq.Transformation
 
         public override void VisitOrderByClause(OrderByClause orderByClause, QueryModel queryModel, int index)
         {
-            Log.Trace(m => m("Original QueryModel:     {0}", queryModel));
+            Log.Trace(() => string.Format("Original QueryModel:     {0}", queryModel));
 
             foreach (var visitor in orderingVisitors)
             {
                 orderByClause.TransformExpressions(visitor.VisitExpression);
-                Log.Trace(m => m("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
+                Log.Trace(() => string.Format("Transformed QueryModel after {0}: {1}", visitor.GetType().Name, queryModel));
             }
             
             ExpandCompositeOrderings(orderByClause);

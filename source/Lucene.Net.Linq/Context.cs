@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common.Logging;
 using Lucene.Net.Index;
+using Lucene.Net.Linq.Logging;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 
@@ -42,7 +42,7 @@ namespace Lucene.Net.Linq
 
                 if (!tracker.TryDispose())
                 {
-                    Log.Warn(m => m("Context is being disposed before all handles were released."));
+                    Log.Warn(() => ("Context is being disposed before all handles were released."));
                 }
 
                 tracker = null;
@@ -72,7 +72,7 @@ namespace Lucene.Net.Linq
             lock (reloadLock)
             {
                 AssertNotDisposed();
-                Log.Info(m => m("Reloading index."));
+                Log.Info(() => ("Reloading index."));
 
                 IndexSearcher searcher;
                 if (reader == null)
@@ -91,7 +91,7 @@ namespace Lucene.Net.Linq
 
                 if (tmpHandler != null)
                 {
-                    Log.Debug(m => m("Invoking SearcherLoading event."));
+                    Log.Debug(() => ("Invoking SearcherLoading event."));
                     tmpHandler(this, new SearcherLoadEventArgs(newTracker.Searcher));
                 }
 
@@ -106,7 +106,7 @@ namespace Lucene.Net.Linq
                 }
             }
 
-            Log.Debug(m => m("Index reloading completed."));
+            Log.Debug(() => ("Index reloading completed."));
         }
 
         internal SearcherClientTracker CurrentTracker
@@ -280,6 +280,27 @@ namespace Lucene.Net.Linq
             {
                 searcherReferences.RemoveAll(wr => !wr.IsAlive);
             }
+        }
+    }
+
+    internal class LogManager
+
+    {
+        public static ILog GetLogger<T>()
+        {
+
+
+            return LogProvider.For<T>();
+        }
+
+        public static ILog GetLogger(Type type)
+        {
+            return LogProvider.GetLogger(type);
+        }
+
+        public static ILog GetCurrentClassLogger()
+        {
+            return LogProvider.GetCurrentClassLogger();
         }
     }
 

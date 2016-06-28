@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using Common.Logging;
+using Lucene.Net.Linq.Logging;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Mapping;
 using Lucene.Net.Linq.ScalarResultHandlers;
@@ -294,7 +294,7 @@ namespace Lucene.Net.Linq
             var builder = new QueryModelTranslator(this, context);
             builder.Build(queryModel);
             
-            Log.Debug(m => m("Lucene query: {0}", builder.Model));
+            Log.Debug(() => string.Format("Lucene query: {0}", builder.Model));
 
             return builder.Model;
         }

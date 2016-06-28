@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common.Logging;
+using Lucene.Net.Linq.Logging;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
@@ -376,13 +376,13 @@ namespace Lucene.Net.Linq
         {
             context.SearcherLoading += (s, e) =>
             {
-                Log.Trace(m => m("Invoking cache warming callback " + lookup));
+                Log.Trace(() => ("Invoking cache warming callback " + lookup));
 
                 var warmupContext = new WarmUpContext(context, e.IndexSearcher);
                 var queryable = CreateQueryable(lookup, warmupContext, documentMapper);
                 callback(queryable);
 
-                Log.Trace(m => m("Callback {0} completed.", lookup));
+                Log.Trace(() => string.Format("Callback {0} completed.", lookup));
             };
         }
 

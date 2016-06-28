@@ -34,10 +34,6 @@
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Common.Logging, Version=2.3.1.0, Culture=neutral, PublicKeyToken=af08829b84f0328e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Common.Logging.2.3.1\lib\net40\Common.Logging.dll</HintPath>
-    </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">
       <HintPath>..\..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
     </Reference>
@@ -63,6 +59,7 @@
     <Compile Include="Analysis\CaseInsensitiveKeywordAnalyzer.cs" />
     <Compile Include="Analysis\PerFieldAnalyzer.cs" />
     <Compile Include="AnalyzerExtensions.cs" />
+    <Compile Include="App_Packages\LibLog.4.2\LibLog.cs" />
     <Compile Include="Clauses\ExpressionNodes\BoostExpressionNode.cs" />
     <Compile Include="Clauses\BoostClause.cs" />
     <Compile Include="Clauses\ExpressionNodes\QueryStatisticsCallbackExpressionNode.cs" />
