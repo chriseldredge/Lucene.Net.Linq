@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Common.Logging;
+using Lucene.Net.Linq.Logging;
 using Lucene.Net.Documents;
 using Lucene.Net.Linq.Abstractions;
 using Lucene.Net.Linq.Mapping;
@@ -143,14 +143,14 @@ namespace Lucene.Net.Linq
                     }
                     catch (OutOfMemoryException ex)
                     {
-                        Log.Error(m => m("OutOfMemoryException while writing/committing to Lucene index. Closing writer."), ex);
+                        Log.ErrorException(("OutOfMemoryException while writing/committing to Lucene index. Closing writer."), ex);
                         try
                         {
                             writer.Dispose();
                         }
                         catch (Exception ex2)
                         {
-                            Log.Error(m => m("Exception in IndexWriter.Dispose"), ex2);
+                            Log.ErrorException(("Exception in IndexWriter.Dispose"), ex2);
                             throw new AggregateException(ex, ex2);
                         }
 
@@ -158,14 +158,14 @@ namespace Lucene.Net.Linq
                     }
                     catch (Exception ex)
                     {
-                        Log.Error(m => m("Exception in commit"), ex);
+                        Log.ErrorException(("Exception in commit"), ex);
                         try
                         {
                             writer.Rollback();
                         }
                         catch (Exception ex2)
                         {
-                            Log.Error(m => m("Exception in rollback"), ex2);
+                            Log.ErrorException(("Exception in rollback"), ex2);
                             throw new AggregateException(ex, ex2);
                         }
                         
@@ -185,7 +185,7 @@ namespace Lucene.Net.Linq
             }
             else if (deletes.Any())
             {
-                deletes.Apply(query => Log.Trace(m => m("Delete by query: " + query)));
+                deletes.Apply(query => Log.Trace(() => ("Delete by query: " + query)));
                 writer.DeleteDocuments(deletes.Distinct().ToArray());
             }
 
@@ -194,8 +194,8 @@ namespace Lucene.Net.Linq
                 additions.Apply(writer.AddDocument);
             }
 
-            Log.Debug(m => m("Applied {0} deletes and {1} additions.", deletes.Count(), additions.Count));
-            Log.Info(m => m("Committing."));
+            Log.Debug(() => string.Format("Applied {0} deletes and {1} additions.", deletes.Count(), additions.Count));
+            Log.Info(() => ("Committing."));
 
             writer.Commit();
 
@@ -203,7 +203,7 @@ namespace Lucene.Net.Linq
             
             context.Reload();
 
-            Log.Info(m => m("Commit completed."));
+            Log.Info(() => ("Commit completed."));
         }
 
         internal IList<Document> StageModifiedDocuments()
@@ -213,7 +213,7 @@ namespace Lucene.Net.Linq
             foreach (var doc in docs)
             {
                 var captured = doc;
-                Log.Trace(m => m("Flushing modified document " + captured));
+                Log.Trace(() => ("Flushing modified document " + captured));
 
                 if (!doc.Key.Empty)
                 {
