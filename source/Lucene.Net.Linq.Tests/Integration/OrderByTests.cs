@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Lucene.Net.Analysis;
 using NUnit.Framework;
 using Version = System.Version;
@@ -11,9 +12,9 @@ namespace Lucene.Net.Linq.Tests.Integration
         [SetUp]
         public void AddDocuments()
         {
-            AddDocument(new SampleDocument { Name = "c", Scalar = 3, Flag = true, Version = new Version(100, 0, 0) });
-            AddDocument(new SampleDocument { Name = "a", Scalar = 1, Flag = false, Version = new Version(20, 0, 0) });
-            AddDocument(new SampleDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0) });
+            AddDocument(new SampleDocument { Name = "c", Scalar = 3, Flag = true, Version = new Version(100, 0, 0), DateTime = DateTime.Today.AddDays(-1), DateTimeOffset = DateTimeOffset.UtcNow.Date.AddDays(-1), });
+            AddDocument(new SampleDocument { Name = "a", Scalar = 1, Flag = false, Version = new Version(20, 0, 0), DateTime = DateTime.Today.AddDays(0), DateTimeOffset = DateTimeOffset.UtcNow.Date.AddDays(0), });
+            AddDocument(new SampleDocument { Name = "b", Scalar = 2, Flag = true, Version = new Version(3, 0, 0), DateTime = DateTime.Today.AddDays(1), DateTimeOffset = DateTimeOffset.UtcNow.Date.AddDays(1), });
         }
 
         protected override Analyzer GetAnalyzer(Net.Util.Version version)
@@ -69,7 +70,27 @@ namespace Lucene.Net.Linq.Tests.Integration
 
             Assert.That(result.ToArray(), Is.EqualTo(new[] { 4667L, 22468359L, 23155163L }));
         }
+        
+        [Test]
+        public void OrderBy_DateTime()
+        {
+            var documents = provider.AsQueryable<SampleDocument>();
 
+            var result = from d in documents orderby d.DateTime select d.DateTime;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { DateTime.Today.AddDays(-1), DateTime.Today, DateTime.Today.AddDays(2) }));
+        }
+
+        [Test]
+        public void OrderBy_DateTimeOffset()
+        {
+            var documents = provider.AsQueryable<SampleDocument>();
+
+            var result = from d in documents orderby d.DateTimeOffset select d.DateTimeOffset;
+
+            Assert.That(result.ToArray(), Is.EqualTo(new[] { DateTimeOffset.UtcNow.Date.AddDays(-1), DateTimeOffset.UtcNow.Date, DateTimeOffset.UtcNow.Date.AddDays(1) }));
+        }
+        
         [Test]
         public void OrderBy_Bool()
         {
